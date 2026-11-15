@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Kubewiser report</title><style>
+:root{color-scheme:light dark;font-family:system-ui,sans-serif;line-height:1.5}body{max-width:1400px;margin:0 auto;padding:32px}h1{margin-bottom:8px}h2,h3{margin-top:32px}section{margin:16px 0}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #8886;text-align:left;vertical-align:top;padding:10px;white-space:pre-wrap;overflow-wrap:anywhere}th{background:#8882}tbody tr:nth-child(even){background:#8881}.muted{opacity:.7}li{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0}@media print{body{padding:0;font-size:11px}.table-wrap{overflow:visible}tr{break-inside:avoid}h2,h3{break-after:avoid}}
+</style></head><body><main><h1>Kubewiser report</h1><p class="muted">검사 결과 · 근거와 미검사 항목을 함께 확인하세요. / Review evidence and unchecked areas.</p>
+<div class="table-wrap"><table><thead><tr><th scope="col">항목 / Field</th><th scope="col">값 / Value</th></tr></thead><tbody><tr><th scope="row">documents</th><td>1</td></tr>
+<tr><th scope="row">rules_version</th><td>2026-11-15</td></tr>
+<tr><th scope="row">schema_checked</th><td>0</td></tr>
+<tr><th scope="row">schema_version</th><td>2</td></tr>
+<tr><th scope="row">status</th><td>partial</td></tr>
+<tr><th scope="row">target_version</th><td>1.37</td></tr>
+</tbody></table></div>
+<section><h2>findings</h2>
+<section><h3>1. KW-API-REMOVED</h3>
+<div class="table-wrap"><table><thead><tr><th scope="col">항목 / Field</th><th scope="col">값 / Value</th></tr></thead><tbody><tr><th scope="row">document</th><td>1</td></tr>
+<tr><th scope="row">evidence</th><td>confirmed</td></tr>
+<tr><th scope="row">field</th><td>/apiVersion</td></tr>
+<tr><th scope="row">file</th><td>docs/examples/manifest.yaml</td></tr>
+<tr><th scope="row">line</th><td>1</td></tr>
+<tr><th scope="row">message</th><td>Not served since 1.25; migrate to batch/v1</td></tr>
+<tr><th scope="row">requirement</th><td>required</td></tr>
+<tr><th scope="row">resource</th><td>batch/v1beta1/CronJob//example-legacy-job</td></tr>
+<tr><th scope="row">rule_id</th><td>KW-API-REMOVED</td></tr>
+<tr><th scope="row">severity</th><td>error</td></tr>
+<tr><th scope="row">source</th><td>https://kubernetes.io/docs/reference/using-api/deprecation-guide/</td></tr>
+</tbody></table></div>
+</section>
+</section>
+<section><h2>inputs</h2>
+<div class="table-wrap"><table><thead><tr><th scope="col">file</th><th scope="col">sha256</th></tr></thead><tbody><tr><td>docs/examples/manifest.yaml</td><td>0f45796b38e101e3f9f2b89ecf6a971f4ae65dda89f82c14c0181b68d3220af9</td></tr>
+</tbody></table></div>
+</section>
+<section><h2>schema</h2>
+<div class="table-wrap"><table><thead><tr><th scope="col">항목 / Field</th><th scope="col">값 / Value</th></tr></thead><tbody><tr><th scope="row">bundle_sha256</th><td>4f565e7c9fb10bb8d9a0cb58ca0d867b0e73c8eb259102f244ed2049d92cf1c0</td></tr>
+<tr><th scope="row">reviewed</th><td>2026-11-15</td></tr>
+<tr><th scope="row">source</th><td>https://raw.githubusercontent.com/kubernetes/kubernetes/v1.37.0/api/openapi-spec/swagger.json</td></tr>
+<tr><th scope="row">source_sha256</th><td>465276aedf437726de5a6ed23a41b86d78bb0d347edf251a755ae26a93cdd8a6</td></tr>
+<tr><th scope="row">version</th><td>v1.37.0</td></tr>
+</tbody></table></div>
+</section>
+<section><h2>unchecked</h2>
+<ul><li>Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated</li>
+<li>OpenAPI validation does not replace Kubernetes admission or server semantic validation</li>
+<li>Schemas are pinned to minor .0 releases; patch-specific changes are not inferred</li>
+</ul>
+</section>
+</main></body></html>

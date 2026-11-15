@@ -22,7 +22,7 @@ import (
 
 const help = `Commands: kubewiser or kubewise
   --version
-  versions
+  versions [--format json|markdown|html]
   scan files --target-version VERSION [--recommend] PATH
   scan helm --target-version VERSION --release NAME --namespace NS [--values FILE] CHART
   scan snapshot --target-version VERSION SNAPSHOT
@@ -35,7 +35,7 @@ const help = `Commands: kubewiser or kubewise
   plan upgrade --snapshot FILE --from VERSION --to VERSION
   plan migrate --source PATH --from eks --to aks
   mcp --input PATH [--snapshot FILE] [--chart DIR] [--values FILE] [--flows FILE]
-Use --format json|text (default json for new commands); flags precede positional paths.
+Use --format json|text|markdown|html (default json); flags precede positional paths.
 All analysis is offline except explicitly requested collect. No automatic downloads or apply.`
 
 func Run(args []string, out, errOut io.Writer) int {
@@ -52,10 +52,16 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 		return 0
 	}
 	if args[0] == "versions" {
-		if len(args) != 1 {
-			return fail(fmt.Errorf("versions takes no arguments"))
+		flags := flag.NewFlagSet("versions", flag.ContinueOnError)
+		flags.SetOutput(errOut)
+		format := flags.String("format", "json", "json, markdown or html")
+		if e := flags.Parse(args[1:]); e != nil {
+			return 2
 		}
-		return emit(out, errOut, schema.Sources(), "json", 0)
+		if flags.NArg() != 0 || (*format != "json" && *format != "markdown" && *format != "html") {
+			return fail(fmt.Errorf("versions accepts --format json|markdown|html"))
+		}
+		return emit(out, errOut, schema.Sources(), *format, 0)
 	}
 	cmd := args[0]
 	restArgs := args[1:]
@@ -69,7 +75,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 	}
 	fs := flag.NewFlagSet(cmd, flag.ContinueOnError)
 	fs.SetOutput(errOut)
-	format := fs.String("format", "json", "json or text")
+	format := fs.String("format", "json", "json, text, markdown or html")
 	target := fs.String("target-version", "", "target Kubernetes version")
 	source := fs.String("source", "", "desired manifest path")
 	snapshot := fs.String("snapshot", "", "snapshot file")
@@ -94,8 +100,8 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 	if e := fs.Parse(restArgs); e != nil {
 		return 2
 	}
-	if *format != "json" && *format != "text" {
-		return fail(fmt.Errorf("format must be json or text"))
+	if *format != "json" && *format != "text" && *format != "markdown" && *format != "html" {
+		return fail(fmt.Errorf("format must be json, text, markdown or html"))
 	}
 	collection := cluster.Options{Kubeconfig: *kubeconfig, Context: *kubecontext, Namespace: *ns, IncludeCluster: *includeCluster, QPS: *qps, MaxItems: *max, Timeout: *timeout}
 	renderOpts := func() render.Options {
@@ -329,6 +335,20 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 	}
 }
 func emit(out, errOut io.Writer, v any, format string, code int) int {
+	if format == "html" {
+		if e := writeHTML(out, v); e != nil {
+			fmt.Fprintln(errOut, e)
+			return 2
+		}
+		return code
+	}
+	if format == "markdown" {
+		if e := writeMarkdown(out, v); e != nil {
+			fmt.Fprintln(errOut, e)
+			return 2
+		}
+		return code
+	}
 	if format == "text" {
 		if r, ok := v.(scan.Report); ok {
 			fmt.Fprintf(out, "Resources: %d | Schema-checked: %d | Findings: %d | Coverage: %s\n", r.Documents, r.SchemaChecked, len(r.Findings), r.Status)
