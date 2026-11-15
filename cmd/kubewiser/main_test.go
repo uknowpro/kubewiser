@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/uknowpro/kubewiser/internal/buildinfo"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -20,5 +22,17 @@ func TestCLI(t *testing.T) {
 	}
 	if code := run([]string{"scan", "files", p}, &out, &errs); code != 2 {
 		t.Fatal(code)
+	}
+}
+
+func TestVersion(t *testing.T) {
+	for _, arg := range []string{"--version", "version"} {
+		var out, errs bytes.Buffer
+		if code := run([]string{arg}, &out, &errs); code != 0 {
+			t.Fatal(code, errs.String())
+		}
+		if !strings.Contains(out.String(), "kubewiser "+buildinfo.Version+" (commit "+buildinfo.Commit) {
+			t.Fatal(out.String())
+		}
 	}
 }

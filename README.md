@@ -2,6 +2,12 @@
 
 Evidence-oriented Kubernetes inspection CLI. Initial implementation: offline manifest checks and a machine-readable report. No cluster requests or resource mutations.
 
+## Binary distribution (no Go installation required)
+
+Linux and macOS archives for amd64 and arm64 are prepared by `scripts/release.sh`. See [installation and release instructions](docs/releases.md). Tagged releases are staged as GitHub drafts after CI. No public binary release is implied by this documentation.
+
+Use `kubewiser --version` to inspect the embedded version, commit and platform.
+
 ## Build and use
 
 Requires Go 1.23 or newer.

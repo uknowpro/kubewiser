@@ -5,13 +5,20 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/uknowpro/kubewiser/internal/buildinfo"
 	"github.com/uknowpro/kubewiser/internal/mcpserver"
 	"github.com/uknowpro/kubewiser/internal/scan"
 	"io"
 	"os"
+	"runtime"
 )
 
 func run(args []string, out, errOut io.Writer) int {
+	if len(args) == 1 && (args[0] == "--version" || args[0] == "version") {
+		fmt.Fprintf(out, "kubewiser %s (commit %s; %s/%s)\n", buildinfo.Version, buildinfo.Commit, runtime.GOOS, runtime.GOARCH)
+		return 0
+	}
+
 	if len(args) > 0 && args[0] == "mcp" {
 		fs := flag.NewFlagSet("mcp", flag.ContinueOnError)
 		fs.SetOutput(errOut)
@@ -35,7 +42,7 @@ func run(args []string, out, errOut io.Writer) int {
 	}
 
 	if len(args) == 1 && (args[0] == "--help" || args[0] == "help") {
-		fmt.Fprintln(out, "kubewiser scan files --target-version 1.32 [--format json|text] PATH")
+		fmt.Fprintln(out, "kubewiser --version\nkubewiser mcp --input PATH\nkubewiser scan files --target-version 1.32 [--format json|text] PATH")
 		return 0
 	}
 	if len(args) < 2 || args[0] != "scan" || args[1] != "files" {

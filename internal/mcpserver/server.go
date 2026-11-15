@@ -4,6 +4,7 @@ package mcpserver
 import (
 	"context"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/uknowpro/kubewiser/internal/buildinfo"
 	"github.com/uknowpro/kubewiser/internal/scan"
 )
 
@@ -13,7 +14,7 @@ type Args struct {
 
 // The operator fixes the input at startup; tool arguments cannot select arbitrary paths.
 func New(path string) *mcp.Server {
-	s := mcp.NewServer(&mcp.Implementation{Name: "kubewiser", Version: "0.1.0"}, nil)
+	s := mcp.NewServer(&mcp.Implementation{Name: "kubewiser", Version: buildinfo.Version}, nil)
 	mcp.AddTool(s, &mcp.Tool{Name: "scan_files", Description: "Inspect the operator-selected local manifests. Partial rule coverage only; no cluster access or mutations."}, func(ctx context.Context, req *mcp.CallToolRequest, a Args) (*mcp.CallToolResult, scan.Report, error) {
 		if err := ctx.Err(); err != nil {
 			return nil, scan.Report{}, err
