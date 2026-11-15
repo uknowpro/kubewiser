@@ -68,3 +68,34 @@ jobs:
           kubewise --version
           if ($LASTEXITCODE -ne 0) { throw 'Alias version command failed' }
           exit 0
+      - name: Automatic command registration (Windows PowerShell 5.1)
+        shell: powershell
+        run: |
+          $oldPath = [Environment]::GetEnvironmentVariable('Path','User')
+          try {
+            $destination = Join-Path $env:RUNNER_TEMP 'kubewiser-install'
+            & ./scripts/install-windows.ps1 -BinaryPath ./kubewiser.exe -InstallDir $destination
+            & ./scripts/install-windows.ps1 -BinaryPath ./kubewiser.exe -InstallDir $destination
+            foreach ($name in @('kubewiser','kubewise')) {
+              $command = Get-Command $name -CommandType Application
+              if ((Split-Path $command.Source) -ne $destination) { throw 'Command resolves outside install directory' }
+              & $name --version
+              if ($LASTEXITCODE -ne 0) { throw 'Registered command failed' }
+            }
+            $a = & cmd /d /c 'kubewiser --version'
+            if ($LASTEXITCODE -ne 0) { throw 'CMD kubewiser failed' }
+            $b = & cmd /d /c 'kubewise --version'
+            if ($LASTEXITCODE -ne 0 -or $a -ne $b) { throw 'CMD commands differ' }
+            # Unrelated files must never be overwritten.
+            $conflict = Join-Path $env:RUNNER_TEMP 'kubewiser-conflict'
+            New-Item -ItemType Directory -Force $conflict | Out-Null
+            $conflictFile = Join-Path $conflict 'kubewise.exe'
+            'keep me' | Set-Content $conflictFile
+            $before = (Get-FileHash $conflictFile).Hash
+            $rejected = $false
+            try { & ./scripts/install-windows.ps1 -BinaryPath ./kubewiser.exe -InstallDir $conflict } catch { $rejected = $true }
+            if (-not $rejected -or (Get-FileHash $conflictFile).Hash -ne $before) { throw 'Conflict handling failed' }
+          } finally {
+            [Environment]::SetEnvironmentVariable('Path',$oldPath,'User')
+          }
+          exit 0
