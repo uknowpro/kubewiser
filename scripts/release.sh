@@ -19,21 +19,23 @@ mkdir -p dist
 stage="$(mktemp -d dist/.release.XXXXXX)"
 trap 'rm -rf "$stage"' EXIT
 export CGO_ENABLED=0
-for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64; do
+for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/386; do
   os="${target%/*}"
   arch="${target#*/}"
   name="kubewiser_${version}_${os}_${arch}"
+  alias=kubewise
   binary=kubewiser
-  if [[ "$os" == windows ]]; then binary=kubewiser.exe; fi
+  if [[ "$os" == windows ]]; then binary=kubewiser.exe; alias=kubewise.exe; fi
   mkdir -p "$stage/$name"
   GOOS="$os" GOARCH="$arch" go build -mod=readonly -trimpath \
     -ldflags="-s -w -X github.com/uknowpro/kubewiser/internal/buildinfo.Version=$version -X github.com/uknowpro/kubewiser/internal/buildinfo.Commit=$commit" \
     -o "$stage/$name/$binary" ./cmd/kubewiser
+  cp "$stage/$name/$binary" "$stage/$name/$alias"
   cp LICENSE README.md "$stage/$name/"
   if [[ "$os" == windows ]]; then
-    (cd "$stage/$name" && zip -q "../$name.zip" "$binary" LICENSE README.md)
+    (cd "$stage/$name" && zip -q "../$name.zip" "$binary" "$alias" LICENSE README.md)
   else
-    tar -czf "$stage/$name.tar.gz" -C "$stage/$name" "$binary" LICENSE README.md
+    tar -czf "$stage/$name.tar.gz" -C "$stage/$name" "$binary" "$alias" LICENSE README.md
   fi
   rm -rf "$stage/$name"
 done

@@ -4,7 +4,7 @@ Evidence-oriented Kubernetes inspection CLI. Initial implementation: offline man
 
 ## Binary distribution (no Go installation required)
 
-Linux and macOS archives for amd64 and arm64, plus a Windows 10+ x64 ZIP are prepared by `scripts/release.sh`. See [installation and release instructions](docs/releases.md). Tagged releases are staged as GitHub drafts after CI. Downloads: [GitHub Releases](https://github.com/uknowpro/kubewiser/releases). Windows users can extract the ZIP and run `.\kubewiser.exe --version` in PowerShell; Go and WSL are not required.
+Linux and macOS archives for amd64 and arm64, plus a Windows 10+ x64 and x86 ZIPs are prepared by `scripts/release.sh`. See [installation and release instructions](docs/releases.md). Tagged releases are staged as GitHub drafts after CI. Downloads: [GitHub Releases](https://github.com/uknowpro/kubewiser/releases). Windows users can extract the ZIP and run `.\kubewiser.exe --version` in PowerShell; Go and WSL are not required.
 
 Use `kubewiser --version` to inspect the embedded version, commit and platform.
 
@@ -49,3 +49,16 @@ API rule source: https://kubernetes.io/docs/reference/using-api/deprecation-guid
 ```
 
 Configure an MCP-capable client to launch this command. The `scan_files` tool accepts `target_version` and returns the same structured report as the CLI. The input is fixed by the operator at startup; the model cannot choose another path. The operator-selected files must be trusted local inputs. The pinned SDK handles stdio framing and negotiation; no HTTP listener or model runtime is started. Local DeepSeek/Ollama use requires a separate MCP-capable client.
+
+## Command names
+
+`kubewiser` and `kubewise` are equivalent commands, including `scan files`, `mcp`, and `--version`. Both use the same CLI implementation and return the same output and exit codes. The product/version banner remains `kubewiser` for either name.
+
+All archives include both executables (`kubewiser.exe` and `kubewise.exe` on Windows). Install both in a directory on PATH; no shell alias is required. Windows users can run `.\kubewise.exe` directly in PowerShell.
+
+```sh
+go install github.com/uknowpro/kubewiser/cmd/kubewiser@latest
+go install github.com/uknowpro/kubewiser/cmd/kubewise@latest
+```
+
+For prerelease source installation, replace `@latest` with the exact release tag. Windows 10 32-bit users should download `windows_386.zip`; x64 users should prefer `windows_amd64.zip`.

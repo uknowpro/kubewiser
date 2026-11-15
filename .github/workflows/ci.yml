@@ -24,8 +24,17 @@ jobs:
       - run: go vet ./...
       - run: CGO_ENABLED=0 go build -o kubewiser ./cmd/kubewiser
       - run: ./kubewiser --version
+      - run: CGO_ENABLED=0 go build -o kubewise ./cmd/kubewise
+      - run: ./kubewise --version
   windows:
     runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, '386']
+    env:
+      GOARCH: ${{ matrix.arch }}
+      CGO_ENABLED: '0'
     steps:
       - uses: actions/checkout@v6
         with:
@@ -39,6 +48,8 @@ jobs:
         env:
           CGO_ENABLED: '0'
         run: go build -o kubewiser.exe ./cmd/kubewiser
+      - name: Build alternate command
+        run: go build -o kubewise.exe ./cmd/kubewise
       - name: PowerShell smoke test
         shell: pwsh
         run: |
@@ -52,4 +63,9 @@ jobs:
           if ($LASTEXITCODE -ne 1) { throw 'Expected findings exit code 1' }
           $report = $output | ConvertFrom-Json
           if ($report.findings[0].rule_id -ne 'KW-API-REMOVED') { throw 'Missing API removal finding' }
+          $aliasOutput = & ./kubewise.exe scan files --target-version 1.32 --format json $file
+          if ($LASTEXITCODE -ne 1) { throw 'Alias exit code mismatch' }
+          if (($output -join "`n") -ne ($aliasOutput -join "`n")) { throw 'Alias output mismatch' }
+          ./kubewise.exe --version
+          if ($LASTEXITCODE -ne 0) { throw 'Alias version command failed' }
           exit 0
