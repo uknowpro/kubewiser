@@ -1,0 +1,36 @@
+{
+  "format": "kubewiser.snapshot.v1",
+  "context": "demo",
+  "namespace": "team",
+  "server_version": "v1.35.0",
+  "resources": [
+    {
+      "object": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "web",
+          "namespace": "team"
+        },
+        "spec": {
+          "type": "LoadBalancer",
+          "ports": [
+            {
+              "port": 80,
+              "targetPort": 9090
+            }
+          ]
+        }
+      },
+      "file": "cluster:Service"
+    }
+  ],
+  "gaps": [
+    {
+      "resource": "coverage",
+      "reason": "Synthetic documentation fixture: only one Service included"
+    }
+  ],
+  "redacted": [],
+  "requests": 0
+}

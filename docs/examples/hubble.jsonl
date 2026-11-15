@@ -1,0 +1,1 @@
+{"flow": {"source": {"namespace": "team", "pod_name": "web"}, "destination": {"namespace": "team", "pod_name": "db"}, "verdict": "FORWARDED", "time": "2026-11-15T00:00:00Z"}}
