@@ -90,3 +90,25 @@ func TestRedaction(t *testing.T) {
 		t.Fatal(m)
 	}
 }
+
+func TestLegacyEndpointSelection(t *testing.T) {
+	for _, tc := range []struct{ version, kind, api string }{{"v1.18.20", "Ingress", "networking.k8s.io/v1beta1"}, {"v1.20.1", "CronJob", "batch/v1beta1"}, {"v1.21.14", "HorizontalPodAutoscaler", "autoscaling/v2beta2"}, {"v1.35.0", "HorizontalPodAutoscaler", "autoscaling/v2"}, {"unknown", "CronJob", "batch/v1"}} {
+		found := false
+		for _, ep := range endpointsFor(tc.version) {
+			if ep.kind == tc.kind {
+				found = true
+				if ep.api != tc.api || !strings.Contains(ep.path, "/apis/"+tc.api+"/") {
+					t.Fatal(ep, tc)
+				}
+			}
+		}
+		if !found {
+			t.Fatal(tc)
+		}
+	}
+	for _, ep := range endpoints {
+		if ep.kind == "CronJob" && ep.api != "batch/v1" {
+			t.Fatal("global endpoints mutated")
+		}
+	}
+}

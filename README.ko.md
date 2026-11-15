@@ -36,7 +36,7 @@ manifest, Helm 차트, 읽기 전용 스냅샷을 검사하고 **현재 상태 �
 | 🎯 실행 가능한 권장안 | 필수·조건부·선택 조치를 구분하고 현재·권장 상태, 변경 이유와 검증 방법을 비교합니다. |
 | ⚖️ Helm·manifest 차이 비교 | 로컬 차트를 렌더링하고 원하는 상태와 명시한 범위의 GET 전용 스냅샷을 비교합니다. |
 | 🪜 업그레이드 계획 | 마이너 버전별 단계와 워크로드 API 변경을 검토합니다. 플랫폼의 업그레이드 가능 여부와 실제 동작은 별도 검증이 필요합니다. |
-| ☁️ 클라우드 이전 검토 | EKS/AKS/GKE의 스토리지·로드밸런서·ID 의존성을 정리합니다. 인프라 생성과 데이터 이전은 아직 제공하지 않습니다. |
+| ☁️ 클라우드 이전 검토 | EKS/AKS/GKE의 스토리지·로드밸런서·ID 의존성을 정리합니다. 클라우드 간 인프라 생성·데이터 이전은 수행하지 않으며 AKS 검토 초안 생성은 별도로 제공합니다. |
 | 🌐 네트워크 의도 분석 | 능동 탐침 없이 Service/Ingress 노출, NetworkPolicy 격리 의도와 기존 Hubble 기록을 확인합니다. |
 | 📊 공유 가능한 보고서 | 터미널 요약과 JSON·Markdown·독립 HTML로 근거와 미검사 영역을 함께 확인합니다. |
 | 🤖 로컬 MCP 연동 | 로컬 DeepSeek/Ollama 모델을 사용하는 MCP 클라이언트 등에 범위가 제한된 검사 도구를 제공합니다. 자체 LLM 호출은 없습니다. |
@@ -118,12 +118,24 @@ Start-Process .\report.html
 | `scan snapshot` | 저장한 리소스의 목표 버전 검사 |
 | `diff` | manifest/Helm과 스냅샷 비교 |
 | `plan upgrade` | 단계별 업그레이드 조치 |
+| `plan aks` / `generate` | AKS 프로젝트 검토 / 로컬 검토 초안 생성 |
+| `scan path` | 두 Pod의 ingress·egress 정책 의도 분석 |
 | `scan network` | 설정과 기존 네트워크 기록 분석 |
 | `plan migrate` | 클라우드 이전 의존성 검토 |
 | `mcp` | 로컬 MCP 검사 도구 서버 |
 | `versions` / `--version` / `--help` | 스키마 목록 / 실행 파일 정보 / 도움말 |
 
 아래 항목을 펼치면 실행 명령·터미널 출력·종료 코드까지 확인할 수 있습니다.
+
+### AKS 프로젝트 계획 (v0.2.0-alpha.4 이상)
+
+```sh
+kubewiser plan aks --source ./deploy --profile docs/examples/project/aks.json --format html --lang ko > aks-plan.html
+kubewiser generate --profile docs/examples/project/aks.json --output ./new-review-drafts
+kubewiser scan path --source ./network-inputs --source-pod team/client --destination-pod team/api --port 8080
+```
+
+[요구사항 프로필·아키텍처 변경·템플릿·네트워크 경로 안내](docs/project-planning.md). 1.21 → 1.35는 요구사항 예제이며 AKS가 지원하는 실제 경로로 검증한 것이 아닙니다. 생성물은 검토용 초안이고 인프라 작업을 실행하지 않습니다.
 
 <a id="명령어-안내"></a>
 

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "provider": "aks",
+  "mode": "in-place",
+  "from_version": "1.21",
+  "to_version": "1.35",
+  "maintenance_window": "unknown",
+  "max_downtime": "unknown",
+  "rpo": "unknown",
+  "rto": "unknown",
+  "architecture_changes": [],
+  "addons": []
+}

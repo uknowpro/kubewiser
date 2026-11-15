@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -46,6 +47,9 @@ type endpoint struct {
 }
 
 var endpoints = []endpoint{
+	{"/apis/batch/v1/namespaces/%s/jobs", "batch/v1", "Job", false},
+	{"/apis/apps/v1/namespaces/%s/replicasets", "apps/v1", "ReplicaSet", false},
+	{"/apis/autoscaling/v2/namespaces/%s/horizontalpodautoscalers", "autoscaling/v2", "HorizontalPodAutoscaler", false},
 	{"/api/v1/namespaces/%s/pods", "v1", "Pod", false}, {"/api/v1/namespaces/%s/services", "v1", "Service", false}, {"/api/v1/namespaces/%s/configmaps", "v1", "ConfigMap", false}, {"/api/v1/namespaces/%s/persistentvolumeclaims", "v1", "PersistentVolumeClaim", false}, {"/api/v1/namespaces/%s/serviceaccounts", "v1", "ServiceAccount", false},
 	{"/apis/apps/v1/namespaces/%s/deployments", "apps/v1", "Deployment", false}, {"/apis/apps/v1/namespaces/%s/statefulsets", "apps/v1", "StatefulSet", false}, {"/apis/apps/v1/namespaces/%s/daemonsets", "apps/v1", "DaemonSet", false}, {"/apis/batch/v1/namespaces/%s/cronjobs", "batch/v1", "CronJob", false}, {"/apis/networking.k8s.io/v1/namespaces/%s/ingresses", "networking.k8s.io/v1", "Ingress", false}, {"/apis/networking.k8s.io/v1/namespaces/%s/networkpolicies", "networking.k8s.io/v1", "NetworkPolicy", false}, {"/apis/policy/v1/namespaces/%s/poddisruptionbudgets", "policy/v1", "PodDisruptionBudget", false},
 	{"/api/v1/nodes", "v1", "Node", true}, {"/apis/storage.k8s.io/v1/storageclasses", "storage.k8s.io/v1", "StorageClass", true},
@@ -159,7 +163,7 @@ func collectConfig(ctx context.Context, cfg *rest.Config, o Options, s Snapshot)
 	} else {
 		s.ServerVersion = manifest.String(ver, "gitVersion")
 	}
-	for _, ep := range endpoints {
+	for _, ep := range endpointsFor(s.ServerVersion) {
 		if ep.cluster && !o.IncludeCluster {
 			continue
 		}
@@ -274,4 +278,44 @@ func Read(path string) (Snapshot, error) {
 		return s, fmt.Errorf("snapshot resource limit")
 	}
 	return s, nil
+}
+
+// Select only known served versions from the reported minor. No speculative
+// retries or discovery expansion occurs when version information is absent.
+func endpointsFor(version string) []endpoint {
+	out := append([]endpoint(nil), endpoints...)
+	parts := strings.Split(strings.TrimPrefix(version, "v"), ".")
+	if len(parts) < 2 || parts[0] != "1" {
+		return out
+	}
+	minor, e := strconv.Atoi(parts[1])
+	if e != nil || minor < 16 {
+		return out
+	}
+	for i, ep := range out {
+		replacement := ""
+		switch ep.kind {
+		case "CronJob":
+			if minor < 21 {
+				replacement = "batch/v1beta1"
+			}
+		case "Ingress":
+			if minor < 19 {
+				replacement = "networking.k8s.io/v1beta1"
+			}
+		case "PodDisruptionBudget":
+			if minor < 21 {
+				replacement = "policy/v1beta1"
+			}
+		case "HorizontalPodAutoscaler":
+			if minor < 23 {
+				replacement = "autoscaling/v2beta2"
+			}
+		}
+		if replacement != "" {
+			out[i].path = strings.Replace(ep.path, "/apis/"+ep.api+"/", "/apis/"+replacement+"/", 1)
+			out[i].api = replacement
+		}
+	}
+	return out
 }

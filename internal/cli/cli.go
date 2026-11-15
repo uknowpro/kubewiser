@@ -28,12 +28,15 @@ const help = `Commands: kubewiser or kubewise
   scan snapshot --target-version VERSION SNAPSHOT
   scan network [--flows HUBBLE.jsonl] [--namespace NS] PATH
   scan network --snapshot FILE [--flows HUBBLE.jsonl]
+  scan path --source PATH --source-pod NS/NAME --destination-pod NS/NAME --port PORT [--protocol TCP]
   collect --kubeconfig FILE --context NAME --namespace NS --output snapshot.json
   diff --source PATH --snapshot FILE [--namespace NS]
   diff --chart DIR --target-version VERSION --release NAME --snapshot FILE [--values FILE]
   plan upgrade --source PATH --from VERSION --to VERSION
   plan upgrade --snapshot FILE --from VERSION --to VERSION
   plan migrate --source PATH --from eks --to aks
+  plan aks --source PATH --profile project.json
+  generate --profile project.json --output NEW_DIRECTORY
   mcp --input PATH [--snapshot FILE] [--chart DIR] [--values FILE] [--flows FILE]
 Use --format json|text|markdown|html (default json); flags precede positional paths.
 Readable scan/plan/diff reports support --lang en|ko (default en).
@@ -80,6 +83,11 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 	format := fs.String("format", "json", "json, text, markdown or html")
 	lang := fs.String("lang", "en", "en or ko for readable reports; JSON unchanged")
 	target := fs.String("target-version", "", "target Kubernetes version")
+	sourcePod := fs.String("source-pod", "", "source namespace/pod")
+	destinationPod := fs.String("destination-pod", "", "destination namespace/pod")
+	port := fs.Int("port", 0, "destination port")
+	protocol := fs.String("protocol", "TCP", "TCP, UDP or SCTP")
+	profile := fs.String("profile", "", "local AKS project profile JSON")
 	source := fs.String("source", "", "desired manifest path")
 	snapshot := fs.String("snapshot", "", "snapshot file")
 	ns := fs.String("namespace", "default", "namespace")
@@ -128,7 +136,43 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 		return manifest.Set{Resources: s.Resources}, e
 	}
 	switch cmd {
+	case "generate":
+		if fs.NArg() != 0 || *profile == "" || *output == "" {
+			return fail(fmt.Errorf("generate requires --profile and a new --output directory"))
+		}
+		p, e := analyze.ReadProfile(*profile)
+		if e != nil {
+			return fail(e)
+		}
+		files, e := analyze.Generate(p, *output)
+		if e != nil {
+			return fail(e)
+		}
+		return emit(out, errOut, map[string]any{"status": "review_drafts", "output": *output, "files": files, "unchecked": []string{"Drafts require review; no infrastructure commands executed"}}, *format, 0, *lang)
 	case "scan":
+		if sub == "path" {
+			if fs.NArg() != 0 {
+				return fail(fmt.Errorf("scan path uses --source or --snapshot"))
+			}
+			set, e := load()
+			if e != nil {
+				return fail(e)
+			}
+			r, e := analyze.NetworkPath(ctx, set, *sourcePod, *destinationPod, *protocol, *port)
+			if e != nil {
+				return fail(e)
+			}
+			if *snapshot != "" {
+				snap, e := cluster.Read(*snapshot)
+				if e != nil {
+					return fail(e)
+				}
+				for _, g := range snap.Gaps {
+					r.Unchecked = append(r.Unchecked, g.Resource+": "+g.Reason)
+				}
+			}
+			return emit(out, errOut, r, *format, 0, *lang)
+		}
 		if sub == "network" {
 			if fs.NArg() > 1 || (fs.NArg() == 0 && *snapshot == "") || (fs.NArg() == 1 && *snapshot != "") {
 				return fail(fmt.Errorf("network requires one path or --snapshot"))
@@ -296,6 +340,12 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 		switch sub {
 		case "upgrade":
 			p, e = analyze.Upgrade(ctx, set, *from, *to)
+		case "aks":
+			var project analyze.ProjectProfile
+			project, e = analyze.ReadProfile(*profile)
+			if e == nil {
+				p, e = analyze.Project(ctx, set, project)
+			}
 		case "migrate":
 			p, e = analyze.Migration(set, *from, *to)
 		default:
@@ -316,7 +366,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 		if fs.NArg() != 0 || (*input == "" && *snapshot == "") {
 			return fail(fmt.Errorf("mcp requires --input or --snapshot"))
 		}
-		c := mcpserver.Config{Input: *input, Snapshot: *snapshot, Chart: *chart, Values: *values, Flows: *flows, Namespace: *ns}
+		c := mcpserver.Config{Input: *input, Snapshot: *snapshot, Chart: *chart, Values: *values, Flows: *flows, Namespace: *ns, Profile: *profile}
 		if *allowCluster {
 			explicitNS := false
 			fs.Visit(func(f *flag.Flag) {

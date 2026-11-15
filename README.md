@@ -36,7 +36,7 @@ Inspect manifests, Helm charts and read-only snapshots with a CLI that compares 
 | 🎯 Actionable recommendations | Review required, conditional and optional actions with current/recommended comparisons, reasons and verification steps. |
 | ⚖️ Helm & manifest drift | Render local charts and compare desired resources with explicitly scoped, GET-only snapshots. |
 | 🪜 Upgrade planning | Review minor-version steps and workload API changes before upgrading. Provider availability and runtime compatibility need separate verification. |
-| ☁️ Cloud migration review | Inventory EKS/AKS/GKE storage, load balancer and identity dependencies. Infrastructure generation and data migration are not yet provided. |
+| ☁️ Cloud migration review | Inventory EKS/AKS/GKE storage, load balancer and identity dependencies. Cross-cloud provisioning and data migration are not performed; AKS review scaffolds are available separately. |
 | 🌐 Network intent analysis | Inspect Service/Ingress exposure, NetworkPolicy isolation intent and existing Hubble flows without active probes. |
 | 📊 Shareable reports | Read terminal summaries or export JSON, Markdown and standalone HTML with evidence and unchecked areas. |
 | 🤖 Local MCP integration | Expose scoped inspection tools to MCP clients, including clients using local DeepSeek/Ollama models. No built-in LLM calls. |
@@ -118,12 +118,24 @@ See [installation details](docs/releases.md) for checksums, OS validation bounda
 | `scan snapshot` | Validate saved resources for a target version |
 | `diff` | Compare manifests or a chart with a snapshot |
 | `plan upgrade` | Review minor upgrade steps and actions |
+| `plan aks` / `generate` | Review an AKS project profile / create local draft templates |
+| `scan path` | Evaluate supplied ingress and egress policy intent for two Pods |
 | `scan network` | Inspect configuration and existing flows |
 | `plan migrate` | Review cloud migration dependencies |
 | `mcp` | Serve scoped local inspection tools |
 | `versions` / `--version` / `--help` | Schema inventory / binary information / help |
 
 Expand the sections below for commands, actual terminal output and exit codes.
+
+### AKS project planning (v0.2.0-alpha.4+)
+
+```sh
+kubewiser plan aks --source ./deploy --profile docs/examples/project/aks.json --format html > aks-plan.html
+kubewiser generate --profile docs/examples/project/aks.json --output ./new-review-drafts
+kubewiser scan path --source ./network-inputs --source-pod team/client --destination-pod team/api --port 8080
+```
+
+[Project profile, architecture requirements, templates and network path guide](docs/project-planning.md). The 1.21 → 1.35 example is an unverified requirement, not an AKS-supported route. Generated Terraform/Helm/manifest files are review scaffolds; no infrastructure operations run.
 
 <a id="command-reference"></a>
 

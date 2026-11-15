@@ -14,8 +14,8 @@ import (
 )
 
 type Config struct {
-	Input, Snapshot, Chart, Values, Flows, Namespace string
-	Cluster                                          *cluster.Options
+	Input, Snapshot, Chart, Values, Flows, Namespace, Profile string
+	Cluster                                                   *cluster.Options
 }
 type Args struct {
 	Target    string `json:"target_version" jsonschema:"Kubernetes target minor version from 1.16 through 1.37"`
@@ -97,6 +97,21 @@ func NewConfigured(c Config) *mcp.Server {
 		r.Unchecked = append(r.Unchecked, snapshotGaps()...)
 		return nil, r, e
 	})
+	if c.Profile != "" {
+		mcp.AddTool(s, &mcp.Tool{Name: "plan_aks", Description: "Offline AKS project review using operator-fixed profile and inputs. No Azure calls or writes."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Plan, error) {
+			set, e := load(ctx)
+			if e != nil {
+				return nil, analyze.Plan{}, e
+			}
+			profile, e := analyze.ReadProfile(c.Profile)
+			if e != nil {
+				return nil, analyze.Plan{}, e
+			}
+			p, e := analyze.Project(ctx, set, profile)
+			p.Unchecked = append(p.Unchecked, snapshotGaps()...)
+			return nil, p, e
+		})
+	}
 	if c.Snapshot != "" && c.Input != "" {
 		mcp.AddTool(s, &mcp.Tool{Name: "compare_drift", Description: "Compare operator-selected desired files and snapshot; values omitted and redacted fields excluded."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Diff, error) {
 			set, e := load(ctx)

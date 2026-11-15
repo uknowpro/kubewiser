@@ -137,10 +137,31 @@ func explain(f map[string]any, lang string) reviewItem {
 	i.Why = str(f, "message")
 	i.Action = tr(lang, "Review the affected resource and documentation before editing the configuration.", "해당 리소스와 근거 문서를 확인한 뒤 설정을 수정하세요.")
 	i.Verify = tr(lang, "Re-run this inspection and test the workload in a staging environment.", "수정 후 다시 검사하고 검증 환경에서 워크로드 동작을 확인하세요.")
-	if x := str(f, "verification"); x != "" && lang != "ko" {
+	if x := str(f, "verification"); x != "" {
 		i.Verify = x
 	}
 	switch id {
+	case "KW-AKS-ROUTE":
+		i.Title = tr(lang, "Confirm the actual AKS upgrade route", "실제 AKS 업그레이드 경로 확인")
+		i.Current = tr(lang, "Requested version range; provider route has not been verified.", "요청한 버전 범위이며 공급자의 실제 경로는 확인되지 않았습니다.")
+		i.Recommended = tr(lang, "Only the next upgrade offered for this exact cluster, verified before every step.", "단계마다 해당 클러스터에 실제 제공되는 다음 업그레이드만 확인해 진행합니다.")
+		i.Action = i.Verify
+	case "KW-AKS-RECOVERY":
+		i.Title = tr(lang, "Rehearse recovery before upgrading", "업그레이드 전 복구 리허설")
+		i.Current = tr(lang, "Recovery evidence is not established by these inputs.", "현재 입력으로 복구 가능성이 검증되지 않았습니다.")
+		i.Recommended = tr(lang, "A tested recovery procedure meeting agreed RPO/RTO.", "합의한 RPO/RTO를 충족하는 검증된 복구 절차.")
+		i.Action = i.Verify
+	case "KW-AKS-DRAIN":
+		i.Title = tr(lang, "Verify disruption and spare capacity", "중단 영향과 여유 용량 검증")
+		i.Action = i.Verify
+	case "KW-PROJECT-REQUIREMENT":
+		i.Title = tr(lang, "Define project acceptance criteria", "프로젝트 완료 기준 확정")
+		i.Current = tr(lang, "Missing or unknown project requirement.", "프로젝트 요구사항이 없거나 미정입니다.")
+		i.Recommended = tr(lang, "A measurable requirement agreed with the service owner.", "서비스 담당자와 합의한 측정 가능한 기준.")
+		i.Action = i.Verify
+	case "KW-ADDON-EVIDENCE":
+		i.Title = tr(lang, "Review supplied add-on compatibility evidence", "입력한 애드온 호환성 근거 검토")
+		i.Action = i.Verify
 	case "KW-API-REMOVED", "KW-API-DEPRECATED":
 		i.Title = tr(lang, "Migrate the Kubernetes API", "Kubernetes API 이전")
 		for _, rule := range scan.Rules() {
@@ -196,12 +217,36 @@ func explain(f map[string]any, lang string) reviewItem {
 		i.Recommended = tr(lang, "An agreed desired state after checking defaults, ownership, conversion and collection gaps.", "기본값·필드 소유권·버전 변환·수집 누락을 확인한 뒤 합의한 목표 상태.")
 		i.Action = tr(lang, "Confirm which state is intended before editing. Missing observations do not prove deletion; extra resources are not deletion recommendations.", "어느 상태가 의도한 것인지 먼저 확인하세요. 관측 누락은 삭제의 증거가 아니며, 추가 리소스도 삭제 권고가 아닙니다.")
 	default:
+		if strings.HasPrefix(id, "KW-ARCH-") {
+			i.Title = tr(lang, "Review architecture change", "아키텍처 변경 검토")
+			i.Action = i.Verify
+		}
+		if strings.HasPrefix(id, "KW-BEHAVIOR-") {
+			i.Title = tr(lang, "Review version behavior change", "버전별 동작 변경 검토")
+			i.Action = i.Verify
+		}
 		if strings.HasPrefix(id, "KW-MIGRATE-") {
 			i.Title = tr(lang, "Review cloud migration dependency", "클라우드 이전 의존성 검토")
 			i.Current = tr(lang, "A resource or setting matched a platform dependency check.", "리소스 또는 설정이 플랫폼 의존성 검사에 해당합니다.")
 			i.Recommended = str(f, "message")
 			i.Action = tr(lang, "Map the source dependency to the target provider, validate in staging, then plan cutover. No infrastructure is created.", "출발 환경 의존성을 대상 플랫폼에 매핑하고 검증 환경에서 확인한 뒤 전환을 계획하세요. 인프라는 생성하지 않습니다.")
 		}
+	}
+	if x := str(f, "current"); x != "" {
+		i.Current = x
+	}
+	if x := str(f, "recommended"); x != "" {
+		i.Recommended = x
+	}
+	if x := str(f, "before_version"); x != "" {
+		i.Location += tr(lang, " · Deadline: ", " · 조치 시점: ") + x
+	}
+	if managers := list(f["field_managers"]); len(managers) > 0 {
+		names := []string{}
+		for _, m := range managers {
+			names = append(names, str(obj(m), "manager"))
+		}
+		i.Why += tr(lang, " Recorded managers (hints only): ", " 기록된 필드 관리자(보조 근거): ") + strings.Join(names, ", ")
 	}
 	return i
 }

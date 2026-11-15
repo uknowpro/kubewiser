@@ -25,6 +25,9 @@ jobs:
       - run: go vet ./...
       - run: CGO_ENABLED=0 go build -o kubewiser ./cmd/kubewiser
       - run: ./kubewiser --version
+      - name: Linux integration and offline checks
+        if: runner.os == 'Linux'
+        run: bash scripts/verify-linux.sh ./kubewiser
       - run: CGO_ENABLED=0 go build -o kubewise ./cmd/kubewise
       - run: ./kubewise --version
   windows:

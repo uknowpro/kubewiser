@@ -14,10 +14,11 @@ import (
 )
 
 type Change struct {
-	Resource string `json:"resource"`
-	Path     string `json:"path"`
-	Type     string `json:"type"`
-	Message  string `json:"message"`
+	FieldManagers []FieldManager `json:"field_managers,omitempty"`
+	Resource      string         `json:"resource"`
+	Path          string         `json:"path"`
+	Type          string         `json:"type"`
+	Message       string         `json:"message"`
 }
 type Diff struct {
 	Render    map[string]any `json:"render,omitempty"`
@@ -42,16 +43,28 @@ func identity(r manifest.Resource, ns string) string {
 	return group + "/" + kind + "/" + n + "/" + manifest.String(meta, "name")
 }
 func Compare(desired manifest.Set, s cluster.Snapshot, ns string) (Diff, error) {
-	d := Diff{Changes: []Change{}, Unchecked: []string{"Observed-only fields may be defaults or controller additions; no server mutation or dry-run was performed", "Custom resource list semantics and version conversions are not inferred; sensitive redacted paths are omitted"}}
+	d := Diff{Changes: []Change{}, Unchecked: []string{"Observed-only fields may be defaults or controller additions; no server mutation or dry-run was performed", "CRD list semantics use supplied local schemas; API version conversion is not performed; sensitive paths are omitted"}}
 	if len(desired.Issues) > 0 {
 		return d, fmt.Errorf("desired inputs contain parse errors; resolve them before drift comparison")
 	}
 	if ns == "" {
 		ns = s.Namespace
 	}
+	schemas, err := driftSchemas(desired.Resources)
+	if err != nil {
+		return d, err
+	}
+	identify := func(r manifest.Resource) string {
+		if sc, ok := schemas[schemaKey(r)]; ok && sc.cluster {
+			return identity(r, "")
+		}
+		return identity(r, ns)
+	}
+	d.Unchecked = append(d.Unchecked, "Recorded field managers are ownership hints, not proof of drift cause or permission to overwrite; unsupported managedFields encodings are not inferred")
+
 	live := map[string]manifest.Resource{}
 	for _, r := range s.Resources {
-		k := identity(r, ns)
+		k := identify(r)
 		if _, ok := live[k]; ok {
 			return d, fmt.Errorf("duplicate observed resource identity")
 		}
@@ -59,7 +72,7 @@ func Compare(desired manifest.Set, s cluster.Snapshot, ns string) (Diff, error) 
 	}
 	seen := map[string]bool{}
 	for _, r := range desired.Resources {
-		id := identity(r, ns)
+		id := identify(r)
 		if seen[id] {
 			return d, fmt.Errorf("duplicate desired resource identity")
 		}
@@ -70,11 +83,11 @@ func Compare(desired manifest.Set, s cluster.Snapshot, ns string) (Diff, error) 
 		}
 		got, ok := live[id]
 		if !ok {
-			d.Changes = append(d.Changes, Change{id, "", "not_observed", "Not found in this snapshot; check namespace, collection scope and RBAC gaps before concluding deletion"})
+			d.Changes = append(d.Changes, Change{Resource: id, Path: "", Type: "not_observed", Message: "Not found in this snapshot; check namespace, collection scope and RBAC gaps before concluding deletion"})
 			continue
 		}
 		if manifest.String(r.Object, "apiVersion") != manifest.String(got.Object, "apiVersion") {
-			d.Changes = append(d.Changes, Change{id, "/apiVersion", "conversion_unverified", "API versions differ; semantic comparison requires conversion"})
+			d.Changes = append(d.Changes, Change{Resource: id, Path: "/apiVersion", Type: "conversion_unverified", Message: "API versions differ; semantic comparison requires conversion"})
 			continue
 		}
 		skip := map[string]bool{}
@@ -84,11 +97,21 @@ func Compare(desired manifest.Set, s cluster.Snapshot, ns string) (Diff, error) 
 				skip[strings.TrimPrefix(x, prefix)] = true
 			}
 		}
-		compare(&d, id, "", r.Object, got.Object, skip)
+		start := len(d.Changes)
+		sc, custom := schemas[schemaKey(r)]
+		compare(&d, id, "", r.Object, got.Object, skip, sc.root, custom)
+		for n := start; n < len(d.Changes); n++ {
+			owners, complete := fieldManagers(got, d.Changes[n].Path, custom)
+			d.Changes[n].FieldManagers = owners
+			if !complete {
+				d.Unchecked = append(d.Unchecked, "Some field management metadata could not be mapped: "+id)
+			}
+		}
+
 	}
 	for id := range live {
 		if !seen[id] {
-			d.Changes = append(d.Changes, Change{id, "", "observed_only_resource", "Resource is outside the supplied desired set; this is not a deletion recommendation"})
+			d.Changes = append(d.Changes, Change{Resource: id, Path: "", Type: "observed_only_resource", Message: "Resource is outside the supplied desired set; this is not a deletion recommendation"})
 		}
 	}
 	for _, g := range s.Gaps {
@@ -100,7 +123,7 @@ func Compare(desired manifest.Set, s cluster.Snapshot, ns string) (Diff, error) 
 	})
 	return d, nil
 }
-func compare(d *Diff, id, path string, a, b any, skip map[string]bool) {
+func compare(d *Diff, id, path string, a, b any, skip map[string]bool, schema map[string]any, custom bool) {
 	if skip[path] || path == "/status" || (len(skip) > 0 && (strings.HasSuffix(path, "/args") || strings.HasSuffix(path, "/command") || (strings.Contains(path, "/env/") && strings.HasSuffix(path, "/value")))) {
 		return
 	}
@@ -133,11 +156,11 @@ func compare(d *Diff, id, path string, a, b any, skip map[string]bool) {
 			av, ae := am[k]
 			bv, be := bm[k]
 			if !ae {
-				d.Changes = append(d.Changes, Change{id, p, "observed_only_field", "May be a default or controller-managed addition; value omitted"})
+				d.Changes = append(d.Changes, Change{Resource: id, Path: p, Type: "observed_only_field", Message: "May be a default or controller-managed addition; value omitted"})
 			} else if !be {
-				d.Changes = append(d.Changes, Change{id, p, "desired_only_field", "Declared field not present in snapshot; value omitted"})
+				d.Changes = append(d.Changes, Change{Resource: id, Path: p, Type: "desired_only_field", Message: "Declared field not present in snapshot; value omitted"})
 			} else {
-				compare(d, id, p, av, bv, skip)
+				compare(d, id, p, av, bv, skip, childSchema(schema, k), custom)
 			}
 		}
 		return
@@ -145,25 +168,54 @@ func compare(d *Diff, id, path string, a, b any, skip map[string]bool) {
 	aa, aok := a.([]any)
 	bb, bok := b.([]any)
 	if aok && bok {
-		field := path[strings.LastIndex(path, "/")+1:]
-		key := ""
-		switch field {
-		case "containers", "initContainers", "ephemeralContainers", "env", "volumes":
-			key = "name"
-		case "volumeMounts":
-			key = "mountPath"
-		}
-		if key != "" {
-			x, xok := keyed(aa, key)
-			y, yok := keyed(bb, key)
-			if xok && yok {
-				compare(d, id, path, x, y, skip)
-				return
+		if custom {
+			switch manifest.String(schema, "x-kubernetes-list-type") {
+			case "map":
+				keys := []string{}
+				for _, v := range manifest.Slice(schema["x-kubernetes-list-map-keys"]) {
+					if k, ok := v.(string); ok {
+						keys = append(keys, k)
+					}
+				}
+				x, xok := keyedCRD(aa, keys)
+				y, yok := keyedCRD(bb, keys)
+				if xok && yok {
+					compare(d, id, path, x, y, skip, map[string]any{"additionalProperties": schema["items"]}, true)
+					return
+				}
+				d.Unchecked = append(d.Unchecked, "Invalid CRD map-list keys or duplicates at "+id+path)
+			case "set":
+				x, xok := canonicalSet(aa)
+				y, yok := canonicalSet(bb)
+				if xok && yok {
+					if !reflect.DeepEqual(x, y) {
+						d.Changes = append(d.Changes, Change{Resource: id, Path: path, Type: "changed", Message: "Set membership differs; values omitted"})
+					}
+					return
+				}
+				d.Unchecked = append(d.Unchecked, "Invalid CRD set-list at "+id+path)
+			}
+		} else {
+			field := path[strings.LastIndex(path, "/")+1:]
+			key := ""
+			switch field {
+			case "containers", "initContainers", "ephemeralContainers", "env", "volumes":
+				key = "name"
+			case "volumeMounts":
+				key = "mountPath"
+			}
+			if key != "" {
+				x, xok := keyed(aa, key)
+				y, yok := keyed(bb, key)
+				if xok && yok {
+					compare(d, id, path, x, y, skip, nil, false)
+					return
+				}
 			}
 		}
 	}
 	if !reflect.DeepEqual(a, b) {
-		d.Changes = append(d.Changes, Change{id, path, "changed", "Declared and observed values differ; values omitted"})
+		d.Changes = append(d.Changes, Change{Resource: id, Path: path, Type: "changed", Message: "Declared and observed values differ; values omitted"})
 	}
 }
 func keyed(a []any, key string) (map[string]any, bool) {
@@ -182,6 +234,8 @@ func keyed(a []any, key string) (map[string]any, bool) {
 }
 
 type Action struct {
+	Current      string `json:"current,omitempty"`
+	Recommended  string `json:"recommended,omitempty"`
 	ID           string `json:"id"`
 	Resource     string `json:"resource"`
 	Requirement  string `json:"requirement"`
@@ -191,13 +245,15 @@ type Action struct {
 	Before       string `json:"before_version,omitempty"`
 }
 type Plan struct {
-	Kind      string       `json:"kind"`
-	From      string       `json:"from"`
-	To        string       `json:"to"`
-	Steps     []string     `json:"steps"`
-	Actions   []Action     `json:"actions"`
-	Unchecked []string     `json:"unchecked"`
-	Report    *scan.Report `json:"report,omitempty"`
+	Project   *ProjectProfile `json:"project,omitempty"`
+	Status    string          `json:"status,omitempty"`
+	Kind      string          `json:"kind"`
+	From      string          `json:"from"`
+	To        string          `json:"to"`
+	Steps     []string        `json:"steps"`
+	Actions   []Action        `json:"actions"`
+	Unchecked []string        `json:"unchecked"`
+	Report    *scan.Report    `json:"report,omitempty"`
 }
 
 func Upgrade(ctx context.Context, set manifest.Set, from, to string) (Plan, error) {
@@ -223,7 +279,7 @@ func Upgrade(ctx context.Context, set manifest.Set, from, to string) (Plan, erro
 		p.Steps = append(p.Steps, fmt.Sprintf("1.%d: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads", n))
 	}
 	for _, f := range report.Findings {
-		p.Actions = append(p.Actions, Action{ID: f.Rule, Resource: f.Resource, Requirement: f.Requirement, Message: f.Message, Verification: "Re-run target validation and test workload behavior in staging", Source: f.Source, Before: to})
+		p.Actions = append(p.Actions, Action{ID: f.Rule, Resource: f.Resource, Requirement: f.Requirement, Message: f.Message, Verification: "Re-run target validation and test workload behavior in staging", Source: f.Source, Before: findingDeadline(f, a, b)})
 	}
 	for _, res := range set.Resources {
 		if manifest.String(res.Object, "kind") != "Node" {
@@ -243,6 +299,7 @@ func Upgrade(ctx context.Context, set manifest.Set, from, to string) (Plan, erro
 			p.Actions = append(p.Actions, Action{ID: "KW-KUBELET-SKEW", Resource: res.ID(), Requirement: "required", Message: "Kubelet version is outside the target control-plane skew window", Verification: "Plan compatible kubelet versions at every minor upgrade step", Source: "https://kubernetes.io/releases/version-skew-policy/", Before: to})
 		}
 	}
+	p.Actions = append(p.Actions, behaviorActions(set, a, b)...)
 	p.Actions = append(p.Actions, Action{ID: "KW-ADDON-MATRIX", Requirement: "conditional", Message: "Verify CNI, CSI, ingress, admission webhooks and managed-provider upgrade support for each step", Verification: "Use vendor version matrices and staging tests; these dependencies are not inferred from Kubernetes schemas", Source: "https://kubernetes.io/releases/version-skew-policy/"})
 	p.Unchecked = append(p.Unchecked, "Audit logs/API client usage, add-on release matrices, actual node kernel/cgroup and image runtime dependencies are not automatically established")
 	return p, nil

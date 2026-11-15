@@ -25,3 +25,8 @@ Upgrade plans provide one-minor steps and target findings. Stage-specific vendor
 Network reports analyze policy isolation intent and configured exposure. They do not evaluate all allow-rule combinations, CNI enforcement, routing or cloud firewalls. Hubble JSON lines are existing local observations, aggregated by endpoints/verdict with observed timestamps. No agent or probe is started; missing observations do not mean a connection is unused or impossible. Flow input is limited to 16 MiB, 10,000 records and 1 MiB per line.
 
 Migration plans inventory recognized dependencies for distinct `eks`, `aks` and `gke` providers. They do not provision infrastructure, generate apply-ready templates, transfer data or perform DNS cutover. Redacted snapshots lose provider annotations; original reviewed manifests give stronger migration evidence.
+
+
+## Extended project inspection (v0.2.0-alpha.4)
+
+See [AKS project planning](project-planning.md) for offline requirements, add-on evidence, network-path intent and review-only generation. Collection adds Jobs, ReplicaSets and HPAs; known older server versions select served beta endpoints. Read-only RBAC review example: [collector-rbac.yaml](examples/collector-rbac.yaml). Bind only the required roles to an approved identity; kubewiser does not create bindings or credentials. `/version` access follows your API server's existing discovery authorization.

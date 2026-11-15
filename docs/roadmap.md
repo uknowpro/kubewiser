@@ -1,6 +1,6 @@
 # 고도화 로드맵 / Development roadmap
 
-검토일: 2026-11-15. 1~5 구현 묶음의 첫 버전을 v0.2.0-alpha.1에 반영했습니다. 전체 목표가 모두 검증됐다는 의미는 아니며 현재 경계는 [README](../README.md), [운영 범위](operations.md), [공식 근거](official-sources.md)에 기록합니다.
+검토일: 2026-11-16. 1~5 구현 묶음의 첫 버전을 v0.2.0-alpha.1에 반영했습니다. 전체 목표가 모두 검증됐다는 의미는 아니며 현재 경계는 [README](../README.md), [운영 범위](operations.md), [공식 근거](official-sources.md)에 기록합니다.
 
 | 묶음 | 이번 구현 | 남은 확장 |
 | --- | --- | --- |
@@ -9,6 +9,24 @@
 | 3. Helm·drift | 로컬 렌더, target capabilities, snapshot diff | managedFields 소유권, CRD 리스트 의미, 버전 변환 |
 | 4. 업그레이드 | 마이너별 단계, 필수·조건부 조치, kubelet skew | 버전별 기본 동작 변경, addon matrix, 앱·OS 실증 |
 | 5. 네트워크·이전 | Hubble 입력, 정책 격리 의도, EKS/AKS/GKE 의존 계획 | 전체 정책 경로 평가, 클라우드별 구체 매핑, Terraform/Helm/manifest 초안 생성 |
+
+## v0.2.0-alpha.4 구현 상태
+
+- **완료:** 로컬 CRD map/set 목록 비교, managedFields 보조 근거와 빈 메타데이터 오판 방지.
+- **완료:** `plan aks` 요구사항 프로필, 가변 버전, 아키텍처 변경, 단계별 API 수정 기한, 복구/중단 기준, 사용자 제공 애드온 지원 범위 검사.
+- **완료:** dockershim/ServiceAccount 토큰/PSP 변경 검토, 선언에서 발견한 OS·런타임 의존성.
+- **완료:** 검토용 Terraform 노드풀·Helm canary·replica 0 manifest·검수 체크리스트 생성. 운영 구성 자동 변환은 아님.
+- **완료:** 두 Pod의 ingress/egress 정책 의도 평가(selector, port, IPBlock), 불충분한 근거의 unknown 처리.
+- **완료:** Job/ReplicaSet/HPA 수집 및 알려진 구버전의 beta API 선택, RBAC 검토 예제.
+- **완료:** 프로필 경로가 고정된 MCP `plan_aks`, 새 CLI의 실제 Linux 검증 스크립트, 1만 리소스 검사.
+
+[프로젝트 사용 가이드](project-planning.md) · [Linux 검증](linux-validation.md)
+
+### 아직 자동 검증하지 않는 영역
+
+CEL/admission 전체 의미, 패치별 공식 스키마 번들, CRD 버전 변환, 실제 앱 실행·커널 모듈·이미지 아키텍처 호환성, 공급자별 공식 애드온 행렬 자동 구축, CNI/클라우드 방화벽/NAT를 포함한 실통신, 운영 요구사항을 충족하는 전체 인프라 자동 설계는 미구현입니다. 템플릿 생성과 검토 조치가 이 검증들을 대신하지 않습니다.
+
+실제 AKS에서 다음 업그레이드가 제공되는지, 복구 목표와 중단 기준을 만족하는지는 프로젝트 환경의 별도 증거가 필요합니다. 사용자 요청에 따라 이번 실행 환경의 완료 기준은 Ubuntu/Linux 검증이며 Windows 10 실장비 검증은 필수 조건에서 제외합니다.
 
 ## 참고 자료와 적용 방법
 
