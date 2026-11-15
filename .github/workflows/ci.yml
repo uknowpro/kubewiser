@@ -24,3 +24,32 @@ jobs:
       - run: go vet ./...
       - run: CGO_ENABLED=0 go build -o kubewiser ./cmd/kubewiser
       - run: ./kubewiser --version
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: .go-version
+      - run: go test ./...
+      - run: go vet ./...
+      - name: Build standalone Windows executable
+        env:
+          CGO_ENABLED: '0'
+        run: go build -o kubewiser.exe ./cmd/kubewiser
+      - name: PowerShell smoke test
+        shell: pwsh
+        run: |
+          ./kubewiser.exe --version
+          if ($LASTEXITCODE -ne 0) { throw 'Version command failed' }
+          $folder = Join-Path $env:RUNNER_TEMP 'kubewiser 한글 경로'
+          New-Item -ItemType Directory -Force $folder | Out-Null
+          $file = Join-Path $folder 'manifest.yaml'
+          "apiVersion: batch/v1beta1`nkind: CronJob" | Set-Content -Encoding utf8 $file
+          $output = & ./kubewiser.exe scan files --target-version 1.32 --format json $file
+          if ($LASTEXITCODE -ne 1) { throw 'Expected findings exit code 1' }
+          $report = $output | ConvertFrom-Json
+          if ($report.findings[0].rule_id -ne 'KW-API-REMOVED') { throw 'Missing API removal finding' }
+          exit 0
