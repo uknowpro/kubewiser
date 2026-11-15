@@ -22,7 +22,7 @@ import (
 
 const help = `Commands: kubewiser or kubewise
   --version
-  versions [--format json|markdown|html]
+  versions [--format json|markdown|html] [--lang en|ko]
   scan files --target-version VERSION [--recommend] PATH
   scan helm --target-version VERSION --release NAME --namespace NS [--values FILE] CHART
   scan snapshot --target-version VERSION SNAPSHOT
@@ -36,6 +36,7 @@ const help = `Commands: kubewiser or kubewise
   plan migrate --source PATH --from eks --to aks
   mcp --input PATH [--snapshot FILE] [--chart DIR] [--values FILE] [--flows FILE]
 Use --format json|text|markdown|html (default json); flags precede positional paths.
+Readable scan/plan/diff reports support --lang en|ko (default en).
 All analysis is offline except explicitly requested collect. No automatic downloads or apply.`
 
 func Run(args []string, out, errOut io.Writer) int {
@@ -55,13 +56,14 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 		flags := flag.NewFlagSet("versions", flag.ContinueOnError)
 		flags.SetOutput(errOut)
 		format := flags.String("format", "json", "json, markdown or html")
+		lang := flags.String("lang", "en", "en or ko for readable reports")
 		if e := flags.Parse(args[1:]); e != nil {
 			return 2
 		}
-		if flags.NArg() != 0 || (*format != "json" && *format != "markdown" && *format != "html") {
+		if (*lang != "en" && *lang != "ko") || flags.NArg() != 0 || (*format != "json" && *format != "markdown" && *format != "html") {
 			return fail(fmt.Errorf("versions accepts --format json|markdown|html"))
 		}
-		return emit(out, errOut, schema.Sources(), *format, 0)
+		return emit(out, errOut, schema.Sources(), *format, 0, *lang)
 	}
 	cmd := args[0]
 	restArgs := args[1:]
@@ -76,6 +78,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 	fs := flag.NewFlagSet(cmd, flag.ContinueOnError)
 	fs.SetOutput(errOut)
 	format := fs.String("format", "json", "json, text, markdown or html")
+	lang := fs.String("lang", "en", "en or ko for readable reports; JSON unchanged")
 	target := fs.String("target-version", "", "target Kubernetes version")
 	source := fs.String("source", "", "desired manifest path")
 	snapshot := fs.String("snapshot", "", "snapshot file")
@@ -102,6 +105,9 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 	}
 	if *format != "json" && *format != "text" && *format != "markdown" && *format != "html" {
 		return fail(fmt.Errorf("format must be json, text, markdown or html"))
+	}
+	if *lang != "en" && *lang != "ko" {
+		return fail(fmt.Errorf("lang must be en or ko"))
 	}
 	collection := cluster.Options{Kubeconfig: *kubeconfig, Context: *kubecontext, Namespace: *ns, IncludeCluster: *includeCluster, QPS: *qps, MaxItems: *max, Timeout: *timeout}
 	renderOpts := func() render.Options {
@@ -140,7 +146,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 			if len(r.Findings) > 0 {
 				code = 1
 			}
-			return emit(out, errOut, r, *format, code)
+			return emit(out, errOut, r, *format, code, *lang)
 		case "snapshot":
 			snap, e := cluster.Read(fs.Arg(0))
 			if e != nil {
@@ -158,7 +164,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 			if len(r.Findings) > 0 {
 				code = 1
 			}
-			return emit(out, errOut, r, *format, code)
+			return emit(out, errOut, r, *format, code, *lang)
 		case "helm":
 			*chart = fs.Arg(0)
 			rr, e := render.Render(ctx, renderOpts())
@@ -174,7 +180,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 			if len(r.Findings) > 0 {
 				code = 1
 			}
-			return emit(out, errOut, map[string]any{"render": rr.Metadata(), "report": r}, *format, code)
+			return emit(out, errOut, map[string]any{"render": rr.Metadata(), "report": r}, *format, code, *lang)
 		case "network":
 			var set manifest.Set
 			var e error
@@ -208,7 +214,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 			for _, g := range gaps {
 				r.Unchecked = append(r.Unchecked, g.Resource+": "+g.Reason)
 			}
-			return emit(out, errOut, r, *format, 0)
+			return emit(out, errOut, r, *format, 0, *lang)
 		default:
 			return fail(fmt.Errorf("unknown scan subcommand"))
 		}
@@ -232,7 +238,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 		if e = cluster.Write(*output, s); e != nil {
 			return fail(e)
 		}
-		return emit(out, errOut, map[string]any{"output": *output, "resources": len(s.Resources), "requests": s.Requests, "gaps": s.Gaps, "redacted_fields": len(s.Redacted)}, *format, 0)
+		return emit(out, errOut, map[string]any{"output": *output, "resources": len(s.Resources), "requests": s.Requests, "gaps": s.Gaps, "redacted_fields": len(s.Redacted)}, *format, 0, *lang)
 	case "diff":
 		if fs.NArg() != 0 || *snapshot == "" || ((*source == "") == (*chart == "")) {
 			return fail(fmt.Errorf("diff requires --snapshot and exactly one of --source or --chart"))
@@ -277,7 +283,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 		if len(d.Changes) > 0 {
 			code = 1
 		}
-		return emit(out, errOut, d, *format, code)
+		return emit(out, errOut, d, *format, code, *lang)
 	case "plan":
 		if fs.NArg() != 0 {
 			return fail(fmt.Errorf("unexpected positional arguments"))
@@ -305,7 +311,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 			}
 			p.Unchecked = append(p.Unchecked, "Snapshot annotations and literal configuration values may be redacted")
 		}
-		return emit(out, errOut, p, *format, 0)
+		return emit(out, errOut, p, *format, 0, *lang)
 	case "mcp":
 		if fs.NArg() != 0 || (*input == "" && *snapshot == "") {
 			return fail(fmt.Errorf("mcp requires --input or --snapshot"))
@@ -334,33 +340,42 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 		return fail(fmt.Errorf("unknown command; use --help"))
 	}
 }
-func emit(out, errOut io.Writer, v any, format string, code int) int {
+func emit(out, errOut io.Writer, v any, format string, code int, langs ...string) int {
+	lang := language(langs)
 	if format == "html" {
-		if e := writeHTML(out, v); e != nil {
+		if e := writeHTML(out, v, lang); e != nil {
 			fmt.Fprintln(errOut, e)
 			return 2
 		}
 		return code
 	}
 	if format == "markdown" {
-		if e := writeMarkdown(out, v); e != nil {
+		if e := writeMarkdown(out, v, lang); e != nil {
 			fmt.Fprintln(errOut, e)
 			return 2
 		}
 		return code
 	}
 	if format == "text" {
-		if r, ok := v.(scan.Report); ok {
-			fmt.Fprintf(out, "Resources: %d | Schema-checked: %d | Findings: %d | Coverage: %s\n", r.Documents, r.SchemaChecked, len(r.Findings), r.Status)
-			for _, f := range r.Findings {
-				fmt.Fprintf(out, "%s %s:%d %s %s: %s\n", f.Rule, f.File, f.Line, f.Field, f.Requirement, f.Message)
-			}
-			for _, u := range r.Unchecked {
-				fmt.Fprintf(out, "UNCHECKED: %s\n", u)
+		data, e := json.Marshal(v)
+		if e != nil {
+			fmt.Fprintln(errOut, e)
+			return 2
+		}
+		var value any
+		if e = json.Unmarshal(data, &value); e != nil {
+			fmt.Fprintln(errOut, e)
+			return 2
+		}
+		if handled, e := writeTextReview(out, value, lang); handled {
+			if e != nil {
+				fmt.Fprintln(errOut, e)
+				return 2
 			}
 			return code
 		}
 	}
+
 	enc := json.NewEncoder(out)
 	enc.SetIndent("", "  ")
 	if e := enc.Encode(v); e != nil {

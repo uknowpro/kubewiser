@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Kubewiser report</title><style>
+:root{color-scheme:light dark;font-family:system-ui,sans-serif;line-height:1.5}body{max-width:1400px;margin:0 auto;padding:32px}h1{margin-bottom:8px}h2,h3{margin-top:32px}section{margin:16px 0}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #8886;text-align:left;vertical-align:top;padding:10px;white-space:pre-wrap;overflow-wrap:anywhere}th{background:#8882}tbody tr:nth-child(even){background:#8881}.muted{opacity:.7}li{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0}@media print{body{padding:0;font-size:11px}.table-wrap{overflow:visible}tr{break-inside:avoid}h2,h3{break-after:avoid}}
+
+:root{color-scheme:light;font-family:system-ui,sans-serif;color:#172b3a;background:#f3f6fa}body{max-width:1080px;padding:40px 24px}header{margin-bottom:24px}h1{font-size:32px;letter-spacing:-.03em}h2{font-size:22px;margin:12px 0}h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;margin:0 0 12px}.eyebrow{font-size:12px;font-weight:700;color:#486079;letter-spacing:.12em}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.metric{background:white;border:1px solid #d8e1ea;border-radius:12px;padding:18px 24px;border-top:4px solid #75869b}.metric.required{border-top-color:#b42318}.metric.conditional{border-top-color:#a66300}.metric.optional{border-top-color:#245eb0}.metric strong{font-size:34px;display:block}.metric span{font-size:14px}.notice{font-size:13px;color:#526277;background:#e8eef5;padding:12px 16px;border-radius:8px}.finding{background:white;border:1px solid #d8e1ea;border-radius:14px;padding:24px;margin:24px 0}.finding-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.badge{font-size:12px;font-weight:700;border-radius:6px;padding:4px 10px;background:#fff0d1;color:#795000}.required .badge{background:#fee6e3;color:#a42118}.optional .badge{background:#e6efff;color:#245eb0}.resource{font-family:ui-monospace,monospace;font-size:13px;overflow-wrap:anywhere;color:#486079}.comparison{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}.comparison section{margin:0;padding:18px;background:#f5f7fa;border-radius:8px;border:1px solid #dfe5ec}.comparison .recommended{background:#edf7f4;border-color:#b8dcd1}.comparison p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}dl{display:grid;grid-template-columns:130px 1fr;gap:12px;font-size:14px}dt{font-weight:650}dd{margin:0;overflow-wrap:anywhere}a{color:#245eb0}.coverage{border-top:1px solid #d8e1ea;padding-top:20px;font-size:14px}details{margin:24px 0;background:white;border:1px solid #d8e1ea;border-radius:8px;padding:16px}summary{cursor:pointer;font-weight:600}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}.muted{color:#58697c;opacity:1}@media(max-width:640px){body{padding:20px 12px}.comparison{grid-template-columns:1fr}.metrics{gap:8px}.metric{padding:12px}.metric strong{font-size:28px}dl{grid-template-columns:1fr;gap:6px}dd{margin-bottom:10px}}@media print{body{background:white}.finding{break-inside:avoid}details{display:block}details pre{display:block}}
+</style></head><body><main>
+<header><p class="eyebrow">KUBEWISER · 근거 기반 검사</p><h1>검사 결과와 권장 조치</h1><p>필수 조치부터 해결한 뒤, 조건부 권고가 실제 워크로드에 해당하는지 확인하세요.</p><p class="muted">목표 Kubernetes 1.37 · 리소스 1개 · 스키마 검사 0개</p></header><div class="metrics"><div class="metric required"><strong>1</strong><span>필수 조치</span></div><div class="metric conditional"><strong>0</strong><span>조건 확인</span></div><div class="metric optional"><strong>0</strong><span>선택 권고</span></div></div><p class="notice">부분 검사 · 권장안은 워크로드별 검증 필요 · 변경 자동 적용 없음</p><article class="finding required"><div class="finding-head"><span class="badge">필수 조치</span><span class="muted">KW-API-REMOVED</span></div><h2>1. Kubernetes API 이전</h2><p class="resource">batch/v1beta1/CronJob//example-legacy-job</p><div class="comparison"><section><h3>현재 상태</h3><p>apiVersion: batch/v1beta1</p></section><section class="recommended"><h3>권장 상태</h3><p>batch/v1</p></section></div><dl><dt>이유</dt><dd>1.21에서 폐기 예정으로 지정됐고, 1.25부터 제공되지 않습니다.</dd><dt>다음 조치</dt><dd>공식 이전 가이드에 따라 필드와 동작 변경도 함께 반영하세요. apiVersion만 바꾸는 것으로 충분하지 않을 수 있습니다.</dd><dt>검증 방법</dt><dd>수정 후 다시 검사하고 검증 환경에서 워크로드 동작을 확인하세요.</dd><dt>위치</dt><dd>docs/examples/manifest.yaml:1 /apiVersion</dd></dl><a rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></article><section class="coverage"><h2>검사하지 못한 항목</h2><p>발견 사항이 없어도 아래 검증 한계는 남아 있습니다.</p><ul><li>Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated</li><li>OpenAPI validation does not replace Kubernetes admission or server semantic validation</li><li>Schemas are pinned to minor .0 releases; patch-specific changes are not inferred</li></ul></section><details><summary>원본 근거·출처 해시·메타데이터</summary><pre>{
+  &#34;documents&#34;: 1,
+  &#34;findings&#34;: [
+    {
+      &#34;document&#34;: 1,
+      &#34;evidence&#34;: &#34;confirmed&#34;,
+      &#34;field&#34;: &#34;/apiVersion&#34;,
+      &#34;file&#34;: &#34;docs/examples/manifest.yaml&#34;,
+      &#34;line&#34;: 1,
+      &#34;message&#34;: &#34;Not served since 1.25; migrate to batch/v1&#34;,
+      &#34;requirement&#34;: &#34;required&#34;,
+      &#34;resource&#34;: &#34;batch/v1beta1/CronJob//example-legacy-job&#34;,
+      &#34;rule_id&#34;: &#34;KW-API-REMOVED&#34;,
+      &#34;severity&#34;: &#34;error&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/reference/using-api/deprecation-guide/&#34;
+    }
+  ],
+  &#34;inputs&#34;: [
+    {
+      &#34;file&#34;: &#34;docs/examples/manifest.yaml&#34;,
+      &#34;sha256&#34;: &#34;0f45796b38e101e3f9f2b89ecf6a971f4ae65dda89f82c14c0181b68d3220af9&#34;
+    }
+  ],
+  &#34;rules_version&#34;: &#34;2026-11-15&#34;,
+  &#34;schema&#34;: {
+    &#34;bundle_sha256&#34;: &#34;4f565e7c9fb10bb8d9a0cb58ca0d867b0e73c8eb259102f244ed2049d92cf1c0&#34;,
+    &#34;reviewed&#34;: &#34;2026-11-15&#34;,
+    &#34;source&#34;: &#34;https://raw.githubusercontent.com/kubernetes/kubernetes/v1.37.0/api/openapi-spec/swagger.json&#34;,
+    &#34;source_sha256&#34;: &#34;465276aedf437726de5a6ed23a41b86d78bb0d347edf251a755ae26a93cdd8a6&#34;,
+    &#34;version&#34;: &#34;v1.37.0&#34;
+  },
+  &#34;schema_checked&#34;: 0,
+  &#34;schema_version&#34;: &#34;2&#34;,
+  &#34;status&#34;: &#34;partial&#34;,
+  &#34;target_version&#34;: &#34;1.37&#34;,
+  &#34;unchecked&#34;: [
+    &#34;Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated&#34;,
+    &#34;OpenAPI validation does not replace Kubernetes admission or server semantic validation&#34;,
+    &#34;Schemas are pinned to minor .0 releases; patch-specific changes are not inferred&#34;
+  ]
+}</pre></details></main></body></html>

@@ -13,7 +13,7 @@ func TestStandaloneHTMLEscapesInputs(t *testing.T) {
 		t.Fatal(code)
 	}
 	s := out.String()
-	for _, want := range []string{"<!doctype html>", "<table>", "&lt;img src=x onerror=alert(1)&gt;", "a &amp; b", "Admission not evaluated", "default-src 'none'"} {
+	for _, want := range []string{"<!doctype html>", "Current state", "Recommended state", "&lt;img src=x onerror=alert(1)&gt;", "a &amp; b", "Admission not evaluated", "default-src 'none'"} {
 		if !strings.Contains(s, want) {
 			t.Fatal(want, s)
 		}

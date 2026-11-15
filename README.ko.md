@@ -2,31 +2,99 @@
 
 [English](README.md) | **한국어**
 
-근거 중심의 Kubernetes 검사 CLI와 로컬 MCP 서버입니다. `kubewiser`와 `kubewise`는 같은 엔진을 사용합니다. 기본 분석은 오프라인이며, 명시한 `collect` 명령 또는 별도로 활성화한 MCP 수집만 선택한 Kubernetes API 서버에 접속합니다. 텔레메트리, 자동 업데이트 확인, 문서 다운로드, 클라우드 API 호출, 리소스 변경은 하지 않습니다.
+**Kubernetes 변경 전에, 무엇을 고쳐야 하는지 확인하세요.**
 
-## 다운로드와 설치
+manifest, Helm 차트, 읽기 전용 스냅샷을 검사하고 **현재 상태 → 권장 상태 → 다음 조치**를 비교하는 CLI입니다. 목표 버전의 공식 스키마와 근거 문서를 사용하며, 로컬 분석과 MCP 연결을 지원합니다.
 
-[GitHub Releases](https://github.com/uknowpro/kubewiser/releases)에서 Linux/macOS amd64·arm64와 Windows 10+ amd64·386 실행 파일을 제공합니다. **사용자 환경에 Go, Helm, kubectl, WSL 설치가 필요하지 않습니다.** Windows ZIP은 EXE 하나를 포함하며 `install.ps1`이 하드링크로 두 명령을 등록합니다. 체크섬과 플랫폼 검증 범위는 [설치 문서](docs/releases.md)를 확인하세요.
+[다운로드](https://github.com/uknowpro/kubewiser/releases) · [빠른 시작](#빠른-시작) · [보고서 미리보기](#보고서-미리보기) · [명령어 안내](#명령어-안내) · [로드맵](docs/roadmap.md)
 
-## 구현 범위
+> 알파 버전입니다. 기본 검사는 오프라인이며 텔레메트리가 없습니다. 명시적인 수집만 선택한 API 서버에 접근합니다. 결과는 부분 검사이며 변경을 자동 적용하지 않습니다.
 
-| 영역 | 제공 기능 | 한계 |
-| --- | --- | --- |
-| 버전별 검사 | Kubernetes 1.16~1.37 `.0` 공식 스키마, 필드·타입·필수값, 로컬 CRD, API 폐기·제거 규칙 | admission 검사나 실제 앱 호환성 보증은 아님 |
-| 수집 | 명시한 context/namespace, 순차 GET·페이지·속도·시간·개수 제한, 누락과 제거 필드 기록 | 허용 목록만 수집; Secret·사용자 정의 리소스·exec 인증 제외 |
-| Helm·차이 비교 | 로컬 차트 렌더링, 목표 capabilities, 해시, 이름 기준 리스트 비교 | 설치·다운로드·live lookup·values.schema.json 검증·필드 소유권 추론 제외 |
-| 업그레이드 | 마이너별 단계, 필수·조건부 조치, kubelet 버전 차이와 의존성 권고 | 플랫폼·애드온·실제 앱 동작은 별도 확인 |
-| 네트워크·이전 | 정책 격리 의도, Service/Ingress 노출, 기존 Hubble 기록, EKS/AKS/GKE 의존성 조치 | 능동 탐사·실제 연결 보증·인프라 생성·데이터 이전 제외 |
+## 주요 기능
 
-[공식 근거](docs/official-sources.md) · [운영 범위](docs/operations.md) · [로드맵](docs/roadmap.md)
+| 하고 싶은 일 | 제공 기능 |
+| --- | --- |
+| 버전 변경 전 오류 찾기 | Kubernetes 1.16~1.37 `.0` 공식 스키마, 로컬 CRD, API 폐기·제거 검사 |
+| 무엇부터 고칠지 판단 | 필수·조건부·선택 구분, 현재·권장 비교, 이유·조치·검증 방법 |
+| 실제 상태와 비교 | 범위를 명시한 GET 전용 스냅샷, Helm/manifest와 차이 비교 |
+| 업그레이드·이전 준비 | 마이너별 조치와 EKS/AKS/GKE 의존성 계획 |
+| 네트워크 의도 확인 | Service/Ingress 노출, NetworkPolicy 격리 의도, 기존 Hubble 기록 |
+| 결과 공유·AI 연결 | JSON·터미널·Markdown·독립 HTML, 로컬 MCP 도구 |
 
-## HTML 보고서 미리보기
+## 보고서 미리보기
 
-[실제 생성한 HTML 보고서](docs/examples/report.html)를 브라우저에서 캡처했습니다. 요약과 API 제거에 따른 필수 조치가 보이며, 아래로 스크롤하면 전체 결과를 확인할 수 있습니다. GitHub에서는 HTML 소스가 표시되므로 내려받아 브라우저로 여세요.
+실제 생성한 한국어 HTML 보고서입니다. 필수 조치를 먼저 보여주고 현재·권장 상태를 비교합니다. 원본 해시와 상세 근거는 펼쳐서 확인할 수 있습니다.
 
-![요약과 API 이전 필수 조치를 보여주는 HTML 보고서](docs/images/html-report.png)
+![현재 API와 권장 API, 필수 조치와 검증 방법을 비교하는 보고서](docs/images/html-report.ko.png)
 
-[Markdown 예제](docs/examples/report.md) · [예제 입력](docs/examples/manifest.yaml)
+[HTML 파일](docs/examples/report.ko.html) · [Markdown 결과](docs/examples/report.ko.md) · [예제 입력](docs/examples/manifest.yaml)
+
+HTML은 내려받아 브라우저로 여세요. 외부 폰트·스크립트 없이 파일 하나로 동작합니다. 위 비교 화면은 v0.2.0-alpha.3부터 제공합니다.
+
+## 빠른 시작
+
+1. [Releases](https://github.com/uknowpro/kubewiser/releases)에서 운영체제에 맞는 압축 파일을 받아 체크섬을 확인하고 풉니다.
+2. 실행 파일을 PATH에 등록하거나 해당 폴더에서 `./kubewiser`(Windows: `.\kubewiser.exe`)로 실행합니다.
+3. 아래 명령으로 검사하고 보고서를 엽니다. **Go·Helm·kubectl 설치는 필요하지 않습니다.**
+
+```sh
+kubewiser --version
+kubewiser scan files --target-version 1.37 --recommend --format text --lang ko ./deploy
+kubewiser scan files --target-version 1.37 --recommend --format html --lang ko ./deploy > report.html
+```
+
+예를 들어 구형 CronJob을 검사하면 다음처럼 표시됩니다. 실제 출력 중 핵심 줄을 발췌했습니다.
+
+```console
+$ kubewiser scan files --target-version 1.37 --format text --lang ko docs/examples/manifest.yaml
+검사 결과와 권장 조치
+목표 Kubernetes 1.37 · 리소스 1개 · 스키마 검사 0개
+...
+필수 조치: 1 | 조건 확인: 0 | 선택 권고: 0
+
+1. [필수 조치] Kubernetes API 이전 (KW-API-REMOVED)
+   batch/v1beta1/CronJob//example-legacy-job
+   현재: apiVersion: batch/v1beta1
+   권장: batch/v1
+...
+```
+
+발견 사항이 있으면 종료 코드는 `1`이며 보고서는 정상 생성됩니다. 미검사 항목도 반드시 확인하세요.
+
+## 설치
+
+| 환경 | 배포 파일 |
+| --- | --- |
+| Linux Intel/AMD · ARM64 | `linux_amd64.tar.gz` · `linux_arm64.tar.gz` |
+| macOS Intel · Apple Silicon | `darwin_amd64.tar.gz` · `darwin_arm64.tar.gz` |
+| Windows 10+ 64비트 · 32비트 | `windows_amd64.zip` · `windows_386.zip` |
+
+파일 이름에는 릴리스 버전도 포함됩니다. `kubewiser`와 `kubewise`는 같은 명령입니다. Windows ZIP에는 EXE 하나와 `install.ps1`이 포함됩니다. 설치 스크립트를 실행하면 사용자 PATH와 두 명령을 등록합니다.
+
+```powershell
+.\install.ps1
+kubewiser scan files --target-version 1.37 --format html --lang ko .\deploy | Out-File -Encoding utf8 report.html
+Start-Process .\report.html
+```
+
+체크섬·설치·OS 검증 범위는 [설치 안내](docs/releases.md)를 참고하세요.
+
+## 명령어 한눈에 보기
+
+| 명령 | 용도 |
+| --- | --- |
+| `scan files` | 파일·디렉터리 검사 |
+| `scan helm` | 로컬 차트 렌더링 후 검사 |
+| `collect` | 선택한 클러스터·namespace에서 스냅샷 수집 |
+| `scan snapshot` | 저장한 리소스의 목표 버전 검사 |
+| `diff` | manifest/Helm과 스냅샷 비교 |
+| `plan upgrade` | 단계별 업그레이드 조치 |
+| `scan network` | 설정과 기존 네트워크 기록 분석 |
+| `plan migrate` | 클라우드 이전 의존성 검토 |
+| `mcp` | 로컬 MCP 검사 도구 서버 |
+| `versions` / `--version` / `--help` | 스키마 목록 / 실행 파일 정보 / 도움말 |
+
+아래 항목을 펼치면 실행 명령·터미널 출력·종료 코드까지 확인할 수 있습니다.
 
 ## 명령어 안내
 
@@ -34,9 +102,11 @@
 
 예제는 저장소 루트에서 실행합니다. `docs/examples`의 입력은 문서용 가상 데이터이며 스냅샷은 Service 하나만 포함합니다. 아래 출력은 실제 CLI 실행 결과를 발췌했습니다. `$ echo $?`는 POSIX 셸 종료 코드 확인 방법이며 PowerShell에서는 `$LASTEXITCODE`를 사용합니다.
 
-### 결과 형식과 저장
 
-v0.2.0-alpha.2부터 `--format markdown`과 `--format html`을 지원합니다. 이전 배포판은 업데이트가 필요합니다.
+<details>
+<summary>결과 형식과 저장</summary>
+
+v0.2.0-alpha.2부터 Markdown/HTML을 지원하며, v0.2.0-alpha.3부터 scan/plan/diff에 권장 비교와 `--lang en|ko`를 제공합니다. 원본 JSON과 미검사 근거는 유지합니다. 한국어 옵션은 읽기용 설명을 번역하며 원본 근거 문구는 영어로 남을 수 있습니다.
 
 | 형식 | 용도 | 저장 예시 |
 | --- | --- | --- |
@@ -45,7 +115,7 @@ v0.2.0-alpha.2부터 `--format markdown`과 `--format html`을 지원합니다. 
 | `markdown` | GitHub·에디터에서 표와 목록으로 검토 | `--format markdown ... > report.md` |
 | `html` | 브라우저에서 보고서 열기·인쇄 | `--format html ... > report.html` |
 
-`text`의 간략 출력은 `scan files`와 `scan snapshot`에 적용되며 다른 결과는 JSON으로 표시됩니다. Markdown/HTML은 scan, diff, plan, collect 요약에 적용됩니다. `versions`는 json/markdown/html을 지원합니다. MCP는 통신 프로토콜의 구조화된 응답을 사용합니다.
+`text`는 scan files/snapshot/helm, diff, plan에서 현재·권장 상태와 조치를 표시합니다. network와 collect 결과는 JSON으로 표시됩니다. Markdown/HTML은 scan, diff, plan, collect 요약에 적용됩니다. `versions`는 json/markdown/html을 지원합니다. MCP는 통신 프로토콜의 구조화된 응답을 사용합니다.
 
 ```sh
 # Linux/macOS: Markdown 또는 HTML 파일로 저장
@@ -64,7 +134,10 @@ HTML은 CSS를 포함한 단일 파일이며 외부 폰트·스크립트·이미
 
 실제 생성 예시: [Markdown 보고서](docs/examples/report.md), [HTML 파일](docs/examples/report.html), [예제 입력](docs/examples/manifest.yaml). GitHub에서 HTML은 소스 코드로 표시되므로 다운로드한 파일을 브라우저로 여세요.
 
-### `--help`, `--version`, `versions` — 도움말과 지원 버전
+</details>
+
+<details>
+<summary>--help, --version, versions — 도움말과 지원 버전</summary>
 
 ```sh
 kubewiser --help
@@ -112,7 +185,10 @@ $ echo $?
 0
 ```
 
-### `scan files` — YAML/JSON manifest 검사
+</details>
+
+<details>
+<summary>scan files — YAML/JSON manifest 검사</summary>
 
 파일 하나 또는 디렉터리를 재귀 검사합니다. 스키마 오류와 API 폐기·제거 여부를 찾습니다. `--recommend`는 readiness probe, resource requests 등 조건부 권고를 추가합니다. CRD와 해당 사용자 정의 리소스를 함께 입력하면 로컬 CRD 스키마도 사용합니다.
 
@@ -127,16 +203,33 @@ kubewiser scan files --target-version 1.37 --recommend --format html ./deploy > 
 
 ```console
 $ kubewiser scan files --target-version 1.37 --format text docs/examples/manifest.yaml
-Resources: 1 | Schema-checked: 0 | Findings: 1 | Coverage: partial
-KW-API-REMOVED docs/examples/manifest.yaml:1 /apiVersion required: Not served since 1.25; migrate to batch/v1
-UNCHECKED: Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated
-UNCHECKED: OpenAPI validation does not replace Kubernetes admission or server semantic validation
-UNCHECKED: Schemas are pinned to minor .0 releases; patch-specific changes are not inferred
+Inspection review
+Target Kubernetes 1.37 · Resources 1 · Schema checked 0
+Start with required actions, then check whether conditional recommendations apply to your workloads.
+Required: 1 | Conditional: 0 | Optional: 0
+
+1. [Required] Migrate the Kubernetes API (KW-API-REMOVED)
+   batch/v1beta1/CronJob//example-legacy-job
+   Current: apiVersion: batch/v1beta1
+   Recommended: batch/v1
+   Why: Deprecated in 1.21; no longer served from 1.25.
+   Action: Migrate the resource using the official migration guide, including field and behavior changes. An apiVersion edit alone may be insufficient.
+   Verify: Re-run this inspection and test the workload in a staging environment.
+   Location: docs/examples/manifest.yaml:1 /apiVersion
+   Source: https://kubernetes.io/docs/reference/using-api/deprecation-guide/
+
+NOT VERIFIED (partial coverage):
+- Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated
+- OpenAPI validation does not replace Kubernetes admission or server semantic validation
+- Schemas are pinned to minor .0 releases; patch-specific changes are not inferred
 $ echo $?
 1
 ```
 
-### `scan helm` — 로컬 Helm 차트 렌더링 후 검사
+</details>
+
+<details>
+<summary>scan helm — 로컬 Helm 차트 렌더링 후 검사</summary>
 
 압축을 푼 로컬 차트와 이미 준비된 의존 차트가 필요합니다. `--release`, `--namespace`, `--values`로 렌더링 조건을 고정합니다. Helm 설치는 필요하지 않으며 의존 차트 다운로드, live lookup, 리소스 적용은 하지 않습니다.
 
@@ -169,7 +262,10 @@ $ echo $?
 0
 ```
 
-### `collect` — 읽기 전용 스냅샷 수집
+</details>
+
+<details>
+<summary>collect — 읽기 전용 스냅샷 수집</summary>
 
 선택한 API 서버에서 지정한 namespace의 허용된 리소스만 GET으로 수집합니다. 이 명령은 네트워크에 접근합니다. kubeconfig·context·namespace·새 출력 파일 경로를 명시해야 합니다.
 
@@ -201,7 +297,10 @@ $ echo $?
 0
 ```
 
-### `scan snapshot` — 저장된 스냅샷의 목표 버전 검사
+</details>
+
+<details>
+<summary>scan snapshot — 저장된 스냅샷의 목표 버전 검사</summary>
 
 클러스터에 다시 접속하지 않고 저장된 리소스를 검사합니다.
 
@@ -215,17 +314,25 @@ kubewiser scan snapshot --target-version 1.37 --recommend --format html ./snapsh
 
 ```console
 $ kubewiser scan snapshot --target-version 1.37 --format text docs/examples/snapshot.json
-Resources: 1 | Schema-checked: 1 | Findings: 0 | Coverage: partial
-UNCHECKED: Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated
-UNCHECKED: OpenAPI validation does not replace Kubernetes admission or server semantic validation
-UNCHECKED: Schemas are pinned to minor .0 releases; patch-specific changes are not inferred
-UNCHECKED: coverage: Synthetic documentation fixture: only one Service included
-UNCHECKED: Redacted fields may not be schema-validated
+Inspection review
+Target Kubernetes 1.37 · Resources 1 · Schema checked 1
+No findings in the checks performed. Review coverage before deciding that a change is safe.
+Required: 0 | Conditional: 0 | Optional: 0
+
+NOT VERIFIED (partial coverage):
+- Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated
+- OpenAPI validation does not replace Kubernetes admission or server semantic validation
+- Schemas are pinned to minor .0 releases; patch-specific changes are not inferred
+- coverage: Synthetic documentation fixture: only one Service included
+- Redacted fields may not be schema-validated
 $ echo $?
 0
 ```
 
-### `diff` — 원하는 상태와 수집한 상태 비교
+</details>
+
+<details>
+<summary>diff — 원하는 상태와 수집한 상태 비교</summary>
 
 manifest 경로(`--source`) 또는 Helm 차트(`--chart`) 중 하나와 `--snapshot`을 지정합니다. namespace를 생략하면 스냅샷의 namespace를 사용합니다.
 
@@ -261,7 +368,10 @@ $ echo $?
 1
 ```
 
-### `plan upgrade` — 버전 업그레이드 조치 목록
+</details>
+
+<details>
+<summary>plan upgrade — 버전 업그레이드 조치 목록</summary>
 
 현재 버전 `--from`과 목표 버전 `--to`, `--source` 또는 `--snapshot` 중 하나를 지정합니다. 목표 마이너 버전은 더 높아야 합니다.
 
@@ -300,7 +410,10 @@ $ echo $?
 0
 ```
 
-### `scan network` — 설정과 기존 통신 기록 분석
+</details>
+
+<details>
+<summary>scan network — 설정과 기존 통신 기록 분석</summary>
 
 manifest 또는 스냅샷을 읽어 Service/Ingress 노출과 NetworkPolicy 격리 의도를 확인합니다. `--flows`는 선택 사항이며 기존 Hubble JSON Lines 파일을 추가 분석합니다.
 
@@ -338,7 +451,10 @@ $ echo $?
 0
 ```
 
-### `plan migrate` — 클라우드 이전 의존성 확인
+</details>
+
+<details>
+<summary>plan migrate — 클라우드 이전 의존성 확인</summary>
 
 `eks`, `aks`, `gke` 중 서로 다른 출발·대상 플랫폼을 지정합니다. 스토리지, 로드밸런서, 워크로드 ID, 플랫폼 종속 설정 등을 조치 목록으로 정리합니다.
 
@@ -372,7 +488,10 @@ $ echo $?
 0
 ```
 
-### `mcp` — 로컬 모델용 검사 도구 서버
+</details>
+
+<details>
+<summary>mcp — 로컬 모델용 검사 도구 서버</summary>
 
 ```sh
 kubewiser mcp --input /absolute/path/deploy --snapshot /absolute/path/snapshot.json --namespace team
@@ -390,7 +509,10 @@ $ kubewiser mcp --input docs/examples/desired.yaml --snapshot docs/examples/snap
 
 요청을 기다리는 동안 배너나 보고서를 출력하지 않습니다. MCP 클라이언트가 이 프로세스를 실행하도록 설정하며, 수동 실행을 끝내려면 Ctrl+C를 누릅니다.
 
-### 결과 해석과 종료 코드
+</details>
+
+<details>
+<summary>결과 해석과 종료 코드</summary>
 
 | 항목 | 의미 |
 | --- | --- |
@@ -404,6 +526,7 @@ $ kubewiser mcp --input docs/examples/desired.yaml --snapshot docs/examples/snap
 
 scan은 발견 사항이 없으면 `0`, 있으면 `1`, 인자·실행 오류는 `2`입니다. diff는 차이가 있으면 `1`입니다. collect/plan/network는 성공 시 조치·누락이 있어도 `0`입니다. **종료 코드 0은 전체 호환성 보증이 아닙니다.** 발견 사항이 있어 `1`로 종료해도 Markdown/HTML 보고서는 생성됩니다. 셸의 `>`는 기존 보고서를 덮어쓰므로 보관할 파일명은 구분하세요.
 
+</details>
 ## 로컬 MCP와 로컬 모델
 
 MCP 지원 클라이언트를 통해 로컬 DeepSeek/Ollama 모델과 연결할 수 있습니다. kubewiser 자체는 LLM을 실행하거나 호출하지 않습니다. 기본 도구는 `scan_files`, `plan_upgrade`, `plan_migrate`, `scan_network`입니다. `compare_drift`는 input과 snapshot, `scan_helm`은 chart 설정이 필요합니다. 파일 경로와 클러스터 범위는 시작할 때 운영자가 고정하며 모델이 변경할 수 없습니다.
@@ -421,3 +544,15 @@ go vet ./...
 ```
 
 의존성과 내장 공식 스키마의 라이선스는 [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt)를 확인하세요. 보고서 형식은 v2이며 이전 알파 보고서를 처리하던 프로그램은 파서를 업데이트해야 합니다.
+
+## 검증 범위와 근거
+
+스키마는 마이너 `.0` 기준이며 패치별 의미 차이까지 검증하지 않습니다. admission/CEL, 실제 앱·커널 호환성, 전체 네트워크 연결 가능 여부는 별도 검증이 필요합니다. 인프라 자동 생성과 데이터 이전은 수행하지 않습니다. CPU·메모리 적정 수치는 실측이 필요하며 보고서가 임의의 값을 만들지 않습니다.
+
+[공식 근거](docs/official-sources.md) · [운영 범위](docs/operations.md) · [보고서 설계 참고 자료](docs/report-design.md)
+
+## 개발과 피드백
+
+재현 가능한 문제는 [GitHub Issues](https://github.com/uknowpro/kubewiser/issues)에 명령어·목표 버전·비식별화한 최소 입력과 함께 남겨주세요. kubeconfig 인증정보, Secret, 검토하지 않은 운영 스냅샷은 첨부하지 마세요.
+
+[로드맵](docs/roadmap.md) · [릴리스 노트](https://github.com/uknowpro/kubewiser/releases) · [라이선스](LICENSE) · [외부 라이선스 고지](THIRD_PARTY_NOTICES.txt)

@@ -17,7 +17,7 @@ func TestMarkdownEscapingAndCoverage(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := out.String()
-	for _, want := range []string{"# Kubewiser report", "a\\|b<br>&lt;script&gt;", "\\[link\\]", "Admission not evaluated", "| count | 1 |"} {
+	for _, want := range []string{"# Inspection review", "a\\|b<br>&lt;script&gt;", "\\[link\\]", "Admission not evaluated", `"count": 1`} {
 		if !strings.Contains(s, want) {
 			t.Fatal(want, s)
 		}

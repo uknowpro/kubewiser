@@ -11,7 +11,7 @@ import (
 
 // Render the same public report as JSON, retaining evidence and unchecked fields.
 // Escape input-controlled Markdown/HTML so resource names cannot inject markup.
-func writeMarkdown(w io.Writer, report any) error {
+func writeMarkdown(w io.Writer, report any, langs ...string) error {
 	data, err := json.Marshal(report)
 	if err != nil {
 		return err
@@ -23,8 +23,10 @@ func writeMarkdown(w io.Writer, report any) error {
 		return err
 	}
 	var b strings.Builder
-	b.WriteString("# Kubewiser report\n\n")
-	markdownValue(&b, value, 2)
+	if !reviewMarkdown(&b, value, language(langs)) {
+		b.WriteString("# Kubewiser report\n\n")
+		markdownValue(&b, value, 2)
+	}
 	_, err = io.WriteString(w, b.String())
 	return err
 }

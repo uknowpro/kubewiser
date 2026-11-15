@@ -9,7 +9,7 @@ import (
 )
 
 // A standalone report: no scripts, remote assets or input-controlled markup.
-func writeHTML(w io.Writer, report any) error {
+func writeHTML(w io.Writer, report any, langs ...string) error {
 	data, err := json.Marshal(report)
 	if err != nil {
 		return err
@@ -21,14 +21,19 @@ func writeHTML(w io.Writer, report any) error {
 		return err
 	}
 	var b strings.Builder
+	lang := language(langs)
 	b.WriteString(`<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="` + lang + `"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
 <title>Kubewiser report</title><style>
 :root{color-scheme:light dark;font-family:system-ui,sans-serif;line-height:1.5}body{max-width:1400px;margin:0 auto;padding:32px}h1{margin-bottom:8px}h2,h3{margin-top:32px}section{margin:16px 0}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #8886;text-align:left;vertical-align:top;padding:10px;white-space:pre-wrap;overflow-wrap:anywhere}th{background:#8882}tbody tr:nth-child(even){background:#8881}.muted{opacity:.7}li{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0}@media print{body{padding:0;font-size:11px}.table-wrap{overflow:visible}tr{break-inside:avoid}h2,h3{break-after:avoid}}
-</style></head><body><main><h1>Kubewiser report</h1><p class="muted">검사 결과 · 근거와 미검사 항목을 함께 확인하세요. / Review evidence and unchecked areas.</p>
+` + reviewCSS + `</style></head><body><main>
 `)
-	htmlValue(&b, value, 2)
+	if !reviewHTML(&b, value, lang) {
+		b.WriteString("<h1>Kubewiser report</h1>")
+		htmlValue(&b, value, 2)
+	}
+
 	b.WriteString("</main></body></html>\n")
 	_, err = io.WriteString(w, b.String())
 	return err

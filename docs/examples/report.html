@@ -3,46 +3,47 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
 <title>Kubewiser report</title><style>
 :root{color-scheme:light dark;font-family:system-ui,sans-serif;line-height:1.5}body{max-width:1400px;margin:0 auto;padding:32px}h1{margin-bottom:8px}h2,h3{margin-top:32px}section{margin:16px 0}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #8886;text-align:left;vertical-align:top;padding:10px;white-space:pre-wrap;overflow-wrap:anywhere}th{background:#8882}tbody tr:nth-child(even){background:#8881}.muted{opacity:.7}li{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0}@media print{body{padding:0;font-size:11px}.table-wrap{overflow:visible}tr{break-inside:avoid}h2,h3{break-after:avoid}}
-</style></head><body><main><h1>Kubewiser report</h1><p class="muted">검사 결과 · 근거와 미검사 항목을 함께 확인하세요. / Review evidence and unchecked areas.</p>
-<div class="table-wrap"><table><thead><tr><th scope="col">항목 / Field</th><th scope="col">값 / Value</th></tr></thead><tbody><tr><th scope="row">documents</th><td>1</td></tr>
-<tr><th scope="row">rules_version</th><td>2026-11-15</td></tr>
-<tr><th scope="row">schema_checked</th><td>0</td></tr>
-<tr><th scope="row">schema_version</th><td>2</td></tr>
-<tr><th scope="row">status</th><td>partial</td></tr>
-<tr><th scope="row">target_version</th><td>1.37</td></tr>
-</tbody></table></div>
-<section><h2>findings</h2>
-<section><h3>1. KW-API-REMOVED</h3>
-<div class="table-wrap"><table><thead><tr><th scope="col">항목 / Field</th><th scope="col">값 / Value</th></tr></thead><tbody><tr><th scope="row">document</th><td>1</td></tr>
-<tr><th scope="row">evidence</th><td>confirmed</td></tr>
-<tr><th scope="row">field</th><td>/apiVersion</td></tr>
-<tr><th scope="row">file</th><td>docs/examples/manifest.yaml</td></tr>
-<tr><th scope="row">line</th><td>1</td></tr>
-<tr><th scope="row">message</th><td>Not served since 1.25; migrate to batch/v1</td></tr>
-<tr><th scope="row">requirement</th><td>required</td></tr>
-<tr><th scope="row">resource</th><td>batch/v1beta1/CronJob//example-legacy-job</td></tr>
-<tr><th scope="row">rule_id</th><td>KW-API-REMOVED</td></tr>
-<tr><th scope="row">severity</th><td>error</td></tr>
-<tr><th scope="row">source</th><td>https://kubernetes.io/docs/reference/using-api/deprecation-guide/</td></tr>
-</tbody></table></div>
-</section>
-</section>
-<section><h2>inputs</h2>
-<div class="table-wrap"><table><thead><tr><th scope="col">file</th><th scope="col">sha256</th></tr></thead><tbody><tr><td>docs/examples/manifest.yaml</td><td>0f45796b38e101e3f9f2b89ecf6a971f4ae65dda89f82c14c0181b68d3220af9</td></tr>
-</tbody></table></div>
-</section>
-<section><h2>schema</h2>
-<div class="table-wrap"><table><thead><tr><th scope="col">항목 / Field</th><th scope="col">값 / Value</th></tr></thead><tbody><tr><th scope="row">bundle_sha256</th><td>4f565e7c9fb10bb8d9a0cb58ca0d867b0e73c8eb259102f244ed2049d92cf1c0</td></tr>
-<tr><th scope="row">reviewed</th><td>2026-11-15</td></tr>
-<tr><th scope="row">source</th><td>https://raw.githubusercontent.com/kubernetes/kubernetes/v1.37.0/api/openapi-spec/swagger.json</td></tr>
-<tr><th scope="row">source_sha256</th><td>465276aedf437726de5a6ed23a41b86d78bb0d347edf251a755ae26a93cdd8a6</td></tr>
-<tr><th scope="row">version</th><td>v1.37.0</td></tr>
-</tbody></table></div>
-</section>
-<section><h2>unchecked</h2>
-<ul><li>Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated</li>
-<li>OpenAPI validation does not replace Kubernetes admission or server semantic validation</li>
-<li>Schemas are pinned to minor .0 releases; patch-specific changes are not inferred</li>
-</ul>
-</section>
-</main></body></html>
+
+:root{color-scheme:light;font-family:system-ui,sans-serif;color:#172b3a;background:#f3f6fa}body{max-width:1080px;padding:40px 24px}header{margin-bottom:24px}h1{font-size:32px;letter-spacing:-.03em}h2{font-size:22px;margin:12px 0}h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;margin:0 0 12px}.eyebrow{font-size:12px;font-weight:700;color:#486079;letter-spacing:.12em}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.metric{background:white;border:1px solid #d8e1ea;border-radius:12px;padding:18px 24px;border-top:4px solid #75869b}.metric.required{border-top-color:#b42318}.metric.conditional{border-top-color:#a66300}.metric.optional{border-top-color:#245eb0}.metric strong{font-size:34px;display:block}.metric span{font-size:14px}.notice{font-size:13px;color:#526277;background:#e8eef5;padding:12px 16px;border-radius:8px}.finding{background:white;border:1px solid #d8e1ea;border-radius:14px;padding:24px;margin:24px 0}.finding-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.badge{font-size:12px;font-weight:700;border-radius:6px;padding:4px 10px;background:#fff0d1;color:#795000}.required .badge{background:#fee6e3;color:#a42118}.optional .badge{background:#e6efff;color:#245eb0}.resource{font-family:ui-monospace,monospace;font-size:13px;overflow-wrap:anywhere;color:#486079}.comparison{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}.comparison section{margin:0;padding:18px;background:#f5f7fa;border-radius:8px;border:1px solid #dfe5ec}.comparison .recommended{background:#edf7f4;border-color:#b8dcd1}.comparison p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}dl{display:grid;grid-template-columns:130px 1fr;gap:12px;font-size:14px}dt{font-weight:650}dd{margin:0;overflow-wrap:anywhere}a{color:#245eb0}.coverage{border-top:1px solid #d8e1ea;padding-top:20px;font-size:14px}details{margin:24px 0;background:white;border:1px solid #d8e1ea;border-radius:8px;padding:16px}summary{cursor:pointer;font-weight:600}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}.muted{color:#58697c;opacity:1}@media(max-width:640px){body{padding:20px 12px}.comparison{grid-template-columns:1fr}.metrics{gap:8px}.metric{padding:12px}.metric strong{font-size:28px}dl{grid-template-columns:1fr;gap:6px}dd{margin-bottom:10px}}@media print{body{background:white}.finding{break-inside:avoid}details{display:block}details pre{display:block}}
+</style></head><body><main>
+<header><p class="eyebrow">KUBEWISER · EVIDENCE-BASED REVIEW</p><h1>Inspection review</h1><p>Start with required actions, then check whether conditional recommendations apply to your workloads.</p><p class="muted">Target Kubernetes 1.37 · Resources 1 · Schema checked 0</p></header><div class="metrics"><div class="metric required"><strong>1</strong><span>Required</span></div><div class="metric conditional"><strong>0</strong><span>Conditional</span></div><div class="metric optional"><strong>0</strong><span>Optional</span></div></div><p class="notice">Partial coverage · Recommendations require workload validation · No automatic changes</p><article class="finding required"><div class="finding-head"><span class="badge">Required</span><span class="muted">KW-API-REMOVED</span></div><h2>1. Migrate the Kubernetes API</h2><p class="resource">batch/v1beta1/CronJob//example-legacy-job</p><div class="comparison"><section><h3>Current state</h3><p>apiVersion: batch/v1beta1</p></section><section class="recommended"><h3>Recommended state</h3><p>batch/v1</p></section></div><dl><dt>Why it matters</dt><dd>Deprecated in 1.21; no longer served from 1.25.</dd><dt>Next action</dt><dd>Migrate the resource using the official migration guide, including field and behavior changes. An apiVersion edit alone may be insufficient.</dd><dt>How to verify</dt><dd>Re-run this inspection and test the workload in a staging environment.</dd><dt>Location</dt><dd>docs/examples/manifest.yaml:1 /apiVersion</dd></dl><a rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference documentation ↗</a></article><section class="coverage"><h2>Not verified</h2><p>These limits still apply even when no findings are reported.</p><ul><li>Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated</li><li>OpenAPI validation does not replace Kubernetes admission or server semantic validation</li><li>Schemas are pinned to minor .0 releases; patch-specific changes are not inferred</li></ul></section><details><summary>Original evidence, source hashes and metadata</summary><pre>{
+  &#34;documents&#34;: 1,
+  &#34;findings&#34;: [
+    {
+      &#34;document&#34;: 1,
+      &#34;evidence&#34;: &#34;confirmed&#34;,
+      &#34;field&#34;: &#34;/apiVersion&#34;,
+      &#34;file&#34;: &#34;docs/examples/manifest.yaml&#34;,
+      &#34;line&#34;: 1,
+      &#34;message&#34;: &#34;Not served since 1.25; migrate to batch/v1&#34;,
+      &#34;requirement&#34;: &#34;required&#34;,
+      &#34;resource&#34;: &#34;batch/v1beta1/CronJob//example-legacy-job&#34;,
+      &#34;rule_id&#34;: &#34;KW-API-REMOVED&#34;,
+      &#34;severity&#34;: &#34;error&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/reference/using-api/deprecation-guide/&#34;
+    }
+  ],
+  &#34;inputs&#34;: [
+    {
+      &#34;file&#34;: &#34;docs/examples/manifest.yaml&#34;,
+      &#34;sha256&#34;: &#34;0f45796b38e101e3f9f2b89ecf6a971f4ae65dda89f82c14c0181b68d3220af9&#34;
+    }
+  ],
+  &#34;rules_version&#34;: &#34;2026-11-15&#34;,
+  &#34;schema&#34;: {
+    &#34;bundle_sha256&#34;: &#34;4f565e7c9fb10bb8d9a0cb58ca0d867b0e73c8eb259102f244ed2049d92cf1c0&#34;,
+    &#34;reviewed&#34;: &#34;2026-11-15&#34;,
+    &#34;source&#34;: &#34;https://raw.githubusercontent.com/kubernetes/kubernetes/v1.37.0/api/openapi-spec/swagger.json&#34;,
+    &#34;source_sha256&#34;: &#34;465276aedf437726de5a6ed23a41b86d78bb0d347edf251a755ae26a93cdd8a6&#34;,
+    &#34;version&#34;: &#34;v1.37.0&#34;
+  },
+  &#34;schema_checked&#34;: 0,
+  &#34;schema_version&#34;: &#34;2&#34;,
+  &#34;status&#34;: &#34;partial&#34;,
+  &#34;target_version&#34;: &#34;1.37&#34;,
+  &#34;unchecked&#34;: [
+    &#34;Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated&#34;,
+    &#34;OpenAPI validation does not replace Kubernetes admission or server semantic validation&#34;,
+    &#34;Schemas are pinned to minor .0 releases; patch-specific changes are not inferred&#34;
+  ]
+}</pre></details></main></body></html>
