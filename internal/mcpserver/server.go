@@ -1,27 +1,138 @@
-// Package mcpserver exposes the same offline engine to local AI clients.
+// Package mcpserver exposes scoped inspection tools. File and cluster scope is fixed by the operator.
 package mcpserver
 
 import (
 	"context"
+	"fmt"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/uknowpro/kubewiser/internal/analyze"
 	"github.com/uknowpro/kubewiser/internal/buildinfo"
+	"github.com/uknowpro/kubewiser/internal/cluster"
+	"github.com/uknowpro/kubewiser/internal/manifest"
+	"github.com/uknowpro/kubewiser/internal/render"
 	"github.com/uknowpro/kubewiser/internal/scan"
 )
 
-type Args struct {
-	Target string `json:"target_version" jsonschema:"Kubernetes target version from 1.16 through 1.32"`
+type Config struct {
+	Input, Snapshot, Chart, Values, Flows, Namespace string
+	Cluster                                          *cluster.Options
 }
+type Args struct {
+	Target    string `json:"target_version" jsonschema:"Kubernetes target minor version from 1.16 through 1.37"`
+	Recommend bool   `json:"recommend,omitempty"`
+}
+type UpgradeArgs struct {
+	From string `json:"from_version"`
+	To   string `json:"target_version"`
+}
+type MigrateArgs struct {
+	From string `json:"from_provider"`
+	To   string `json:"to_provider"`
+}
+type Empty struct{}
 
-// The operator fixes the input at startup; tool arguments cannot select arbitrary paths.
-func New(path string) *mcp.Server {
+func New(path string) *mcp.Server { return NewConfigured(Config{Input: path, Namespace: "default"}) }
+func NewConfigured(c Config) *mcp.Server {
 	s := mcp.NewServer(&mcp.Implementation{Name: "kubewiser", Version: buildinfo.Version}, nil)
-	mcp.AddTool(s, &mcp.Tool{Name: "scan_files", Description: "Inspect the operator-selected local manifests. Partial rule coverage only; no cluster access or mutations."}, func(ctx context.Context, req *mcp.CallToolRequest, a Args) (*mcp.CallToolResult, scan.Report, error) {
-		if err := ctx.Err(); err != nil {
-			return nil, scan.Report{}, err
+	load := func(ctx context.Context) (manifest.Set, error) {
+		if c.Input != "" {
+			return manifest.Load(ctx, c.Input)
 		}
-		report, err := scan.Scan(path, a.Target)
-		return nil, report, err
+		if c.Snapshot != "" {
+			snap, e := cluster.Read(c.Snapshot)
+			if e != nil {
+				return manifest.Set{}, e
+			}
+			return manifest.Set{Resources: snap.Resources}, nil
+		}
+		return manifest.Set{}, fmt.Errorf("operator did not configure inputs")
+	}
+	snapshotGaps := func() []string {
+		if c.Input != "" || c.Snapshot == "" {
+			return nil
+		}
+		snap, err := cluster.Read(c.Snapshot)
+		if err != nil {
+			return []string{"Snapshot coverage unavailable"}
+		}
+		gaps := []string{"Snapshot fields are redacted; missing kinds and fields cannot establish compatibility"}
+		for _, g := range snap.Gaps {
+			gaps = append(gaps, g.Resource+": "+g.Reason)
+		}
+		return gaps
+	}
+	mcp.AddTool(s, &mcp.Tool{Name: "scan_files", Description: "Offline pinned official-schema and API rule validation. No remote schema loading."}, func(ctx context.Context, req *mcp.CallToolRequest, a Args) (*mcp.CallToolResult, scan.Report, error) {
+		set, e := load(ctx)
+		if e != nil {
+			return nil, scan.Report{}, e
+		}
+		r, e := scan.Analyze(ctx, set, a.Target, a.Recommend)
+		r.Unchecked = append(r.Unchecked, snapshotGaps()...)
+		return nil, r, e
 	})
+	mcp.AddTool(s, &mcp.Tool{Name: "plan_upgrade", Description: "Offline version-step actions from the configured inputs; includes unchecked dependencies."}, func(ctx context.Context, req *mcp.CallToolRequest, a UpgradeArgs) (*mcp.CallToolResult, analyze.Plan, error) {
+		set, e := load(ctx)
+		if e != nil {
+			return nil, analyze.Plan{}, e
+		}
+		r, e := analyze.Upgrade(ctx, set, a.From, a.To)
+		r.Unchecked = append(r.Unchecked, snapshotGaps()...)
+		return nil, r, e
+	})
+	mcp.AddTool(s, &mcp.Tool{Name: "plan_migrate", Description: "Offline EKS/AKS/GKE dependency checklist; no cloud calls, data movement or provisioning."}, func(ctx context.Context, req *mcp.CallToolRequest, a MigrateArgs) (*mcp.CallToolResult, analyze.Plan, error) {
+		set, e := load(ctx)
+		if e != nil {
+			return nil, analyze.Plan{}, e
+		}
+		r, e := analyze.Migration(set, a.From, a.To)
+		r.Unchecked = append(r.Unchecked, snapshotGaps()...)
+		return nil, r, e
+	})
+	mcp.AddTool(s, &mcp.Tool{Name: "scan_network", Description: "Analyze configured exposure/policy isolation and operator-selected Hubble JSON; no active probes."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Network, error) {
+		set, e := load(ctx)
+		if e != nil {
+			return nil, analyze.Network{}, e
+		}
+		r, e := analyze.NetworkScan(ctx, set, c.Flows, c.Namespace)
+		r.Unchecked = append(r.Unchecked, snapshotGaps()...)
+		return nil, r, e
+	})
+	if c.Snapshot != "" && c.Input != "" {
+		mcp.AddTool(s, &mcp.Tool{Name: "compare_drift", Description: "Compare operator-selected desired files and snapshot; values omitted and redacted fields excluded."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Diff, error) {
+			set, e := load(ctx)
+			if e != nil {
+				return nil, analyze.Diff{}, e
+			}
+			snap, e := cluster.Read(c.Snapshot)
+			if e != nil {
+				return nil, analyze.Diff{}, e
+			}
+			r, e := analyze.Compare(set, snap, c.Namespace)
+			return nil, r, e
+		})
+	}
+	if c.Chart != "" {
+		mcp.AddTool(s, &mcp.Tool{Name: "scan_helm", Description: "Render the configured local chart with fixed values and no cluster or dependency downloads, then inspect."}, func(ctx context.Context, req *mcp.CallToolRequest, a Args) (*mcp.CallToolResult, scan.Report, error) {
+			rr, e := render.Render(ctx, render.Options{Chart: c.Chart, Values: c.Values, Release: "kubewiser", Namespace: c.Namespace, Target: a.Target})
+			if e != nil {
+				return nil, scan.Report{}, e
+			}
+			r, e := scan.Analyze(ctx, rr.Set, a.Target, a.Recommend)
+			r.Unchecked = append(r.Unchecked, rr.Unchecked...)
+			return nil, r, e
+		})
+	}
+	if c.Cluster != nil {
+		mcp.AddTool(s, &mcp.Tool{Name: "collect_cluster", Description: "Explicitly enabled bounded GET-only collection of the operator-fixed context and namespace. Returns a redacted snapshot to the client."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, cluster.Snapshot, error) {
+			r, e := cluster.Collect(ctx, *c.Cluster)
+			return nil, r, e
+		})
+	}
 	return s
 }
-func Run(ctx context.Context, path string) error { return New(path).Run(ctx, &mcp.StdioTransport{}) }
+func Run(ctx context.Context, path string) error {
+	return RunConfigured(ctx, Config{Input: path, Namespace: "default"})
+}
+func RunConfigured(ctx context.Context, c Config) error {
+	return NewConfigured(c).Run(ctx, &mcp.StdioTransport{})
+}

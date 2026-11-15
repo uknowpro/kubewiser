@@ -31,12 +31,12 @@ for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 wi
     -ldflags="-s -w -X github.com/uknowpro/kubewiser/internal/buildinfo.Version=$version -X github.com/uknowpro/kubewiser/internal/buildinfo.Commit=$commit" \
     -o "$stage/$name/$binary" ./cmd/kubewiser
   if [[ "$os" != windows ]]; then cp "$stage/$name/$binary" "$stage/$name/$alias"; fi
-  cp LICENSE README.md "$stage/$name/"
+  cp LICENSE README.md THIRD_PARTY_NOTICES.txt "$stage/$name/"
   if [[ "$os" == windows ]]; then
     cp scripts/install-windows.ps1 "$stage/$name/install.ps1"
-    (cd "$stage/$name" && zip -q "../$name.zip" "$binary" install.ps1 LICENSE README.md)
+    (cd "$stage/$name" && zip -q "../$name.zip" "$binary" install.ps1 LICENSE README.md THIRD_PARTY_NOTICES.txt)
   else
-    tar -czf "$stage/$name.tar.gz" -C "$stage/$name" "$binary" "$alias" LICENSE README.md
+    tar -czf "$stage/$name.tar.gz" -C "$stage/$name" "$binary" "$alias" LICENSE README.md THIRD_PARTY_NOTICES.txt
   fi
   rm -rf "$stage/$name"
 done

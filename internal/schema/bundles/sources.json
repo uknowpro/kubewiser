@@ -1,0 +1,178 @@
+[
+  {
+    "version": "v1.16.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.16.0/api/openapi-spec/swagger.json",
+    "source_sha256": "77f32756bc407ab559e5a4a8b9a20eee026d2910cf32e3d5260b17c4077ee935",
+    "bundle_sha256": "c13842c3c1d20abf0259d3284822cd1d56c66868877d429bf371b08728dff030",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.17.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.17.0/api/openapi-spec/swagger.json",
+    "source_sha256": "363eba8edb97e92c1e3897b964b5a71bbebba0afeebb814bd3929c3d49b21cb7",
+    "bundle_sha256": "b2a7cdcb25ed908e3b27feee054cdc91de01c9f1a5c9e6fe44c9f041c397b83d",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.18.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.18.0/api/openapi-spec/swagger.json",
+    "source_sha256": "c16b4744603a5a9941c6c656ffea9abe857f6b39b02d8620504530b7906d7838",
+    "bundle_sha256": "ea082b0c9bdcd2102b66c77a2386f8079149b1ad653adc24c8dd36aec569116d",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.19.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.19.0/api/openapi-spec/swagger.json",
+    "source_sha256": "657c689d4014c512baae14e02badb2b53743282b8ea163f0c499a4b622a07097",
+    "bundle_sha256": "d450ecc836735f1b4f7c3b4088f43b8dc414613e0714fbdfd5f96db9cbcd6177",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.20.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.20.0/api/openapi-spec/swagger.json",
+    "source_sha256": "c7354e6ab4034a89873229a9b7c1fa31fa6242b2e5f5a9b67c3be4fc67cb903c",
+    "bundle_sha256": "1deb2c8a21f142591c5cdf92b9131346b89d1068ee55619e79973b73e4f7ed5a",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.21.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.21.0/api/openapi-spec/swagger.json",
+    "source_sha256": "128a984dbb5a4e5ceceef9dea0db575267678d333f53ed606300a2132d2539cc",
+    "bundle_sha256": "a2005804e5c2c24fae7bfee96050588686693c07b85085c0c4c6e730d1f52e09",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.22.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.22.0/api/openapi-spec/swagger.json",
+    "source_sha256": "d6718670e062681e4dc9e2b9dadf2b311c147cfdabcac628b9018011165d8773",
+    "bundle_sha256": "b99fbf98928541e243efcc1214d73832406a8b934f64745682732e4eb1101306",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.23.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.23.0/api/openapi-spec/swagger.json",
+    "source_sha256": "4a744e0c28180c3fe90256d69ebdf57d31b8579d9d5dfcdff141cd4e2d7a3b4a",
+    "bundle_sha256": "a7e4812902bdd845c863d12d9a241a37408917f4bd43dc5f336e88dc5aba98c6",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.24.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.24.0/api/openapi-spec/swagger.json",
+    "source_sha256": "0d43576f2097092c8a3f203368a8edc0d605540c9757125dae116031f182e53a",
+    "bundle_sha256": "f5b161aa88817c55ca5a940c157d521ca38e357aeb65ebd110b0faf09422aa11",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.25.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.25.0/api/openapi-spec/swagger.json",
+    "source_sha256": "96354682390d446dde77eb2246fe022baa89697133a8248612ca2573e4a12120",
+    "bundle_sha256": "5d9ea8fee9302bf5afddd52cc6d9d9a928033aa0687c2127c10595f9e4455cf4",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.26.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.26.0/api/openapi-spec/swagger.json",
+    "source_sha256": "a04c5cc1dcb45730940f1bd44a198369830934550b598ca0bccd09625af5dd60",
+    "bundle_sha256": "085506529b00b21cad7323e5aa7f9f3689f107cce363ea235e3134545de500f6",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.27.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.27.0/api/openapi-spec/swagger.json",
+    "source_sha256": "09a502c5b98190a3e47604d6df835f23e7a334dfbbc3fb80729f7bb2cabf8fc4",
+    "bundle_sha256": "4656b2dc7bb0896ea6e51196cb7c8a9ed415c1d10b77f99d5f36bef4c82ee161",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.28.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.28.0/api/openapi-spec/swagger.json",
+    "source_sha256": "c3d62644ad31aeca618e6f640178caf39f917ba296b4919443d9838a22a10be1",
+    "bundle_sha256": "a04bc11371a60f1470ccf42379f863c3b4cccacdfc8482143503b08f53d7bc7a",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.29.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.29.0/api/openapi-spec/swagger.json",
+    "source_sha256": "84c20b1e2bcedce1d9d09c03e0ccb02500cd96e62e4fa54651b0e97b3a211046",
+    "bundle_sha256": "e232238a6f7ea08ca543e491912ce6ec3d6d70151eb2696e9e8ee17e2a2efe2e",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.30.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.30.0/api/openapi-spec/swagger.json",
+    "source_sha256": "94ca7544416a4f27d8cb3f8a332630d41325c5edeb2408a5aefe37ba3fd6af6d",
+    "bundle_sha256": "4d8a83a8badd9a2f95dc285f9b17538ff3b4746f50e26f2c1d4f75e447d0160a",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.31.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.31.0/api/openapi-spec/swagger.json",
+    "source_sha256": "ac357350d9d00ee233ea9a172d7c868201ff405332fec8ffe0fda25dee3e41b4",
+    "bundle_sha256": "1f30de6d0ceb348dea2b38db52c652fafe681b4781cb593fb307756180421a4f",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.32.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.32.0/api/openapi-spec/swagger.json",
+    "source_sha256": "0ba99bb42a1cf0bd35959fe82965f4eec50d404221ca299e9ef79b900e15dc00",
+    "bundle_sha256": "eece04f25662635c0dc6749d581775c11384ee0205c71951522d595aa202a5d8",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.33.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.33.0/api/openapi-spec/swagger.json",
+    "source_sha256": "2af5abf98554af1599e516f31f7f1698085e6faa12b816401f569c097b9f7ef6",
+    "bundle_sha256": "46a17a5a7e7115bfeb0e329d710891a82507c37af7aef887cd148ebaeb0b92e0",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.34.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.34.0/api/openapi-spec/swagger.json",
+    "source_sha256": "d3b0cdc2fda15c753206d25ab459dc7c12df64e2fd652b6809687471ea751c37",
+    "bundle_sha256": "c30ba459b60f50d012885507d55f5a85b0c695a46f6b8de3a218cbcecc21e60e",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.35.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.35.0/api/openapi-spec/swagger.json",
+    "source_sha256": "483500149ee52ce5753d75f5639101d985bb4f5e902cc05b1ba7627465d62446",
+    "bundle_sha256": "6fefde82edecb67157a6848edab0dee2fc89cbd18681835cf4605237d793440c",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.36.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.36.0/api/openapi-spec/swagger.json",
+    "source_sha256": "dcede2063da1d7ad62ecb5af8adb6d7fabd0b52385a7fa0048afb491dac90450",
+    "bundle_sha256": "0e5096808dc4c10a36a123386fe48e146540efe12f2e513b5940ddb889781e42",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  },
+  {
+    "version": "v1.37.0",
+    "source": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.37.0/api/openapi-spec/swagger.json",
+    "source_sha256": "465276aedf437726de5a6ed23a41b86d78bb0d347edf251a755ae26a93cdd8a6",
+    "bundle_sha256": "4f565e7c9fb10bb8d9a0cb58ca0d867b0e73c8eb259102f244ed2049d92cf1c0",
+    "reviewed": "2026-11-15",
+    "transformation": "definitions only; description and externalDocs removed; gzip mtime=0"
+  }
+]

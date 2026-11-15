@@ -11,9 +11,9 @@ import (
 func TestScan(t *testing.T) {
 	cases := []struct{ name, body, target, rule string }{
 		{"removed", "apiVersion: batch/v1beta1\nkind: CronJob\n", "1.25", "KW-API-REMOVED"},
-		{"before removal", "apiVersion: batch/v1beta1\nkind: CronJob\n", "1.24", ""},
-		{"duplicate", "apiVersion: v1\nkind: Secret\nkind: Pod\n", "1.32", "KW-YAML"},
-		{"syntax", "apiVersion: [\n", "1.32", "KW-YAML"},
+		{"before removal", "apiVersion: batch/v1beta1\nkind: CronJob\n", "1.24", "KW-API-DEPRECATED"},
+		{"duplicate", "apiVersion: v1\nkind: Secret\nkind: Pod\n", "1.32", "KW-INPUT"},
+		{"syntax", "apiVersion: [\n", "1.32", "KW-INPUT"},
 		{"type", "apiVersion: 12\nkind: Pod\n", "1.32", "KW-REQUIRED"},
 		{"custom", "apiVersion: example.org/v1\nkind: Custom\n", "1.32", ""},
 	}

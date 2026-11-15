@@ -26,7 +26,7 @@ func TestTool(t *testing.T) {
 	}
 	defer cs.Close()
 	list, err := cs.ListTools(ctx, nil)
-	if err != nil || len(list.Tools) != 1 {
+	if err != nil || len(list.Tools) != 4 {
 		t.Fatal(list, err)
 	}
 	res, err := cs.CallTool(ctx, &mcp.CallToolParams{Name: "scan_files", Arguments: map[string]any{"target_version": "1.25"}})

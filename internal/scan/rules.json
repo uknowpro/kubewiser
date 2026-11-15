@@ -1,0 +1,344 @@
+[
+  {
+    "api": "extensions/v1beta1",
+    "kind": "Deployment",
+    "deprecated": 0,
+    "removed": 16,
+    "replacement": "apps/v1; verify explicit selectors",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "apps/v1beta1",
+    "kind": "Deployment",
+    "deprecated": 0,
+    "removed": 16,
+    "replacement": "apps/v1; verify explicit selectors",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "apps/v1beta2",
+    "kind": "Deployment",
+    "deprecated": 0,
+    "removed": 16,
+    "replacement": "apps/v1; verify explicit selectors",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "apps/v1beta1",
+    "kind": "StatefulSet",
+    "deprecated": 0,
+    "removed": 16,
+    "replacement": "apps/v1; verify explicit selectors",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "apps/v1beta2",
+    "kind": "StatefulSet",
+    "deprecated": 0,
+    "removed": 16,
+    "replacement": "apps/v1; verify explicit selectors",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "apps/v1beta2",
+    "kind": "DaemonSet",
+    "deprecated": 0,
+    "removed": 16,
+    "replacement": "apps/v1; verify explicit selectors",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "apps/v1beta2",
+    "kind": "ReplicaSet",
+    "deprecated": 0,
+    "removed": 16,
+    "replacement": "apps/v1; verify explicit selectors",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "extensions/v1beta1",
+    "kind": "DaemonSet",
+    "deprecated": 0,
+    "removed": 16,
+    "replacement": "apps/v1; verify explicit selectors",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "extensions/v1beta1",
+    "kind": "ReplicaSet",
+    "deprecated": 0,
+    "removed": 16,
+    "replacement": "apps/v1; verify explicit selectors",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "extensions/v1beta1",
+    "kind": "NetworkPolicy",
+    "deprecated": 0,
+    "removed": 16,
+    "replacement": "networking.k8s.io/v1",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "extensions/v1beta1",
+    "kind": "Ingress",
+    "deprecated": 19,
+    "removed": 22,
+    "replacement": "networking.k8s.io/v1; convert backend fields and specify pathType",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "networking.k8s.io/v1beta1",
+    "kind": "Ingress",
+    "deprecated": 19,
+    "removed": 22,
+    "replacement": "networking.k8s.io/v1; convert backend fields and specify pathType",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "apiextensions.k8s.io/v1beta1",
+    "kind": "CustomResourceDefinition",
+    "deprecated": 16,
+    "removed": 22,
+    "replacement": "apiextensions.k8s.io/v1; structural schemas and per-version fields required",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "admissionregistration.k8s.io/v1beta1",
+    "kind": "MutatingWebhookConfiguration",
+    "deprecated": 16,
+    "removed": 22,
+    "replacement": "admissionregistration.k8s.io/v1; review sideEffects, admissionReviewVersions and failurePolicy",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "admissionregistration.k8s.io/v1beta1",
+    "kind": "ValidatingWebhookConfiguration",
+    "deprecated": 16,
+    "removed": 22,
+    "replacement": "admissionregistration.k8s.io/v1; review sideEffects, admissionReviewVersions and failurePolicy",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "certificates.k8s.io/v1beta1",
+    "kind": "CertificateSigningRequest",
+    "deprecated": 19,
+    "removed": 22,
+    "replacement": "certificates.k8s.io/v1; signerName required",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "rbac.authorization.k8s.io/v1beta1",
+    "kind": "Role",
+    "deprecated": 17,
+    "removed": 22,
+    "replacement": "rbac.authorization.k8s.io/v1",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "rbac.authorization.k8s.io/v1beta1",
+    "kind": "RoleBinding",
+    "deprecated": 17,
+    "removed": 22,
+    "replacement": "rbac.authorization.k8s.io/v1",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "rbac.authorization.k8s.io/v1beta1",
+    "kind": "ClusterRole",
+    "deprecated": 17,
+    "removed": 22,
+    "replacement": "rbac.authorization.k8s.io/v1",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "rbac.authorization.k8s.io/v1beta1",
+    "kind": "ClusterRoleBinding",
+    "deprecated": 17,
+    "removed": 22,
+    "replacement": "rbac.authorization.k8s.io/v1",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "storage.k8s.io/v1beta1",
+    "kind": "CSIDriver",
+    "deprecated": 17,
+    "removed": 22,
+    "replacement": "storage.k8s.io/v1",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "storage.k8s.io/v1beta1",
+    "kind": "CSINode",
+    "deprecated": 17,
+    "removed": 22,
+    "replacement": "storage.k8s.io/v1",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "storage.k8s.io/v1beta1",
+    "kind": "StorageClass",
+    "deprecated": 17,
+    "removed": 22,
+    "replacement": "storage.k8s.io/v1",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "storage.k8s.io/v1beta1",
+    "kind": "VolumeAttachment",
+    "deprecated": 17,
+    "removed": 22,
+    "replacement": "storage.k8s.io/v1",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "batch/v1beta1",
+    "kind": "CronJob",
+    "deprecated": 21,
+    "removed": 25,
+    "replacement": "batch/v1",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "policy/v1beta1",
+    "kind": "PodDisruptionBudget",
+    "deprecated": 21,
+    "removed": 25,
+    "replacement": "policy/v1; empty selector {} selects all pods, unlike v1beta1",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "policy/v1beta1",
+    "kind": "PodSecurityPolicy",
+    "deprecated": 21,
+    "removed": 25,
+    "replacement": "Pod Security Admission or alternative policy controller; no direct API replacement",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "autoscaling/v2beta1",
+    "kind": "HorizontalPodAutoscaler",
+    "deprecated": 22,
+    "removed": 25,
+    "replacement": "autoscaling/v2; convert metric target fields",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "autoscaling/v2beta2",
+    "kind": "HorizontalPodAutoscaler",
+    "deprecated": 23,
+    "removed": 26,
+    "replacement": "autoscaling/v2",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "discovery.k8s.io/v1beta1",
+    "kind": "EndpointSlice",
+    "deprecated": 21,
+    "removed": 25,
+    "replacement": "discovery.k8s.io/v1; topology fields changed",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "events.k8s.io/v1beta1",
+    "kind": "Event",
+    "deprecated": 19,
+    "removed": 25,
+    "replacement": "events.k8s.io/v1",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "flowcontrol.apiserver.k8s.io/v1beta1",
+    "kind": "FlowSchema",
+    "deprecated": 23,
+    "removed": 26,
+    "replacement": "flowcontrol.apiserver.k8s.io/v1; review concurrency field changes",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "flowcontrol.apiserver.k8s.io/v1beta1",
+    "kind": "PriorityLevelConfiguration",
+    "deprecated": 23,
+    "removed": 26,
+    "replacement": "flowcontrol.apiserver.k8s.io/v1; review concurrency field changes",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "flowcontrol.apiserver.k8s.io/v1beta2",
+    "kind": "FlowSchema",
+    "deprecated": 26,
+    "removed": 29,
+    "replacement": "flowcontrol.apiserver.k8s.io/v1; review nominalConcurrencyShares",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "flowcontrol.apiserver.k8s.io/v1beta2",
+    "kind": "PriorityLevelConfiguration",
+    "deprecated": 26,
+    "removed": 29,
+    "replacement": "flowcontrol.apiserver.k8s.io/v1; review nominalConcurrencyShares",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "flowcontrol.apiserver.k8s.io/v1beta3",
+    "kind": "FlowSchema",
+    "deprecated": 29,
+    "removed": 32,
+    "replacement": "flowcontrol.apiserver.k8s.io/v1; explicit zero nominalConcurrencyShares is no longer defaulted to 30",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "flowcontrol.apiserver.k8s.io/v1beta3",
+    "kind": "PriorityLevelConfiguration",
+    "deprecated": 29,
+    "removed": 32,
+    "replacement": "flowcontrol.apiserver.k8s.io/v1; explicit zero nominalConcurrencyShares is no longer defaulted to 30",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  },
+  {
+    "api": "storage.k8s.io/v1beta1",
+    "kind": "CSIStorageCapacity",
+    "deprecated": 24,
+    "removed": 27,
+    "replacement": "storage.k8s.io/v1",
+    "source": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+    "reviewed": "2026-11-15"
+  }
+]

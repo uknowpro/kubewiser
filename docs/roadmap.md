@@ -1,20 +1,14 @@
 # 고도화 로드맵 / Development roadmap
 
-검토일: 2026-11-15. 아래는 구현 계획이며 현재 기능으로 표시하지 않는다. 현재 구현은 오프라인 YAML 검사, 일부 API 제거 규칙, CLI/MCP 및 배포 기반이다.
+검토일: 2026-11-15. 1~5 구현 묶음의 첫 버전을 v0.2.0-alpha.1에 반영했습니다. 전체 목표가 모두 검증됐다는 의미는 아니며 현재 경계는 [README](../README.md), [운영 범위](operations.md), [공식 근거](official-sources.md)에 기록합니다.
 
-## 우선순위와 완료 기준
-
-| 순서 | 범위 | 완료 기준 |
+| 묶음 | 이번 구현 | 남은 확장 |
 | --- | --- | --- |
-| P0 | 입력·보고서 정확성 | List 재귀 검사, 파일별 부분 실패, 최대 파일/문서/깊이 제한, 취소 지원, 규칙 ID/심각도/필수 여부/근거/미검사 범위 분리 |
-| P1 | 버전별 스키마·규칙 | 알 수 없는 필드·타입·필수값, 로컬 CRD 스키마, deprecated/removed 구분, 목표 버전 지원표, 입력 위치와 근거, 오프라인 회귀 테스트 |
-| P2 | 읽기 전용 스냅샷 | 명시한 context/namespace만 수집, GET/LIST 허용 목록, 요청 속도·동시성·페이지·타임아웃 제한, Secret 본문 제외, 누락·RBAC 실패·수집 시간 기록 |
-| P3 | Helm·drift | Chart/values/release/namespace/capabilities 고정, 원본과 렌더링 결과 추적, 필드 소유권·기본값·리스트 의미를 고려한 diff |
-| P4 | 업그레이드·권고 | 버전 단계별 선행 조치와 영향받는 리소스 연결, 기본값/동작 변경·애드온 호환성, 적용 조건과 검증 방법이 있는 권고 |
-| P5 | 네트워크·OS·앱 영향 | 기존 관측 데이터 입력부터 시작, 허용 경로/관측/연결 시험 구분, hostPath/capabilities/sysctl/runtime/이미지 의존 근거, 미확인 사항 명시 |
-| P6 | 클라우드 이전·생성 | 실제 사용하는 이전 경로 한 가지부터 지원, IAM/LB/스토리지/DNS 매핑, 미해결 변수·데이터 이전 절차, Terraform/Helm/manifest 초안과 검증 |
-
-다음 구현 묶음은 P0+P1을 추천한다. 배포 환경 확대보다 판정의 정확도와 범위를 먼저 확립한다. 기존 1.16~1.32 제한을 숫자만 늘려 확장하지 않고, 지원표·검증된 스키마·규칙 데이터와 함께 확장한다. 일정은 대표 입력·목표 버전·실제 클러스터 규모가 정해진 뒤 산정한다.
+| 1. 스키마·규칙 | 22개 버전 공식 스키마, CRD, 위치·근거, deprecated/removed | CEL, 패치별 변경, admission/semantic 규칙 |
+| 2. 스냅샷 | 범위 고정 GET 수집, 한도, 누락·민감값 처리 | 더 넓은 리소스·이전 API 지원, 검토된 인증 방식 |
+| 3. Helm·drift | 로컬 렌더, target capabilities, snapshot diff | managedFields 소유권, CRD 리스트 의미, 버전 변환 |
+| 4. 업그레이드 | 마이너별 단계, 필수·조건부 조치, kubelet skew | 버전별 기본 동작 변경, addon matrix, 앱·OS 실증 |
+| 5. 네트워크·이전 | Hubble 입력, 정책 격리 의도, EKS/AKS/GKE 의존 계획 | 전체 정책 경로 평가, 클라우드별 구체 매핑, Terraform/Helm/manifest 초안 생성 |
 
 ## 참고 자료와 적용 방법
 
@@ -34,7 +28,7 @@
 | [GKE deprecations](https://docs.cloud.google.com/kubernetes-engine/docs/deprecations) | 기능·API 폐기 | 플랫폼 고유 제약 |
 | [Terraform import](https://developer.hashicorp.com/terraform/language/import) | 기존 리소스 import와 설정 생성 | 생성된 구성과 상태 연결의 차이. 다른 클라우드로 자동 변환된다고 가정하지 않음 |
 
-오픈소스는 설계와 테스트의 참고 자료이며 새 런타임 의존성으로 추가한 것이 아니다. 코드를 재사용할 때는 해당 버전의 라이선스·NOTICE와 의존성을 먼저 확인한다. 공식 문서도 바뀌므로 규칙에 문서 URL뿐 아니라 확인일·적용 범위·규칙 버전·회귀 사례를 기록한다.
+Helm SDK와 client-go는 고정된 Go 의존성으로 사용하며 나머지 프로젝트는 설계·테스트의 참고 자료입니다. 코드를 재사용할 때는 해당 버전의 라이선스·NOTICE와 의존성을 먼저 확인한다. 공식 문서도 바뀌므로 규칙에 문서 URL뿐 아니라 확인일·적용 범위·규칙 버전·회귀 사례를 기록한다.
 
 ## 외부 전송 없는 기본 동작
 
@@ -51,11 +45,10 @@
 
 ## 다음 작업 백로그
 
-1. Report 스키마 v2 및 coverage 결과 정의; severity/action/evidence를 분리.
-2. YAML 위치를 유지한 리소스 모델, List 재귀 처리, 입력 제한·취소·부분 실패.
-3. 로컬 스키마 번들 인터페이스와 네트워크 차단 테스트.
-4. Deployment/Service/Ingress 등 대표 리소스에 대한 유효·무효·미검사 fixture와 버전 매트릭스.
-5. deprecated/removed/default-change 규칙 외부 데이터화 및 근거 ID.
-6. CLI/MCP 결과 일치, Windows x86 메모리 한계, 민감 데이터 출력 검증.
+1. 대표 운영 스냅샷을 비식별화해 검증하고 RBAC/제한 튜닝.
+2. 버전별 default/behavior 변경 규칙과 애드온 호환성 데이터 확충.
+3. CRD 리스트·필드 소유권을 반영한 drift 정확도 개선.
+4. 이전 경로 하나를 선정해 클라우드 매핑과 검토용 템플릿 생성.
+5. 실제 Windows 10 x86/x64 장비와 대규모 입력 메모리 검증.
 
-각 단계의 결과를 다음 릴리스 노트에 한국어·영어로 기록한다.
+각 단계의 결과를 한국어·영어 릴리스 노트로 제공합니다.

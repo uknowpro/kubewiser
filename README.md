@@ -1,68 +1,59 @@
 # kubewiser
 
-Evidence-oriented Kubernetes inspection CLI. Initial implementation: offline manifest checks and a machine-readable report. No cluster requests or resource mutations.
+Evidence-oriented Kubernetes inspection CLI and local MCP server. Both `kubewiser` and `kubewise` run the same engine. Analysis is offline; only an explicit `collect` command (or explicitly enabled MCP collection) contacts your selected Kubernetes API server. No telemetry, automatic update checks, document downloads, cloud API calls or resource mutations.
 
-## Binary distribution (no Go installation required)
+## Download and install
 
-Linux and macOS archives for amd64 and arm64, plus a Windows 10+ x64 and x86 ZIPs are prepared by `scripts/release.sh`. See [installation and release instructions](docs/releases.md). Tagged releases are staged as GitHub drafts after CI. Downloads: [GitHub Releases](https://github.com/uknowpro/kubewiser/releases). Windows users can extract the ZIP and run `.\kubewiser.exe --version` in PowerShell; Go and WSL are not required.
+[GitHub Releases](https://github.com/uknowpro/kubewiser/releases) provides Linux/macOS amd64 and arm64, Windows 10+ amd64 and 386 builds. **End users do not need Go, Helm, kubectl or WSL.** Windows ZIPs contain one EXE; `install.ps1` registers both commands using hardlinks to one executable. See [installation instructions](docs/releases.md), including native test limitations and checksums.
 
-Use `kubewiser --version` to inspect the embedded version, commit and platform.
+## Implemented inspection paths
 
-## Build and use
+| Area | Implemented | Boundary |
+| --- | --- | --- |
+| Versioned validation | Embedded official Kubernetes 1.16–1.37 `.0` schemas; unknown fields, types and schema-required fields; local CRDs; deprecated/removed API rules | Schema validation is not admission validation or a guarantee of workload compatibility |
+| Collection | Explicit context/namespace; sequential GETs, pagination, request/time/item limits; gaps and redacted paths | Fixed resource allowlist; no Secrets/custom resources; no exec/cloud auth plugins |
+| Helm and drift | Local vendored chart rendering; target capabilities; source hashes; snapshot comparison with named-list normalization | No install, dependency downloads, live lookup, values.schema.json validation or inferred field ownership |
+| Upgrade planning | Minor-by-minor steps, required/conditional actions, kubelet skew evidence and dependency recommendations | Vendor matrices, behavior changes and real application tests require separate validation |
+| Network and migration | NetworkPolicy isolation intent, Ingress/Service exposure, existing Hubble NDJSON; EKS/AKS/GKE dependency actions | No active probes, firewall reachability proof, infrastructure generation or stateful data migration |
 
-Requires Go 1.23 or newer.
+See [official sources and coverage](docs/official-sources.md), [operational details](docs/operations.md) and [remaining roadmap](docs/roadmap.md).
+
+## Examples
+
+Flags precede positional paths. Use `--help` for commands and `versions` for the bundled official URLs and SHA-256 hashes.
+
+```sh
+kubewiser scan files --target-version 1.37 --recommend ./deploy
+kubewiser scan helm --target-version 1.37 --release app --namespace team --values ./values.yaml ./chart
+kubewiser collect --kubeconfig ./config --context staging --namespace team --output ./snapshot.json
+kubewiser scan snapshot --target-version 1.37 ./snapshot.json
+kubewiser diff --source ./deploy --snapshot ./snapshot.json
+kubewiser diff --chart ./chart --target-version 1.37 --release app --snapshot ./snapshot.json
+kubewiser plan upgrade --snapshot ./snapshot.json --from 1.35 --to 1.37
+kubewiser scan network --snapshot ./snapshot.json --flows ./hubble.jsonl
+kubewiser plan migrate --source ./deploy --from eks --to aks
+```
+
+JSON is the default. `--format text` gives concise text for direct scan reports; other results remain JSON. Scan exit codes: `0` no findings in performed checks, `1` findings, `2` argument/operational error. Diff returns `1` for changes. Successful collection/planning/network commands return `0` even if they contain gaps or actions. **Always inspect `unchecked`, coverage and collection gaps; exit 0 does not prove compatibility.**
+
+## Local MCP and local models
+
+```sh
+kubewiser mcp --input /absolute/path/deploy --snapshot /absolute/path/snapshot.json
+```
+
+An MCP-capable client can connect a local DeepSeek/Ollama model to this stdio server. Kubewiser does not launch or call an LLM. Tools: `scan_files`, `plan_upgrade`, `plan_migrate`, `scan_network`; `compare_drift` requires input and snapshot, `scan_helm` requires `--chart`. Paths and cluster scope are fixed by the operator at startup, not chosen by the model. Use `--namespace` when the desired manifests omit it.
+
+Collection is absent by default. Enabling `--allow-cluster` also requires explicit `--kubeconfig`, `--context`, `--namespace`; collection returns a redacted snapshot to the MCP client. The client/model can transmit received data: use a local-only client configuration if external transmission is prohibited. Paths, hashes, resource names, IPs and remaining snapshot metadata can still be sensitive. Treat chosen charts and manifests as trusted local inputs.
+
+## Build and development
+
+Requires Go 1.26+; CI pins the toolchain in `.go-version`. Runtime binaries require no Go installation.
 
 ```sh
 go build -o kubewiser ./cmd/kubewiser
-./kubewiser scan files --target-version 1.32 --format json ./deploy
-```
-
-Flags must precede the input path. A path may be a YAML/JSON file or a directory. Directories are scanned recursively in sorted order, excluding hidden directories and symlink entries. Multi-document YAML is supported. Render Helm charts separately before scanning.
-
-Exit codes: `0` no findings in the checks performed; `1` findings; `2` invalid arguments or operational failure. **Exit 0 does not mean Kubernetes compatibility is proven.** Reports always include `status: partial` and unchecked areas.
-
-## Implemented checks and boundaries
-
-- YAML syntax, duplicate mapping keys, mapping-shaped documents, required string apiVersion/kind.
-- A deliberately small API removal table: Deployment legacy APIs (1.16), Ingress and CRD beta APIs (1.22), CronJob/PDB/PSP/HPA beta APIs (1.25/1.26).
-- Targets 1.16–1.32 are accepted for this initial rule table. Other targets fail explicitly. This is not a claim of full coverage for those releases.
-- Deterministic JSON, rule identifiers, source location, input SHA-256 hashes, remediation guidance and official evidence link.
-- Raw manifest values and parser diagnostic excerpts are not returned. File paths are included and can be sensitive.
-
-Not yet implemented: complete Kubernetes/CRD schemas, arbitrary unknown-field detection, metadata/spec validation, List item recursion, Helm rendering, live cluster collection, drift, application/network/cloud analysis, or automatic patches. List documents produce a review finding instead of silently skipping their items. Partial results are not emitted after file I/O errors.
-
-## Development
-
-```sh
 go test -race ./...
 go vet ./...
 ```
 
-Next milestones: versioned schema bundles and full validation; read-only snapshots; Helm/drift normalization; upgrade action plans; additional MCP tools over the same engine. Local models connect through an MCP-capable client. LLM output must not override deterministic findings.
-
-API rule source: https://kubernetes.io/docs/reference/using-api/deprecation-guide/
-
-## Local MCP
-
-```sh
-./kubewiser mcp --input /absolute/path/to/manifests
-```
-
-Configure an MCP-capable client to launch this command. The `scan_files` tool accepts `target_version` and returns the same structured report as the CLI. The input is fixed by the operator at startup; the model cannot choose another path. The operator-selected files must be trusted local inputs. The pinned SDK handles stdio framing and negotiation; no HTTP listener or model runtime is started. Local DeepSeek/Ollama use requires a separate MCP-capable client.
-
-## Command names
-
-`kubewiser` and `kubewise` are equivalent commands, including `scan files`, `mcp`, and `--version`. Both use the same CLI implementation and return the same output and exit codes. The product/version banner remains `kubewiser` for either name.
-
-Linux/macOS archives include both commands. Windows ZIPs ship one EXE and `install.ps1`. Run `.\install.ps1` once from the extracted folder: it installs one physical executable with two hardlink names and registers the user PATH, so both commands work in PowerShell and CMD without shell aliases. Requires a hardlink-capable local filesystem (normally NTFS); see [installation details](docs/releases.md). Existing terminal applications may need restarting.
-
-```sh
-go install github.com/uknowpro/kubewiser/cmd/kubewiser@latest
-go install github.com/uknowpro/kubewiser/cmd/kubewise@latest
-```
-
-For prerelease source installation, replace `@latest` with the exact release tag. Windows 10 32-bit users should download `windows_386.zip`; x64 users should prefer `windows_amd64.zip`.
-
-## Next development stages
-
-See [the implementation roadmap and primary references](docs/roadmap.md).
+Third-party dependencies and embedded official schemas are covered by [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt). Reports use format v2; consumers of earlier alpha reports must update their parsers.

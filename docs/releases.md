@@ -20,18 +20,18 @@ Builds use `CGO_ENABLED=0`; Linux binaries do not require a system libc. OS comp
 ```sh
 go test -race ./...
 go vet ./...
-bash scripts/release.sh v0.1.0-alpha.5
+bash scripts/release.sh v0.2.0-alpha.1
 ```
 
-Outputs are under `dist/v0.1.0-alpha.5/`: four tar.gz archives and two Windows ZIPs containing the executable, LICENSE and README, plus SHA-256 checksums and build metadata. Existing output directories are rejected. Build from a clean checkout for a release; archives embed the version and Git commit. Archives are not claimed to be byte-for-byte reproducible.
+Outputs are under `dist/v0.2.0-alpha.1/`: four tar.gz archives and two Windows ZIPs containing the executable, LICENSE, THIRD_PARTY_NOTICES and README, plus SHA-256 checksums and build metadata. Existing output directories are rejected. Build from a clean checkout for a release; archives embed the version and Git commit. Archives are not claimed to be byte-for-byte reproducible.
 
 ## GitHub release
 
 Commit and push the release preparation changes first. After reviewing CI:
 
 ```sh
-git tag -a v0.1.0-alpha.5 -m "kubewiser initial alpha"
-git push origin v0.1.0-alpha.5
+git tag -a v0.2.0-alpha.1 -m "kubewiser initial alpha"
+git push origin v0.2.0-alpha.1
 ```
 
 The tag workflow tests all six test jobs, packages the binaries, verifies checksums, and creates a **draft** GitHub Release. Review assets, limitations and native test results before publishing the draft in GitHub. A prerelease tag also marks the release as a prerelease. Existing releases are not overwritten automatically. The current feature set is an initial alpha; see README for inspection coverage.
@@ -42,15 +42,15 @@ Download the matching archive and `checksums.txt` from the same release. Verify 
 
 ```sh
 # Linux: compare this output with the corresponding checksums.txt entry.
-sha256sum kubewiser_v0.1.0-alpha.5_linux_amd64.tar.gz
+sha256sum kubewiser_v0.2.0-alpha.1_linux_amd64.tar.gz
 # macOS equivalent:
-shasum -a 256 kubewiser_v0.1.0-alpha.5_darwin_arm64.tar.gz
+shasum -a 256 kubewiser_v0.2.0-alpha.1_darwin_arm64.tar.gz
 ```
 
 Extract the matching archive, then install the executable:
 
 ```sh
-tar -xzf kubewiser_v0.1.0-alpha.5_linux_amd64.tar.gz
+tar -xzf kubewiser_v0.2.0-alpha.1_linux_amd64.tar.gz
 mkdir -p "$HOME/.local/bin"
 install -m 0755 kubewiser "$HOME/.local/bin/kubewiser"
 export PATH="$HOME/.local/bin:$PATH"
@@ -68,9 +68,9 @@ Windows 10 64-bit (Intel/AMD) is the target. Go's documented minimum is Windows 
 Download the Windows ZIP and checksums.txt from the same release. In PowerShell:
 
 ```powershell
-Get-FileHash .\kubewiser_v0.1.0-alpha.5_windows_amd64.zip -Algorithm SHA256
+Get-FileHash .\kubewiser_v0.2.0-alpha.1_windows_amd64.zip -Algorithm SHA256
 # Compare with the matching entry in checksums.txt before extraction.
-Expand-Archive .\kubewiser_v0.1.0-alpha.5_windows_amd64.zip -DestinationPath .\kubewiser
+Expand-Archive .\kubewiser_v0.2.0-alpha.1_windows_amd64.zip -DestinationPath .\kubewiser
 cd .\kubewiser
 .\kubewiser.exe --version
 .\kubewiser.exe scan files --target-version 1.32 --format json "C:\deploy manifests"
@@ -83,9 +83,9 @@ Before tagging a release, add bilingual notes at `docs/release-notes/<tag>.md`. 
 
 ## Alternate command and 32-bit Windows
 
-Linux/macOS archives include both command names. Install both with `install -m 0755 kubewiser kubewise "$HOME/.local/bin/"`. Windows archives contain only `kubewiser.exe`; use a shell alias for the second name.
+Linux/macOS archives include both command names. Install both with `install -m 0755 kubewiser kubewise "$HOME/.local/bin/"`. Windows archives contain only `kubewiser.exe`; run `install.ps1` to register both names as hardlinks.
 
-For Windows 10 32-bit, download `kubewiser_v0.1.0-alpha.5_windows_386.zip` and substitute that filename in the installation example above. Both names support the same flags and MCP behavior; version banners intentionally use the product name kubewiser. 32-bit support in this release applies to Windows x86, not macOS or Linux.
+For Windows 10 32-bit, download `kubewiser_v0.2.0-alpha.1_windows_386.zip` and substitute that filename in the installation example above. Both names support the same flags and MCP behavior; version banners intentionally use the product name kubewiser. 32-bit support in this release applies to Windows x86, not macOS or Linux.
 
 ## Automatic Windows command registration
 
