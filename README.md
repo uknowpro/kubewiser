@@ -10,18 +10,41 @@ Inspect manifests, Helm charts and read-only snapshots with a CLI that compares 
 
 > Alpha software. Analysis is offline by default, with no telemetry. Explicit collection contacts your selected API server. Reports show partial coverage and never apply changes automatically.
 
-## Features
+## 📑 Table of contents
 
-| Your goal | What kubewiser provides |
+- [✨ Features](#features)
+- [📊 Report preview](#report-preview)
+- [🚀 Quick start](#quick-start)
+- [📦 Installation](#installation)
+- [🛠️ Commands at a glance](#commands-at-a-glance)
+- [📖 Command reference](#command-reference)
+- [🤖 Local MCP and local models](#local-mcp-and-local-models)
+- [🔧 Build and development](#build-and-development)
+- [🔎 Scope and evidence](#scope-and-evidence)
+- [💬 Development and feedback](#development-and-feedback)
+- [🗺️ Roadmap](docs/roadmap.md)
+- [📝 Release notes](https://github.com/uknowpro/kubewiser/releases)
+- [📄 License](LICENSE)
+
+<a id="features"></a>
+
+## ✨ Features
+
+| Feature | What you can do |
 | --- | --- |
-| Find problems before version changes | Official Kubernetes 1.16–1.37 `.0` schemas, local CRDs, deprecated/removed API checks |
-| Decide what to fix first | Required/conditional/optional priorities, current/recommended comparisons, reasons and verification |
-| Compare desired and observed state | Explicitly scoped GET-only snapshots and Helm/manifest drift |
-| Prepare upgrades and migrations | Minor upgrade steps and EKS/AKS/GKE dependency plans |
-| Review network intent | Service/Ingress exposure, NetworkPolicy isolation intent and existing Hubble flows |
-| Share results or connect a local model | JSON, terminal, Markdown, standalone HTML and scoped MCP tools |
+| 🔍 Manifest & API inspection | Find schema errors and deprecated/removed APIs using official Kubernetes 1.16–1.37 `.0` schemas and supplied local CRDs. |
+| 🎯 Actionable recommendations | Review required, conditional and optional actions with current/recommended comparisons, reasons and verification steps. |
+| ⚖️ Helm & manifest drift | Render local charts and compare desired resources with explicitly scoped, GET-only snapshots. |
+| 🪜 Upgrade planning | Review minor-version steps and workload API changes before upgrading. Provider availability and runtime compatibility need separate verification. |
+| ☁️ Cloud migration review | Inventory EKS/AKS/GKE storage, load balancer and identity dependencies. Infrastructure generation and data migration are not yet provided. |
+| 🌐 Network intent analysis | Inspect Service/Ingress exposure, NetworkPolicy isolation intent and existing Hubble flows without active probes. |
+| 📊 Shareable reports | Read terminal summaries or export JSON, Markdown and standalone HTML with evidence and unchecked areas. |
+| 🤖 Local MCP integration | Expose scoped inspection tools to MCP clients, including clients using local DeepSeek/Ollama models. No built-in LLM calls. |
+| 🔒 Offline analysis | Analyze local inputs without telemetry or automatic downloads. Explicit collection contacts only the selected Kubernetes API server. |
 
-## Report preview
+<a id="report-preview"></a>
+
+## 📊 Report preview
 
 An actual generated HTML review: required actions first, current and recommended settings side by side, with source hashes and original evidence available on demand.
 
@@ -31,7 +54,9 @@ An actual generated HTML review: required actions first, current and recommended
 
 Download the HTML file and open it locally. It loads no external fonts or scripts. The comparison view shown above is available from v0.2.0-alpha.3.
 
-## Quick start
+<a id="quick-start"></a>
+
+## 🚀 Quick start
 
 1. Download the matching archive from [Releases](https://github.com/uknowpro/kubewiser/releases), verify its checksum and extract it.
 2. Add the binary to PATH, or run `./kubewiser` from the extracted folder (`.\kubewiser.exe` on Windows).
@@ -61,7 +86,9 @@ Required: 1 | Conditional: 0 | Optional: 0
 
 Findings return exit code `1` while still producing a report. Always review unchecked areas too. Add `--lang ko` for Korean review explanations; original evidence can remain English.
 
-## Installation
+<a id="installation"></a>
+
+## 📦 Installation
 
 | Platform | Archive suffix |
 | --- | --- |
@@ -79,7 +106,9 @@ Start-Process .\report.html
 
 See [installation details](docs/releases.md) for checksums, OS validation boundaries and setup.
 
-## Commands at a glance
+<a id="commands-at-a-glance"></a>
+
+## 🛠️ Commands at a glance
 
 | Command | Purpose |
 | --- | --- |
@@ -96,7 +125,9 @@ See [installation details](docs/releases.md) for checksums, OS validation bounda
 
 Expand the sections below for commands, actual terminal output and exit codes.
 
-## Command reference
+<a id="command-reference"></a>
+
+## 📖 Command reference
 
 Every `kubewiser` command also works as `kubewise`. Put flags before positional paths. Run the checked-in `docs/examples/...` examples from the repository root. Replace example paths, context and namespace when using your own inputs. Fixtures are synthetic documentation data; `snapshot.json` contains one Service and is not a production snapshot. Terminal excerpts below come from actual local CLI runs. `echo $?` is the POSIX shell exit-code check; in PowerShell use `$LASTEXITCODE`. MCP is a waiting server, not a report-producing command.
 
@@ -479,7 +510,9 @@ No banner or report is printed while waiting for MCP requests. Configure an MCP-
 Scan exits with `0` for no findings, `1` for findings and `2` for argument/operational errors. Diff returns `1` for changes. Successful collect/plan/network commands return `0` even with actions or gaps. **Exit 0 does not prove compatibility.** Findings exit code 1 still produces reports. Shell `>` overwrites existing report files; choose filenames accordingly.
 
 </details>
-## Local MCP and local models
+<a id="local-mcp-and-local-models"></a>
+
+## 🤖 Local MCP and local models
 
 ```sh
 kubewiser mcp --input /absolute/path/deploy --snapshot /absolute/path/snapshot.json
@@ -489,7 +522,9 @@ An MCP-capable client can connect a local DeepSeek/Ollama model to this stdio se
 
 Collection is absent by default. Enabling `--allow-cluster` also requires explicit `--kubeconfig`, `--context`, `--namespace`; collection returns a redacted snapshot to the MCP client. The client/model can transmit received data: use a local-only client configuration if external transmission is prohibited. Paths, hashes, resource names, IPs and remaining snapshot metadata can still be sensitive. Treat chosen charts and manifests as trusted local inputs.
 
-## Build and development
+<a id="build-and-development"></a>
+
+## 🔧 Build and development
 
 Requires Go 1.26+; CI pins the toolchain in `.go-version`. Runtime binaries require no Go installation.
 
@@ -501,13 +536,17 @@ go vet ./...
 
 Third-party dependencies and embedded official schemas are covered by [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt). Reports use format v2; consumers of earlier alpha reports must update their parsers.
 
-## Scope and evidence
+<a id="scope-and-evidence"></a>
+
+## 🔎 Scope and evidence
 
 Schemas are minor `.0` snapshots, not patch-exact validation. Admission/CEL, actual application/kernel compatibility and full network reachability require separate checks. No automatic infrastructure generation or data migration is performed. Numeric CPU/memory sizing needs measurements; this report does not invent values.
 
 [Official sources](docs/official-sources.md) · [Operational boundaries](docs/operations.md) · [Report design references](docs/report-design.md)
 
-## Development and feedback
+<a id="development-and-feedback"></a>
+
+## 💬 Development and feedback
 
 Report reproducible problems through [GitHub Issues](https://github.com/uknowpro/kubewiser/issues). Include the command, target version and a small sanitized example. Do not attach kubeconfig credentials, Secrets or unreviewed production snapshots.
 
