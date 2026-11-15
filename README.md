@@ -54,7 +54,7 @@ Configure an MCP-capable client to launch this command. The `scan_files` tool ac
 
 `kubewiser` and `kubewise` are equivalent commands, including `scan files`, `mcp`, and `--version`. Both use the same CLI implementation and return the same output and exit codes. The product/version banner remains `kubewiser` for either name.
 
-All archives include both executables (`kubewiser.exe` and `kubewise.exe` on Windows). Install both in a directory on PATH; no shell alias is required. Windows users can run `.\kubewise.exe` directly in PowerShell.
+Linux/macOS archives include both commands. Windows archives contain only `kubewiser.exe`; use a PowerShell alias for the alternate name: `Set-Alias kubewise (Resolve-Path .\kubewiser.exe).Path`. Then run `kubewise --version`. This alias lasts for the current PowerShell session; see docs/releases.md for persistence. CMD requires its own alias and does not inherit PowerShell aliases.
 
 ```sh
 go install github.com/uknowpro/kubewiser/cmd/kubewiser@latest

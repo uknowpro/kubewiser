@@ -30,10 +30,10 @@ for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 wi
   GOOS="$os" GOARCH="$arch" go build -mod=readonly -trimpath \
     -ldflags="-s -w -X github.com/uknowpro/kubewiser/internal/buildinfo.Version=$version -X github.com/uknowpro/kubewiser/internal/buildinfo.Commit=$commit" \
     -o "$stage/$name/$binary" ./cmd/kubewiser
-  cp "$stage/$name/$binary" "$stage/$name/$alias"
+  if [[ "$os" != windows ]]; then cp "$stage/$name/$binary" "$stage/$name/$alias"; fi
   cp LICENSE README.md "$stage/$name/"
   if [[ "$os" == windows ]]; then
-    (cd "$stage/$name" && zip -q "../$name.zip" "$binary" "$alias" LICENSE README.md)
+    (cd "$stage/$name" && zip -q "../$name.zip" "$binary" LICENSE README.md)
   else
     tar -czf "$stage/$name.tar.gz" -C "$stage/$name" "$binary" "$alias" LICENSE README.md
   fi
