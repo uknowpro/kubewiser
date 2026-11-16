@@ -19,6 +19,7 @@ import (
 )
 
 type Options struct {
+	AllowExecAuth                  string
 	Kubeconfig, Context, Namespace string
 	IncludeCluster                 bool
 	QPS                            float64
@@ -83,7 +84,7 @@ func Collect(ctx context.Context, o Options) (Snapshot, error) {
 	}
 	selected := raw.Contexts[o.Context]
 	auth := raw.AuthInfos[selected.AuthInfo]
-	if auth != nil && (auth.Exec != nil || auth.AuthProvider != nil) {
+	if auth != nil && (auth.AuthProvider != nil || (auth.Exec != nil && o.AllowExecAuth == "")) {
 		return s, fmt.Errorf("exec/auth-provider plugins are disabled; use static credentials")
 	}
 	cl := raw.Clusters[selected.Cluster]
@@ -93,6 +94,12 @@ func Collect(ctx context.Context, o Options) (Snapshot, error) {
 	cfg, e := clientcmd.NewNonInteractiveClientConfig(*raw, o.Context, &clientcmd.ConfigOverrides{}, nil).ClientConfig()
 	if e != nil {
 		return s, fmt.Errorf("invalid client configuration")
+	}
+	if auth != nil && auth.Exec != nil {
+		if e = execCredentials(ctx, cfg, auth.Exec, o.AllowExecAuth); e != nil {
+			return s, e
+		}
+		s.Gaps = append(s.Gaps, Gap{"authentication", "Explicit external authentication executable used; it may contact identity providers or launch child processes. Credentials are not stored in the snapshot"})
 	}
 	return collectConfig(ctx, cfg, o, s)
 }

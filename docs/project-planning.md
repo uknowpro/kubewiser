@@ -1,6 +1,6 @@
 # AKS project planning / AKS 프로젝트 계획
 
-Available from **v0.2.0-alpha.4**. Analysis and generation remain local. No Azure API calls, infrastructure commands, image pulls, model calls or telemetry occur.
+Available from **v0.2.0-alpha.4**. See [alpha.5 extensions](advanced-inspection.md) for explicit exec authentication, saved AKS route evidence, patch/CEL inspection, normalized drift and configured templates. Analysis and generation remain local. No Azure API calls, infrastructure commands, image pulls, model calls or telemetry occur.
 
 ## English
 
@@ -61,7 +61,7 @@ Supply explicit Pod endpoints and all relevant NetworkPolicies; include Namespac
 
 Locally supplied CRD schemas enable map/set-list comparison; atomic/unspecified lists retain order. Hashed map keys avoid directly printing arbitrary key values (hashes are not anonymization). `field_managers` records hints only: it neither proves the cause of drift nor authorizes overwrite. API-version conversion remains unverified.
 
-Collection now also includes Jobs, ReplicaSets and HPAs. Known older server versions select served beta endpoints for CronJob, Ingress, PDB and HPA within the supported inspection range. Unknown server versions keep stable endpoints and report failures as gaps. RBAC and authentication restrictions remain unchanged; no exec plugin is enabled.
+Collection now also includes Jobs, ReplicaSets and HPAs. Known older server versions select served beta endpoints for CronJob, Ingress, PDB and HPA within the supported inspection range. Unknown server versions keep stable endpoints and report failures as gaps. RBAC and authentication restrictions remain unchanged; exec plugins remain disabled unless a specific executable is explicitly authorized (see the alpha.5 guide).
 
 ## 한국어
 

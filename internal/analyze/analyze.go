@@ -43,7 +43,10 @@ func identity(r manifest.Resource, ns string) string {
 	return group + "/" + kind + "/" + n + "/" + manifest.String(meta, "name")
 }
 func Compare(desired manifest.Set, s cluster.Snapshot, ns string) (Diff, error) {
-	d := Diff{Changes: []Change{}, Unchecked: []string{"Observed-only fields may be defaults or controller additions; no server mutation or dry-run was performed", "CRD list semantics use supplied local schemas; API version conversion is not performed; sensitive paths are omitted"}}
+	return CompareWithOptions(desired, s, ns, DiffOptions{})
+}
+func CompareWithOptions(desired manifest.Set, s cluster.Snapshot, ns string, options DiffOptions) (Diff, error) {
+	d := Diff{Changes: []Change{}, Unchecked: []string{"Observed-only fields may be defaults or controller additions; no server mutation or dry-run was performed", "CRD list semantics use supplied local schemas; webhook conversion is not performed; optional local None conversion is explicitly reported; sensitive paths are omitted"}}
 	if len(desired.Issues) > 0 {
 		return d, fmt.Errorf("desired inputs contain parse errors; resolve them before drift comparison")
 	}
@@ -86,19 +89,41 @@ func Compare(desired manifest.Set, s cluster.Snapshot, ns string) (Diff, error) 
 			d.Changes = append(d.Changes, Change{Resource: id, Path: "", Type: "not_observed", Message: "Not found in this snapshot; check namespace, collection scope and RBAC gaps before concluding deletion"})
 			continue
 		}
+		observedID := got.ID()
+		sc, custom := schemas[schemaKey(r)]
+		resourceNS := ns
+		if clusterKinds[manifest.String(r.Object, "kind")] || (custom && sc.cluster) {
+			resourceNS = ""
+		}
+		r = cloneForDiff(r, resourceNS)
+		got = cloneForDiff(got, resourceNS)
+		if options.CRDConversion && custom && r.Object["apiVersion"] != got.Object["apiVersion"] {
+			if observedSchema, ok := schemas[schemaKey(got)]; ok && observedSchema.convertNone && sc.convertNone {
+				got.Object["apiVersion"] = r.Object["apiVersion"]
+				d.Unchecked = append(d.Unchecked, "Local CRD strategy None conversion simulated for "+id+"; pruning, admission and webhook transformations are not simulated")
+			}
+		}
 		if manifest.String(r.Object, "apiVersion") != manifest.String(got.Object, "apiVersion") {
 			d.Changes = append(d.Changes, Change{Resource: id, Path: "/apiVersion", Type: "conversion_unverified", Message: "API versions differ; semantic comparison requires conversion"})
 			continue
 		}
 		skip := map[string]bool{}
 		for _, x := range s.Redacted {
-			prefix := got.ID() + "#"
+			prefix := observedID + "#"
 			if strings.HasPrefix(x, prefix) {
 				skip[strings.TrimPrefix(x, prefix)] = true
 			}
 		}
 		start := len(d.Changes)
-		sc, custom := schemas[schemaKey(r)]
+		if options.CRDDefaults && custom {
+			if e := defaultCRD(r.Object, sc.root); e != nil {
+				return d, e
+			}
+			if e := defaultCRD(got.Object, sc.root); e != nil {
+				return d, e
+			}
+			d.Unchecked = append(d.Unchecked, "Local CRD defaults normalized for "+id+"; this is not evidence of server admission/defaulting behavior")
+		}
 		compare(&d, id, "", r.Object, got.Object, skip, sc.root, custom)
 		for n := start; n < len(d.Changes); n++ {
 			owners, complete := fieldManagers(got, d.Changes[n].Path, custom)
@@ -245,6 +270,7 @@ type Action struct {
 	Before       string `json:"before_version,omitempty"`
 }
 type Plan struct {
+	Route     *AKSRoute       `json:"aks_route,omitempty"`
 	Project   *ProjectProfile `json:"project,omitempty"`
 	Status    string          `json:"status,omitempty"`
 	Kind      string          `json:"kind"`
@@ -300,6 +326,7 @@ func Upgrade(ctx context.Context, set manifest.Set, from, to string) (Plan, erro
 		}
 	}
 	p.Actions = append(p.Actions, behaviorActions(set, a, b)...)
+	p.Actions = append(p.Actions, addonActions(set, a, b)...)
 	p.Actions = append(p.Actions, Action{ID: "KW-ADDON-MATRIX", Requirement: "conditional", Message: "Verify CNI, CSI, ingress, admission webhooks and managed-provider upgrade support for each step", Verification: "Use vendor version matrices and staging tests; these dependencies are not inferred from Kubernetes schemas", Source: "https://kubernetes.io/releases/version-skew-policy/"})
 	p.Unchecked = append(p.Unchecked, "Audit logs/API client usage, add-on release matrices, actual node kernel/cgroup and image runtime dependencies are not automatically established")
 	return p, nil

@@ -6,7 +6,7 @@
 
 The namespace allowlist contains Pods, Services, ConfigMaps, PVCs, ServiceAccounts, Deployments, StatefulSets, DaemonSets, CronJobs, Ingresses, NetworkPolicies and PDBs. `--include-cluster-resources` adds Nodes and StorageClasses. Secrets, other namespaces, CRDs and custom resources are never collected. Use a separately prepared least-privilege credential granting list permission only for the required resources and GET `/version`. Older servers may not provide every stable API path; these are gaps rather than silently converted resources.
 
-TLS verification is required except loopback HTTP test servers. Exec/auth-provider plugins, kubeconfig proxies, environment proxies, cross-origin requests and redirects are disabled. Static token or certificate credentials are supported. API server DNS resolution may use your configured resolver. This is communication with your selected API server, not external reporting.
+TLS verification is required except loopback HTTP test servers. Exec plugins are blocked by default and require an explicitly approved executable via `--allow-exec-auth`. Legacy auth-provider plugins, kubeconfig proxies, environment proxies, cross-origin requests and redirects are disabled. Static token or certificate credentials are supported. An approved exec program may separately contact identity services. API server DNS resolution may use your configured resolver. This is communication with your selected API server, not external reporting.
 
 Snapshots remove annotations, ConfigMap data, literal environment values, commands and arguments, and record the omitted paths. This is targeted redaction, not a universal secret detector: labels, resource names, image references, status and other fields remain. ConfigMap contents are received from the API server before being removed. Output is created with exclusive creation and mode 0600 on POSIX; Windows permissions follow the directory ACL. Store snapshots accordingly. Existing files are never overwritten.
 
@@ -30,3 +30,8 @@ Migration plans inventory recognized dependencies for distinct `eks`, `aks` and 
 ## Extended project inspection (v0.2.0-alpha.4)
 
 See [AKS project planning](project-planning.md) for offline requirements, add-on evidence, network-path intent and review-only generation. Collection adds Jobs, ReplicaSets and HPAs; known older server versions select served beta endpoints. Read-only RBAC review example: [collector-rbac.yaml](examples/collector-rbac.yaml). Bind only the required roles to an approved identity; kubewiser does not create bindings or credentials. `/version` access follows your API server's existing discovery authorization.
+
+
+## v0.2.0-alpha.5 update
+
+[Advanced inspection](advanced-inspection.md) supersedes older statements about unconditional exec-auth rejection, CEL omission, patch-only `.0` coverage and unconfigured templates. Default scans stay offline; explicitly approved authentication programs may communicate with identity providers. No telemetry, exporters, listening servers or provider mutation are configured.

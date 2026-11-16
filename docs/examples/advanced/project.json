@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "provider": "aks",
+  "mode": "in-place",
+  "from_version": "1.34",
+  "to_version": "1.35",
+  "cluster_id": "/subscriptions/EXAMPLE/resourceGroups/EXAMPLE/providers/Microsoft.ContainerService/managedClusters/EXAMPLE",
+  "maintenance_window": "unknown",
+  "max_downtime": "unknown",
+  "rpo": "unknown",
+  "rto": "unknown",
+  "target_platform": {"os": "linux", "architecture": "arm64"},
+  "architecture_changes": [
+    {"area": "cpu", "current": "amd64", "target": "arm64", "reason": "Synthetic documentation example; replace with approved requirements"}
+  ],
+  "templates": {
+    "node_pool": {"name": "canary", "vm_size": "Standard_D4ps_v5", "node_count": 1, "os_sku": "Ubuntu", "kubernetes_version": "1.35.1", "provider_version": "5.7.0"},
+    "canary": {"image": "example.invalid/canary:review", "namespace": "review", "replicas": 1, "cpu_request": "100m", "memory_request": "128Mi", "node_selector": {"kubernetes.io/arch": "arm64"}}
+  }
+}

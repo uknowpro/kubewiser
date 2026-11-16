@@ -26,12 +26,14 @@ type Isolation struct {
 	Egress   bool   `json:"egress_isolated_by_policy"`
 }
 type Flow struct {
-	Source      string `json:"source"`
-	Destination string `json:"destination"`
-	Verdict     string `json:"verdict"`
-	Count       int    `json:"count"`
-	First       string `json:"first_observed"`
-	Last        string `json:"last_observed"`
+	Protocol        string `json:"protocol,omitempty"`
+	DestinationPort int    `json:"destination_port,omitempty"`
+	Source          string `json:"source"`
+	Destination     string `json:"destination"`
+	Verdict         string `json:"verdict"`
+	Count           int    `json:"count"`
+	First           string `json:"first_observed"`
+	Last            string `json:"last_observed"`
 }
 type Network struct {
 	Exposures []Exposure  `json:"exposures"`
@@ -49,7 +51,11 @@ func NetworkScan(ctx context.Context, set manifest.Set, flowFile, defaultNS stri
 	for _, r := range set.Resources {
 		kind := manifest.String(r.Object, "kind")
 		if kind == "NetworkPolicy" {
-			policies = append(policies, r)
+			if manifest.String(r.Object, "apiVersion") == "networking.k8s.io/v1" {
+				policies = append(policies, r)
+			} else {
+				n.Unchecked = append(n.Unchecked, "CNI-specific NetworkPolicy semantics are not evaluated")
+			}
 		}
 		if kind == "Ingress" {
 			n.Exposures = append(n.Exposures, Exposure{r.ID(), "Ingress", "configured route, not reachability tested"})
@@ -171,10 +177,22 @@ func NetworkScan(ctx context.Context, set manifest.Set, flowFile, defaultNS stri
 			if src == "" || dst == "" || verdict == "" {
 				return n, fmt.Errorf("unsupported Hubble flow at line %d", line)
 			}
-			key := src + "\x00" + dst + "\x00" + verdict
+			protocol := ""
+			port := 0
+			for _, candidate := range []string{"TCP", "UDP", "SCTP"} {
+				layer := manifest.Map(manifest.At(f, "l4", candidate))
+				if len(layer) == 0 {
+					continue
+				}
+				protocol = candidate
+				if value, ok := layer["destination_port"].(float64); ok && value >= 1 && value <= 65535 && value == float64(int(value)) {
+					port = int(value)
+				}
+			}
+			key := src + "\x00" + dst + "\x00" + verdict + fmt.Sprintf("/%s/%d", protocol, port)
 			row := flows[key]
 			if row == nil {
-				row = &Flow{Source: src, Destination: dst, Verdict: verdict}
+				row = &Flow{Source: src, Destination: dst, Verdict: verdict, Protocol: protocol, DestinationPort: port}
 				flows[key] = row
 			}
 			row.Count++

@@ -16,8 +16,9 @@ type FieldManager struct {
 	APIVersion string `json:"api_version"`
 }
 type resourceSchema struct {
-	root    map[string]any
-	cluster bool
+	root        map[string]any
+	cluster     bool
+	convertNone bool
 }
 
 func driftSchemas(rs []manifest.Resource) (map[string]resourceSchema, error) {
@@ -45,7 +46,7 @@ func driftSchemas(rs []manifest.Resource) (map[string]resourceSchema, error) {
 			if _, ok := out[key]; ok {
 				return nil, fmt.Errorf("duplicate CRD drift schema")
 			}
-			out[key] = resourceSchema{root: root, cluster: spec["scope"] == "Cluster"}
+			out[key] = resourceSchema{root: root, cluster: spec["scope"] == "Cluster", convertNone: manifest.At(spec, "conversion", "strategy") == nil || manifest.At(spec, "conversion", "strategy") == "None"}
 		}
 	}
 	return out, nil

@@ -8,7 +8,7 @@ Inspect manifests, Helm charts and read-only snapshots with a CLI that compares 
 
 [Download](https://github.com/uknowpro/kubewiser/releases) · [Quick start](#quick-start) · [Report preview](#report-preview) · [Command reference](#command-reference) · [Roadmap](docs/roadmap.md)
 
-> Alpha software. Analysis is offline by default, with no telemetry. Explicit collection contacts your selected API server. Reports show partial coverage and never apply changes automatically.
+> Alpha software. Analysis is offline by default, with no telemetry. Explicit collection contacts your selected API server; opt-in external authentication may also contact identity services. Reports show partial coverage and never apply changes automatically.
 
 ## 📑 Table of contents
 
@@ -32,7 +32,7 @@ Inspect manifests, Helm charts and read-only snapshots with a CLI that compares 
 
 | Feature | What you can do |
 | --- | --- |
-| 🔍 Manifest & API inspection | Find schema errors and deprecated/removed APIs using official Kubernetes 1.16–1.37 `.0` schemas and supplied local CRDs. |
+| 🔍 Manifest & API inspection | Find schema errors and deprecated/removed APIs using official Kubernetes 1.16–1.37 `.0` schemas, selected exact patches and supplied local CRDs. |
 | 🎯 Actionable recommendations | Review required, conditional and optional actions with current/recommended comparisons, reasons and verification steps. |
 | ⚖️ Helm & manifest drift | Render local charts and compare desired resources with explicitly scoped, GET-only snapshots. |
 | 🪜 Upgrade planning | Review minor-version steps and workload API changes before upgrading. Provider availability and runtime compatibility need separate verification. |
@@ -113,6 +113,7 @@ See [installation details](docs/releases.md) for checksums, OS validation bounda
 | Command | Purpose |
 | --- | --- |
 | `scan files` | Inspect a manifest file or directory |
+| `scan cel` | Evaluate local CRD validation and transition rules |
 | `scan helm` | Render and inspect a local chart |
 | `collect` | Snapshot an explicit cluster context and namespace |
 | `scan snapshot` | Validate saved resources for a target version |
@@ -136,6 +137,17 @@ kubewiser scan path --source ./network-inputs --source-pod team/client --destina
 ```
 
 [Project profile, architecture requirements, templates and network path guide](docs/project-planning.md). The 1.21 → 1.35 example is an unverified requirement, not an AKS-supported route. Generated Terraform/Helm/manifest files are review scaffolds; no infrastructure operations run.
+
+### Advanced checks (v0.2.0-alpha.5+)
+
+```sh
+kubewiser scan files --target-version 1.35.9 ./deploy
+kubewiser scan cel --source ./crds-and-resources --format html > cel.html
+kubewiser diff --source ./deploy --snapshot ./snapshot.json --crd-defaults --crd-conversion
+kubewiser scan path --source ./network-inputs --source-pod team/client --destination-service team/api --port 443 --flows ./hubble.jsonl
+```
+
+[Authentication, AKS exported evidence, patch schemas, CEL, image platforms and configured templates](docs/advanced-inspection.md). Older terminal excerpts below were captured for alpha.3/alpha.4; diagnostic wording can differ in newer versions.
 
 <a id="command-reference"></a>
 
@@ -176,7 +188,7 @@ HTML includes its CSS and loads no external fonts, scripts or images. Both reada
 <details>
 <summary>--help, --version, versions — inspect commands and supported versions</summary>
 
-`--version` identifies the binary; `versions` lists embedded schema versions, official source URLs, hashes and review dates. A 1.37.x target uses the bundled 1.37.0 schema.
+`--version` identifies the binary; `versions` lists embedded schema versions, official source URLs, hashes and review dates. Exact bundled patches (1.35.9, 1.36.5, 1.37.1) are preferred; other patches explicitly report the minor `.0` fallback.
 
 **Terminal example** — Long JSON is excerpted to selected fields. Actual output includes additional evidence and unchecked areas.
 
@@ -291,7 +303,7 @@ kubewiser scan helm --target-version 1.37 --release app --namespace team --value
 <details>
 <summary>collect — create a read-only snapshot</summary>
 
-Requires explicit `--kubeconfig`, `--context`, `--namespace` and a new `--output` file. This command contacts the selected API server. The output file is always a JSON snapshot; stdout is a summary whose presentation can be Markdown/HTML. Existing snapshots are never overwritten. Secrets are excluded and selected sensitive fields are removed. Exec authentication plugins are not supported. Defaults and allowlists are in [operational details](docs/operations.md).
+Requires explicit `--kubeconfig`, `--context`, `--namespace` and a new `--output` file. This command contacts the selected API server. The output file is always a JSON snapshot; stdout is a summary whose presentation can be Markdown/HTML. Existing snapshots are never overwritten. Secrets are excluded and selected sensitive fields are removed. Exec authentication is blocked by default; `--allow-exec-auth /absolute/path` explicitly allows a fixed external authentication executable that may contact identity services. See [authentication boundaries](docs/advanced-inspection.md#explicit-exec-authentication). Defaults and allowlists are in [operational details](docs/operations.md).
 
 **Terminal example** — Captured against an empty loopback mock API server, not a real cluster. Only the temporary output path is shown as snapshot.json.
 
@@ -552,7 +564,7 @@ Third-party dependencies and embedded official schemas are covered by [THIRD_PAR
 
 ## 🔎 Scope and evidence
 
-Schemas are minor `.0` snapshots, not patch-exact validation. Admission/CEL, actual application/kernel compatibility and full network reachability require separate checks. No automatic infrastructure generation or data migration is performed. Numeric CPU/memory sizing needs measurements; this report does not invent values.
+Selected exact patch schemas and separate CRD CEL inspection are available; the actual schema version and remaining coverage are reported. Admission webhooks, target feature gates, application/kernel execution and full network reachability require environment evidence. No automatic infrastructure generation or data migration is performed. Numeric CPU/memory sizing needs measurements; this report does not invent values.
 
 [Official sources](docs/official-sources.md) · [Operational boundaries](docs/operations.md) · [Report design references](docs/report-design.md)
 

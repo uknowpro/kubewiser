@@ -10,16 +10,17 @@ bash scripts/verify-linux.sh /tmp/kubewiser
 go test ./internal/analyze -run '^$' -bench BenchmarkDriftTenThousand -benchtime=1x -benchmem
 ```
 
-The integration script needs Bash and Python 3 for verification only; the distributed binary needs neither Go nor Python. When `strace` is present, it checks network system calls during offline AKS planning. Without strace it reports that check as skipped. It never calls a real cluster or cloud provider. Release CI runs this script on Linux amd64 and arm64.
+The integration script needs Bash and Python 3 for verification only; the distributed binary needs neither Go nor Python. When `strace` is present, it checks network system calls during offline AKS planning and CEL inspection. Without strace it reports that check as skipped. It never calls a real cluster or cloud provider. Release CI runs this script on Linux amd64 and arm64.
 
 ## Local evidence, 2026-11-16
 
 Ubuntu 26.04.1 LTS, linux/amd64, Intel i9-12900K:
 
 - Unit/integration tests cover CRD map/set ordering, hashed keys, field managers, strict profiles, API deadlines, add-on ranges, CLI JSON/text/Markdown/HTML, HTML escaping, MCP tool scope, output collisions and local Helm rendering.
+- Alpha.5 adds tests for bounded explicit exec authentication, local AKS route evidence, CEL create/update rules, CRD defaults/None conversion, Service backend/flow matching, OCI platform evidence, configured templates and generated HCL syntax.
 - Targeted policy tests cover ingress/egress intersection, additive allows, named/numeric/range ports, IPBlock exceptions, missing namespace evidence and host networking.
 - 10,000 unchanged Service resources in the drift benchmark: approximately **28 ms**, **8.12 MB allocated per operation**, 160,163 allocations. One local benchmark iteration, not a production SLA or peak-memory measurement.
-- The standalone integration script validates **10,000 Services** against the 1.35 schema and exercises AKS planning, HTML output, draft generation and the disabled Helm chart.
+- The standalone integration script validates **10,000 Services** against the 1.35 schema and exercises AKS planning, HTML output, draft generation, configured templates, CRD CEL inspection and the disabled Helm chart.
 
 ## Boundaries
 

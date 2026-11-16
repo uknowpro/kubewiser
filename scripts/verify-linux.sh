@@ -6,6 +6,8 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 verify_dir=$(mktemp -d)
 trap 'rm -rf "$verify_dir"' EXIT
 "$binary" --version
+"$binary" scan cel --source "$root/docs/examples/advanced/cel.yaml" > "$verify_dir/cel.json"
+"$binary" generate --profile "$root/docs/examples/advanced/project.json" --output "$verify_dir/configured" > "$verify_dir/configured.json"
 "$binary" plan aks --source "$root/docs/examples/manifest.yaml" --profile "$root/docs/examples/project/aks.json" --format json > "$verify_dir/plan.json"
 "$binary" plan aks --source "$root/docs/examples/manifest.yaml" --profile "$root/docs/examples/project/aks.json" --format html --lang ko > "$verify_dir/plan.html"
 "$binary" generate --profile "$root/docs/examples/project/aks.json" --output "$verify_dir/drafts" > "$verify_dir/generated.json"
@@ -18,6 +20,8 @@ import json, os
 from pathlib import Path
 p=Path(os.environ['VERIFY_DIR']);plan=json.loads((p/'plan.json').read_text())
 assert plan['status']=='review_required'
+assert not json.loads((p/'cel.json').read_text())['actions']
+assert json.loads((p/'configured/nodepool.auto.tfvars.json').read_text())['enable_canary_pool'] is False
 assert any(a['id']=='KW-AKS-ROUTE' for a in plan['actions'])
 assert any(a['id']=='KW-API-REMOVED' and a['before_version']=='1.25' for a in plan['actions'])
 assert '<html' in (p/'plan.html').read_text()
@@ -38,7 +42,11 @@ if command -v strace > /dev/null; then
   if test -s "$verify_dir/network.trace"; then
     echo 'ERROR: unexpected network system call during offline AKS plan' >&2; cat "$verify_dir/network.trace"; exit 1
   fi
-  echo 'PASS: no network system calls during offline AKS plan'
+  strace -f -qq -e signal=none -e trace=network -o "$verify_dir/cel-network.trace" "$binary" scan cel --source "$root/docs/examples/advanced/cel.yaml" > /dev/null
+  if test -s "$verify_dir/cel-network.trace"; then
+    echo 'ERROR: unexpected network call during CEL validation' >&2; exit 1
+  fi
+  echo 'PASS: no network system calls during offline AKS plan or CEL validation'
 else
   echo 'SKIP: strace unavailable; network syscall check not performed'
 fi

@@ -1,8 +1,10 @@
 package analyze
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/uknowpro/kubewiser/internal/manifest"
 	"github.com/uknowpro/kubewiser/internal/scan"
 	"os"
 	"path/filepath"
@@ -94,7 +96,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-canary
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Values.namespace | default .Release.Namespace | quote }}
 spec:
   replicas: {{ .Values.replicas }}
   selector:
@@ -141,10 +143,24 @@ spec:
           image: REPLACE_WITH_APPROVED_IMAGE
 `,
 	}
+	extra, e := configuredTemplates(p, files)
+	if e != nil {
+		return nil, e
+	}
+	set, e := manifest.Decode(context.Background(), []byte(files["manifest.yaml"]), "generated-manifest")
+	if e != nil || len(set.Issues) > 0 {
+		return nil, fmt.Errorf("generated manifest could not be decoded")
+	}
+	validation, e := scan.Analyze(context.Background(), set, p.To, false)
+	if e != nil || len(validation.Findings) > 0 {
+		return nil, fmt.Errorf("generated manifest does not pass target schema validation")
+	}
+
 	if e = os.Mkdir(output, 0700); e != nil {
 		return nil, e
 	}
 	names := []string{"README.md", "project.json", "acceptance.md", "nodepool.tf", "chart/Chart.yaml", "chart/values.yaml", "chart/templates/canary.yaml", "manifest.yaml"}
+	names = append(names, extra...)
 	for _, name := range names {
 		path := filepath.Join(output, filepath.FromSlash(name))
 		if e = os.MkdirAll(filepath.Dir(path), 0700); e != nil {

@@ -17,6 +17,7 @@ import (
 )
 
 type PathReview struct {
+	Flows       []Flow   `json:"matching_observed_flows,omitempty"`
 	Source      string   `json:"source"`
 	Destination string   `json:"destination"`
 	Protocol    string   `json:"protocol"`
@@ -126,6 +127,9 @@ func NetworkPath(ctx context.Context, set manifest.Set, src, dst, protocol strin
 			ls["kubernetes.io/metadata.name"] = n.Name
 			namespaces[n.Name] = ls
 		case "NetworkPolicy":
+			if manifest.String(r.Object, "apiVersion") != "networking.k8s.io/v1" {
+				continue
+			}
 			if manifest.At(r.Object, "spec", "podSelector") == nil {
 				return result, fmt.Errorf("NetworkPolicy podSelector required")
 			}
@@ -151,11 +155,23 @@ func NetworkPath(ctx context.Context, set manifest.Set, src, dst, protocol strin
 		result.Unchecked = append(result.Unchecked, "hostNetwork behavior is CNI-specific")
 		return result, nil
 	}
+	customPolicies := false
+	for _, r := range set.Resources {
+		kind := manifest.String(r.Object, "kind")
+		api := manifest.String(r.Object, "apiVersion")
+		if kind == "CiliumNetworkPolicy" || kind == "CiliumClusterwideNetworkPolicy" || kind == "GlobalNetworkPolicy" || (kind == "NetworkPolicy" && api != "networking.k8s.io/v1") {
+			customPolicies = true
+		}
+	}
 	ingress := direction(policies, b, a, b, true, namespaces, protocol, port)
 	egress := direction(policies, a, b, b, false, namespaces, protocol, port)
 	result.Ingress = state(ingress)
 	result.Egress = state(egress)
 	result.Result = state(and(ingress, egress))
+	if customPolicies {
+		result.Result = "unknown"
+		result.Unchecked = append(result.Unchecked, "CNI-specific policy resources are present; their combined precedence and behavior are not evaluated")
+	}
 	return result, nil
 }
 func direction(policies []netv1.NetworkPolicy, selected, peer, dest core.Pod, ingress bool, namespaces map[string]map[string]string, protocol string, port int) truth {
@@ -306,4 +322,13 @@ func matchPeers(peers []netv1.NetworkPolicyPeer, ns string, pod core.Pod, namesp
 		result = or(result, m)
 	}
 	return result
+}
+
+func AttachFlowEvidence(path *PathReview, flows []Flow) {
+	for _, flow := range flows {
+		if flow.Source == path.Source && flow.Destination == path.Destination && flow.Protocol == path.Protocol && flow.DestinationPort == path.Port {
+			path.Flows = append(path.Flows, flow)
+		}
+	}
+	path.Unchecked = append(path.Unchecked, "Flow observations are matched by endpoint, protocol and destination port. Their timestamps and capture coverage must be reviewed; they do not establish current or future reachability")
 }

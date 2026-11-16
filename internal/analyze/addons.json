@@ -1,0 +1,7 @@
+[
+ {"name":"cert-manager","image":"quay.io/jetstack/cert-manager-controller","version":"1.21","match":"minor","min":33,"max":36,"source":"https://cert-manager.io/docs/releases/","reviewed":"2026-11-16"},
+ {"name":"cert-manager","image":"quay.io/jetstack/cert-manager-controller","version":"1.20","match":"minor","min":32,"max":35,"source":"https://cert-manager.io/docs/releases/","reviewed":"2026-11-16"},
+ {"name":"Cilium","image":"quay.io/cilium/cilium","version":"1.20.4","match":"exact","min":33,"max":36,"source":"https://docs.cilium.io/en/stable/network/kubernetes/compatibility/","reviewed":"2026-11-16"},
+ {"name":"ingress-nginx","image":"registry.k8s.io/ingress-nginx/controller","version":"1.15.1","match":"exact","min":31,"max":35,"source":"https://github.com/kubernetes/ingress-nginx#supported-versions-table","reviewed":"2026-11-16","retired":true},
+ {"name":"ingress-nginx","image":"registry.k8s.io/ingress-nginx/controller","version":"1.15.0","match":"exact","min":31,"max":35,"source":"https://github.com/kubernetes/ingress-nginx#supported-versions-table","reviewed":"2026-11-16","retired":true}
+]

@@ -80,16 +80,19 @@ func ScanContext(ctx context.Context, path, target string, recommend bool) (Repo
 	return Analyze(ctx, s, target, recommend)
 }
 func Analyze(ctx context.Context, set manifest.Set, target string, recommend bool) (Report, error) {
-	r := Report{SchemaVersion: "2", RulesVersion: "2026-11-15", Target: target, Status: "partial", Documents: len(set.Resources), Inputs: set.Inputs, Findings: []Finding{}, Unchecked: []string{"Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated", "Schemas are pinned to minor .0 releases; patch-specific changes are not inferred", "OpenAPI validation does not replace Kubernetes admission or server semantic validation"}}
+	r := Report{SchemaVersion: "2", RulesVersion: "2026-11-15", Target: target, Status: "partial", Documents: len(set.Resources), Inputs: set.Inputs, Findings: []Finding{}, Unchecked: []string{"Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated", "OpenAPI validation does not replace Kubernetes admission or server semantic validation"}}
 	minor, e := Target(target)
 	if e != nil {
 		return r, e
 	}
-	v, e := schema.New(minor)
+	v, e := schema.NewVersion(target)
 	if e != nil {
 		return r, e
 	}
 	r.Schema = v.Source
+	if strings.TrimPrefix(target, "v") != strings.TrimPrefix(v.Source.Version, "v") {
+		r.Unchecked = append(r.Unchecked, "Requested version uses bundled "+v.Source.Version+"; other patch-specific changes are not inferred")
+	}
 	if e = v.AddCRDs(set.Resources); e != nil {
 		return r, e
 	}

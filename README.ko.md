@@ -8,7 +8,7 @@ manifest, Helm 차트, 읽기 전용 스냅샷을 검사하고 **현재 상태 �
 
 [다운로드](https://github.com/uknowpro/kubewiser/releases) · [빠른 시작](#빠른-시작) · [보고서 미리보기](#보고서-미리보기) · [명령어 안내](#명령어-안내) · [로드맵](docs/roadmap.md)
 
-> 알파 버전입니다. 기본 검사는 오프라인이며 텔레메트리가 없습니다. 명시적인 수집만 선택한 API 서버에 접근합니다. 결과는 부분 검사이며 변경을 자동 적용하지 않습니다.
+> 알파 버전입니다. 기본 검사는 오프라인이며 텔레메트리가 없습니다. 명시적인 수집은 선택한 API 서버에 접근하며, 외부 인증 옵션을 켜면 인증 서버 통신도 발생할 수 있습니다. 결과는 부분 검사이며 변경을 자동 적용하지 않습니다.
 
 ## 📑 목차
 
@@ -32,7 +32,7 @@ manifest, Helm 차트, 읽기 전용 스냅샷을 검사하고 **현재 상태 �
 
 | 기능 | 할 수 있는 일 |
 | --- | --- |
-| 🔍 Manifest·API 검사 | Kubernetes 1.16~1.37 `.0` 공식 스키마와 제공한 로컬 CRD로 스키마 오류, API 폐기·제거 여부를 확인합니다. |
+| 🔍 Manifest·API 검사 | Kubernetes 1.16~1.37 `.0`·일부 정확한 패치 스키마와 제공한 로컬 CRD로 스키마 오류, API 폐기·제거 여부를 확인합니다. |
 | 🎯 실행 가능한 권장안 | 필수·조건부·선택 조치를 구분하고 현재·권장 상태, 변경 이유와 검증 방법을 비교합니다. |
 | ⚖️ Helm·manifest 차이 비교 | 로컬 차트를 렌더링하고 원하는 상태와 명시한 범위의 GET 전용 스냅샷을 비교합니다. |
 | 🪜 업그레이드 계획 | 마이너 버전별 단계와 워크로드 API 변경을 검토합니다. 플랫폼의 업그레이드 가능 여부와 실제 동작은 별도 검증이 필요합니다. |
@@ -113,6 +113,7 @@ Start-Process .\report.html
 | 명령 | 용도 |
 | --- | --- |
 | `scan files` | 파일·디렉터리 검사 |
+| `scan cel` | 로컬 CRD CEL·변경 규칙 검사 |
 | `scan helm` | 로컬 차트 렌더링 후 검사 |
 | `collect` | 선택한 클러스터·namespace에서 스냅샷 수집 |
 | `scan snapshot` | 저장한 리소스의 목표 버전 검사 |
@@ -136,6 +137,17 @@ kubewiser scan path --source ./network-inputs --source-pod team/client --destina
 ```
 
 [요구사항 프로필·아키텍처 변경·템플릿·네트워크 경로 안내](docs/project-planning.md). 1.21 → 1.35는 요구사항 예제이며 AKS가 지원하는 실제 경로로 검증한 것이 아닙니다. 생성물은 검토용 초안이고 인프라 작업을 실행하지 않습니다.
+
+### 추가 고도화 검사 (v0.2.0-alpha.5 이상)
+
+```sh
+kubewiser scan files --target-version 1.35.9 ./deploy
+kubewiser scan cel --source ./crds-and-resources --format html --lang ko > cel.html
+kubewiser diff --source ./deploy --snapshot ./snapshot.json --crd-defaults --crd-conversion
+kubewiser scan path --source ./network-inputs --source-pod team/client --destination-service team/api --port 443 --flows ./hubble.jsonl
+```
+
+[인증·AKS 조회 근거·패치 스키마·CEL·이미지 플랫폼·설정 기반 템플릿 안내](docs/advanced-inspection.md). 아래 기존 터미널 발췌는 alpha.3/alpha.4에서 기록했으며 최신 버전의 진단 문구와 다를 수 있습니다.
 
 <a id="명령어-안내"></a>
 
@@ -188,7 +200,7 @@ kubewiser --version
 kubewiser versions --format markdown > supported-versions.md
 ```
 
-`--version`은 실행 파일의 제품 버전·커밋·운영체제를 표시합니다. `versions`는 내장 Kubernetes 스키마 버전, 공식 출처 URL, 원본·번들 SHA-256과 확인일을 보여줍니다. 예를 들어 1.37.x 요청은 내장된 1.37.0 스키마를 사용합니다.
+`--version`은 실행 파일의 제품 버전·커밋·운영체제를 표시합니다. `versions`는 내장 Kubernetes 스키마 버전, 공식 출처 URL, 원본·번들 SHA-256과 확인일을 보여줍니다. 내장된 정확한 패치(1.35.9·1.36.5·1.37.1)를 우선 사용하고, 나머지 패치는 `.0`을 사용했다고 표시합니다.
 
 **터미널 출력 예시** — 긴 JSON은 주요 필드만 발췌했습니다. 실제 출력에는 근거와 미검사 항목이 더 포함됩니다.
 
@@ -318,7 +330,7 @@ kubewiser collect --kubeconfig ./config --context staging --namespace team --out
 kubewiser collect --kubeconfig ./config --context staging --namespace team --include-cluster-resources --qps 1 --max-items 3000 --timeout 3m --output ./snapshot-with-nodes.json --format html > collection-summary.html
 ```
 
-`--output` 파일은 후속 분석용 **JSON 스냅샷**이고, 표준 출력은 수집 개수·요청 수·누락(`gaps`)·제거한 필드 수의 **요약**입니다. `--format`은 요약 형식만 바꿉니다. 기존 스냅샷 파일은 덮어쓰지 않습니다. Secret은 수집하지 않으며 지정된 민감 필드를 제거합니다. 인증 exec 플러그인은 지원하지 않습니다. 자세한 허용 목록과 한도는 [운영 문서](docs/operations.md)를 확인하세요.
+`--output` 파일은 후속 분석용 **JSON 스냅샷**이고, 표준 출력은 수집 개수·요청 수·누락(`gaps`)·제거한 필드 수의 **요약**입니다. `--format`은 요약 형식만 바꿉니다. 기존 스냅샷 파일은 덮어쓰지 않습니다. Secret은 수집하지 않으며 지정된 민감 필드를 제거합니다. 인증 exec 플러그인은 기본 차단이며 `--allow-exec-auth /절대/경로`로 지정한 실행 파일만 허용할 수 있습니다. 이 옵션은 인증 서버 통신을 동반할 수 있습니다. [인증 범위](docs/advanced-inspection.md)를 확인하세요. 자세한 허용 목록과 한도는 [운영 문서](docs/operations.md)를 확인하세요.
 
 **터미널 출력 예시** — 로컬 모의 API 서버의 빈 리소스 응답으로 실행한 예시입니다. 임시 출력 경로만 snapshot.json으로 표기했습니다. 실제 클러스터의 수치가 아닙니다.
 
@@ -596,7 +608,7 @@ go vet ./...
 
 ## 🔎 검증 범위와 근거
 
-스키마는 마이너 `.0` 기준이며 패치별 의미 차이까지 검증하지 않습니다. admission/CEL, 실제 앱·커널 호환성, 전체 네트워크 연결 가능 여부는 별도 검증이 필요합니다. 인프라 자동 생성과 데이터 이전은 수행하지 않습니다. CPU·메모리 적정 수치는 실측이 필요하며 보고서가 임의의 값을 만들지 않습니다.
+일부 정확한 패치 스키마와 별도의 CRD CEL 검사를 지원하며 실제 사용한 버전·미검사 범위를 표시합니다. admission webhook·목표 기능 게이트·앱/커널 실행·전체 네트워크 연결은 실제 환경 근거가 필요합니다. 인프라 자동 생성과 데이터 이전은 수행하지 않습니다. CPU·메모리 적정 수치는 실측이 필요하며 보고서가 임의의 값을 만들지 않습니다.
 
 [공식 근거](docs/official-sources.md) · [운영 범위](docs/operations.md) · [보고서 설계 참고 자료](docs/report-design.md)
 

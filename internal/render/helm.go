@@ -105,11 +105,11 @@ func Render(ctx context.Context, o Options) (Result, error) {
 		}
 		vals = v
 	}
-	minor, err := scan.Target(o.Target)
+	_, err := scan.Target(o.Target)
 	if err != nil {
 		return r, err
 	}
-	validator, err := schema.New(minor)
+	validator, err := schema.NewVersion(o.Target)
 	if err != nil {
 		return r, err
 	}

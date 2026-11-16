@@ -44,9 +44,23 @@ type Validator struct {
 	Unsupported []string
 }
 
-func key(api, kind string) string { return api + "|" + kind }
-func New(minor int) (*Validator, error) {
-	b, e := bundles.ReadFile(fmt.Sprintf("bundles/v1.%d.0.json.gz", minor))
+func key(api, kind string) string       { return api + "|" + kind }
+func New(minor int) (*Validator, error) { return NewVersion(fmt.Sprintf("1.%d", minor)) }
+
+// Exact pinned patches are preferred. Other patches retain explicit minor-.0 coverage.
+func NewVersion(target string) (*Validator, error) {
+	if !regexp.MustCompile(`^v?1\.[0-9]+(?:\.[0-9]+)?$`).MatchString(target) {
+		return nil, fmt.Errorf("invalid schema version")
+	}
+	parts := strings.Split(strings.TrimPrefix(target, "v"), ".")
+	selected := "v1." + parts[1] + ".0"
+	if len(parts) == 3 {
+		exact := "v" + strings.TrimPrefix(target, "v")
+		if _, e := bundles.ReadFile("bundles/" + exact + ".json.gz"); e == nil {
+			selected = exact
+		}
+	}
+	b, e := bundles.ReadFile("bundles/" + selected + ".json.gz")
 	if e != nil {
 		return nil, fmt.Errorf("schema bundle unavailable")
 	}
@@ -61,7 +75,7 @@ func New(minor int) (*Validator, error) {
 	}
 	v := &Validator{names: map[string]string{}, compiled: map[string]*jsonschema.Schema{}, custom: map[string]*jsonschema.Schema{}}
 	for _, s := range Sources() {
-		if s.Version == fmt.Sprintf("v1.%d.0", minor) {
+		if s.Version == selected {
 			v.Source = s
 		}
 	}

@@ -24,6 +24,7 @@ const help = `Commands: kubewiser or kubewise
   --version
   versions [--format json|markdown|html] [--lang en|ko]
   scan files --target-version VERSION [--recommend] PATH
+  scan cel --source PATH [--snapshot OLD_SNAPSHOT]
   scan helm --target-version VERSION --release NAME --namespace NS [--values FILE] CHART
   scan snapshot --target-version VERSION SNAPSHOT
   scan network [--flows HUBBLE.jsonl] [--namespace NS] PATH
@@ -84,9 +85,12 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 	lang := fs.String("lang", "en", "en or ko for readable reports; JSON unchanged")
 	target := fs.String("target-version", "", "target Kubernetes version")
 	sourcePod := fs.String("source-pod", "", "source namespace/pod")
+	destinationService := fs.String("destination-service", "", "destination namespace/service")
 	destinationPod := fs.String("destination-pod", "", "destination namespace/pod")
 	port := fs.Int("port", 0, "destination port")
 	protocol := fs.String("protocol", "TCP", "TCP, UDP or SCTP")
+	crdDefaults := fs.Bool("crd-defaults", false, "normalize local CRD defaults during diff")
+	crdConversion := fs.Bool("crd-conversion", false, "simulate local CRD strategy None conversion during diff")
 	profile := fs.String("profile", "", "local AKS project profile JSON")
 	source := fs.String("source", "", "desired manifest path")
 	snapshot := fs.String("snapshot", "", "snapshot file")
@@ -107,6 +111,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 	qps := fs.Float64("qps", 2, "GET requests per second, maximum 10")
 	max := fs.Int("max-items", 5000, "maximum snapshot resources")
 	timeout := fs.Duration("timeout", 2*time.Minute, "overall collection deadline")
+	allowExec := fs.String("allow-exec-auth", "", "explicit absolute authentication executable; may contact identity services")
 	allowCluster := fs.Bool("allow-cluster", false, "explicitly enable scoped MCP collection")
 	if e := fs.Parse(restArgs); e != nil {
 		return 2
@@ -117,7 +122,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 	if *lang != "en" && *lang != "ko" {
 		return fail(fmt.Errorf("lang must be en or ko"))
 	}
-	collection := cluster.Options{Kubeconfig: *kubeconfig, Context: *kubecontext, Namespace: *ns, IncludeCluster: *includeCluster, QPS: *qps, MaxItems: *max, Timeout: *timeout}
+	collection := cluster.Options{AllowExecAuth: *allowExec, Kubeconfig: *kubeconfig, Context: *kubecontext, Namespace: *ns, IncludeCluster: *includeCluster, QPS: *qps, MaxItems: *max, Timeout: *timeout}
 	renderOpts := func() render.Options {
 		a := []string{}
 		if *apis != "" {
@@ -150,6 +155,35 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 		}
 		return emit(out, errOut, map[string]any{"status": "review_drafts", "output": *output, "files": files, "unchecked": []string{"Drafts require review; no infrastructure commands executed"}}, *format, 0, *lang)
 	case "scan":
+		if sub == "cel" {
+			if *source == "" || fs.NArg() != 0 {
+				return fail(fmt.Errorf("scan cel requires --source and optional --snapshot old values"))
+			}
+			set, e := manifest.Load(ctx, *source)
+			if e != nil {
+				return fail(e)
+			}
+			var old []manifest.Resource
+			if *snapshot != "" {
+				snap, e := cluster.Read(*snapshot)
+				if e != nil {
+					return fail(e)
+				}
+				old = snap.Resources
+			}
+			p, e := analyze.CELReview(ctx, set, old)
+			if e != nil {
+				return fail(e)
+			}
+			if *snapshot != "" {
+				p.Unchecked = append(p.Unchecked, "Old snapshot may be redacted or incomplete; missing values do not establish transition compatibility")
+			}
+			code := 0
+			if len(p.Actions) > 0 {
+				code = 1
+			}
+			return emit(out, errOut, p, *format, code, *lang)
+		}
 		if sub == "path" {
 			if fs.NArg() != 0 {
 				return fail(fmt.Errorf("scan path uses --source or --snapshot"))
@@ -158,10 +192,41 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 			if e != nil {
 				return fail(e)
 			}
+			if *destinationService != "" {
+				if *destinationPod != "" {
+					return fail(fmt.Errorf("choose destination-pod or destination-service"))
+				}
+				r, e := analyze.NetworkServicePath(ctx, set, *sourcePod, *destinationService, *protocol, *port)
+				if e != nil {
+					return fail(e)
+				}
+				if *flows != "" {
+					observations, e := analyze.NetworkScan(ctx, set, *flows, *ns)
+					if e != nil {
+						return fail(e)
+					}
+					for i := range r.Paths {
+						analyze.AttachFlowEvidence(&r.Paths[i], observations.Flows)
+					}
+				}
+
+				if *snapshot != "" {
+					r.Unchecked = append(r.Unchecked, "Snapshot coverage and redaction may omit policy/endpoint evidence")
+				}
+				return emit(out, errOut, r, *format, 0, *lang)
+			}
 			r, e := analyze.NetworkPath(ctx, set, *sourcePod, *destinationPod, *protocol, *port)
 			if e != nil {
 				return fail(e)
 			}
+			if *flows != "" {
+				observations, e := analyze.NetworkScan(ctx, set, *flows, *ns)
+				if e != nil {
+					return fail(e)
+				}
+				analyze.AttachFlowEvidence(&r, observations.Flows)
+			}
+
 			if *snapshot != "" {
 				snap, e := cluster.Read(*snapshot)
 				if e != nil {
@@ -315,7 +380,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 				return fail(e)
 			}
 		}
-		d, e := analyze.Compare(set, snap, *ns)
+		d, e := analyze.CompareWithOptions(set, snap, *ns, analyze.DiffOptions{CRDDefaults: *crdDefaults, CRDConversion: *crdConversion})
 		if e != nil {
 			return fail(e)
 		}

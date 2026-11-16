@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/url"
 	"strings"
+	"time"
 )
 
 const aksUpgradeSource = "https://learn.microsoft.com/en-us/azure/aks/upgrade-aks-control-plane"
@@ -31,6 +32,11 @@ type AddonEvidence struct {
 	Reviewed      string `json:"reviewed"`
 }
 type ProjectProfile struct {
+	TargetPlatform    *Platform            `json:"target_platform,omitempty"`
+	Images            []ImageEvidence      `json:"image_indexes,omitempty"`
+	Templates         *TemplateConfig      `json:"templates,omitempty"`
+	ClusterID         string               `json:"cluster_id,omitempty"`
+	UpgradeEvidence   *AKSEvidence         `json:"upgrade_evidence,omitempty"`
 	Addons            []AddonEvidence      `json:"addons,omitempty"`
 	Version           int                  `json:"schema_version"`
 	Provider          string               `json:"provider"`
@@ -110,9 +116,27 @@ func Project(ctx context.Context, set manifest.Set, profile ProjectProfile) (Pla
 	if e != nil {
 		return p, e
 	}
+	runtimeChecks, runtimeGaps, err := runtimeActions(set, profile)
+	if err != nil {
+		return p, err
+	}
+	p.Actions = append(p.Actions, runtimeChecks...)
+	p.Unchecked = append(p.Unchecked, runtimeGaps...)
 	p.Kind = "aks-project"
 	p.Project = &profile
 	p.Status = "review_required"
+	if profile.UpgradeEvidence != nil {
+		route, err := ReviewAKSRoute(profile, time.Now().UTC())
+		if err != nil {
+			return p, err
+		}
+		p.Route = &route
+		req := "required"
+		if route.Status == "next_step_offered" {
+			req = "conditional"
+		}
+		p.Actions = append(p.Actions, Action{ID: "KW-AKS-EVIDENCE", Requirement: req, Current: route.Current, Recommended: route.Next, Message: "Saved AKS upgrade profile: " + route.Status, Verification: route.Note, Source: aksUpgradeSource})
+	}
 	p.Unchecked = append(p.Unchecked, "Profile values are operator declarations, not live observations. A minor-version sequence is NOT a verified AKS upgrade route.", "Provider availability, support policy, quota, regional capacity and architecture transitions require fresh cluster-specific evidence. No Azure API is contacted.")
 	p.Actions = append([]Action{{ID: "KW-AKS-ROUTE", Requirement: "required", Message: "Confirm the next offered upgrade for this exact AKS cluster; do not execute the entire mathematical minor sequence", Verification: "Review a fresh az aks get-upgrades result and AKS support guidance before each step. If the required path is unavailable, stop and resolve with the provider or assess a replacement cluster", Source: aksUpgradeSource, Before: profile.From}, {ID: "KW-AKS-RECOVERY", Requirement: "required", Message: "Prepare and rehearse recovery before the first control-plane change; do not assume Kubernetes downgrade is a rollback", Verification: "Record backup restore evidence, application rollback limits, recovery owner and measured RPO/RTO", Source: "https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-backup-overview", Before: profile.From}, {ID: "KW-AKS-DRAIN", Requirement: "required", Message: "Validate PDBs, replicas, topology, drain time, surge IP addresses and compute quota before rotating nodes", Verification: "Drain a canary node in staging and measure service errors, latency and storage attachment; stop if the agreed budget is exceeded", Source: "https://learn.microsoft.com/en-us/azure/aks/upgrade-options"}}, p.Actions...)
 	for _, x := range []struct{ name, value string }{{"maintenance_window", profile.MaintenanceWindow}, {"max_downtime", profile.MaxDowntime}, {"rpo", profile.RPO}, {"rto", profile.RTO}} {

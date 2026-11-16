@@ -82,3 +82,24 @@ spec:
 		t.Fatal("unknown schema claimed covered")
 	}
 }
+
+func TestPatchSelectionAndDescriptionProperty(t *testing.T) {
+	for _, v := range []string{"1.35.9", "1.36.5", "1.37.1", "1.35.0"} {
+		validator, e := NewVersion(v)
+		if e != nil {
+			t.Fatal(e)
+		}
+		if validator.Source.Version != "v"+v {
+			t.Fatal(validator.Source)
+		}
+		r := resource(t, "apiVersion: scheduling.k8s.io/v1\nkind: PriorityClass\nmetadata: {name: normal}\nvalue: 100\ndescription: Legitimate Kubernetes field\n")
+		issues, known, e := validator.Validate(r)
+		if e != nil || !known || len(issues) > 0 {
+			t.Fatal(v, issues, known, e)
+		}
+	}
+	v, e := NewVersion("1.35.999")
+	if e != nil || v.Source.Version != "v1.35.0" {
+		t.Fatal(v, e)
+	}
+}

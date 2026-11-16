@@ -97,6 +97,27 @@ func NewConfigured(c Config) *mcp.Server {
 		r.Unchecked = append(r.Unchecked, snapshotGaps()...)
 		return nil, r, e
 	})
+	if c.Input != "" {
+		mcp.AddTool(s, &mcp.Tool{Name: "scan_cel", Description: "Evaluate supplied CRD CEL rules locally with bounded cost. Optional old snapshot is operator-fixed; no admission or conversion calls."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Plan, error) {
+			set, e := manifest.Load(ctx, c.Input)
+			if e != nil {
+				return nil, analyze.Plan{}, e
+			}
+			var old []manifest.Resource
+			if c.Snapshot != "" {
+				snap, e := cluster.Read(c.Snapshot)
+				if e != nil {
+					return nil, analyze.Plan{}, e
+				}
+				old = snap.Resources
+			}
+			p, e := analyze.CELReview(ctx, set, old)
+			if c.Snapshot != "" {
+				p.Unchecked = append(p.Unchecked, "Old snapshot may be redacted or incomplete")
+			}
+			return nil, p, e
+		})
+	}
 	if c.Profile != "" {
 		mcp.AddTool(s, &mcp.Tool{Name: "plan_aks", Description: "Offline AKS project review using operator-fixed profile and inputs. No Azure calls or writes."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Plan, error) {
 			set, e := load(ctx)
