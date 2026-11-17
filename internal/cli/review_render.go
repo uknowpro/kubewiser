@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/url"
 	"strings"
 )
 
@@ -62,30 +61,9 @@ func reviewHTML(b *strings.Builder, value any, lang string) bool {
 	}
 	b.WriteString("</div>")
 	fmt.Fprintf(b, "<p class=\"notice\">%s</p>", tr(lang, "Partial coverage · Recommendations require workload validation · No automatic changes", "부분 검사 · 권장안은 워크로드별 검증 필요 · 변경 자동 적용 없음"))
-	for n, i := range r.Items {
-		kind := i.Requirement
-		if kind != "required" && kind != "optional" {
-			kind = "conditional"
-		}
-		fmt.Fprintf(b, "<article class=\"finding %s\"><div class=\"finding-head\"><span class=\"badge\">%s</span><span class=\"muted\">%s</span></div><h2>%d. %s</h2><p class=\"resource\">%s</p>", kind, requirement(lang, i.Requirement), htmlCell(i.Rule), n+1, htmlCell(i.Title), htmlCell(i.Resource))
-		fmt.Fprintf(b, "<div class=\"comparison\"><section><h3>%s</h3><p>%s</p></section><section class=\"recommended\"><h3>%s</h3><p>%s</p></section></div>", tr(lang, "Current state", "현재 상태"), htmlCell(i.Current), tr(lang, "Recommended state", "권장 상태"), htmlCell(i.Recommended))
-		b.WriteString("<dl>")
-		for _, row := range [][2]string{{tr(lang, "Why it matters", "이유"), i.Why}, {tr(lang, "Next action", "다음 조치"), i.Action}, {tr(lang, "How to verify", "검증 방법"), i.Verify}, {tr(lang, "Location", "위치"), i.Location}} {
-			if row[1] != "" {
-				fmt.Fprintf(b, "<dt>%s</dt><dd>%s</dd>", row[0], htmlCell(row[1]))
-			}
-		}
-		b.WriteString("</dl>")
-		if i.Source != "" {
-			u, e := url.Parse(i.Source)
-			if e == nil && (u.Scheme == "https" || u.Scheme == "http") && u.Host != "" {
-				fmt.Fprintf(b, "<a rel=\"noreferrer\" href=\"%s\">%s ↗</a>", htmlCell(i.Source), tr(lang, "Reference documentation", "근거 문서"))
-			} else {
-				fmt.Fprintf(b, "<p>%s</p>", htmlCell(i.Source))
-			}
-		}
-		b.WriteString("</article>")
-	}
+	versionComparisonHTML(b, obj(value), lang)
+	compactFindingsHTML(b, r, lang)
+
 	if len(r.Steps) > 0 {
 		fmt.Fprintf(b, "<section><h2>%s</h2><ol>", tr(lang, "Upgrade / migration steps", "업그레이드 / 이전 단계"))
 		for _, s := range r.Steps {
@@ -132,3 +110,9 @@ func writeTextReview(w io.Writer, value any, lang string) (bool, error) {
 const reviewCSS = `
 :root{color-scheme:light;font-family:system-ui,sans-serif;color:#172b3a;background:#f3f6fa}body{max-width:1080px;padding:40px 24px}header{margin-bottom:24px}h1{font-size:32px;letter-spacing:-.03em}h2{font-size:22px;margin:12px 0}h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;margin:0 0 12px}.eyebrow{font-size:12px;font-weight:700;color:#486079;letter-spacing:.12em}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.metric{background:white;border:1px solid #d8e1ea;border-radius:12px;padding:18px 24px;border-top:4px solid #75869b}.metric.required{border-top-color:#b42318}.metric.conditional{border-top-color:#a66300}.metric.optional{border-top-color:#245eb0}.metric strong{font-size:34px;display:block}.metric span{font-size:14px}.notice{font-size:13px;color:#526277;background:#e8eef5;padding:12px 16px;border-radius:8px}.finding{background:white;border:1px solid #d8e1ea;border-radius:14px;padding:24px;margin:24px 0}.finding-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.badge{font-size:12px;font-weight:700;border-radius:6px;padding:4px 10px;background:#fff0d1;color:#795000}.required .badge{background:#fee6e3;color:#a42118}.optional .badge{background:#e6efff;color:#245eb0}.resource{font-family:ui-monospace,monospace;font-size:13px;overflow-wrap:anywhere;color:#486079}.comparison{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}.comparison section{margin:0;padding:18px;background:#f5f7fa;border-radius:8px;border:1px solid #dfe5ec}.comparison .recommended{background:#edf7f4;border-color:#b8dcd1}.comparison p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}dl{display:grid;grid-template-columns:130px 1fr;gap:12px;font-size:14px}dt{font-weight:650}dd{margin:0;overflow-wrap:anywhere}a{color:#245eb0}.coverage{border-top:1px solid #d8e1ea;padding-top:20px;font-size:14px}details{margin:24px 0;background:white;border:1px solid #d8e1ea;border-radius:8px;padding:16px}summary{cursor:pointer;font-weight:600}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}.muted{color:#58697c;opacity:1}@media(max-width:640px){body{padding:20px 12px}.comparison{grid-template-columns:1fr}.metrics{gap:8px}.metric{padding:12px}.metric strong{font-size:28px}dl{grid-template-columns:1fr;gap:6px}dd{margin-bottom:10px}}@media print{body{background:white}.finding{break-inside:avoid}details{display:block}details pre{display:block}}
 `
+
+const compactCSS = `
+body{max-width:1680px;padding:24px}h1{font-size:26px}.metrics{display:flex;gap:12px}.metric{padding:8px 16px;display:flex;align-items:center;gap:12px}.metric strong{font-size:24px}.notice{padding:8px 12px}.compact-table{font-size:12px;line-height:1.45;table-layout:fixed;background:white}.compact-table th,.compact-table td{padding:8px;white-space:normal}.compact-table thead th{background:#e8eef5}.compact-table .resource{font-size:11px;margin-top:4px}.compact-table details{margin:4px 0 0;padding:0;border:0;background:transparent}.compact-table summary{font-size:11px;color:#245eb0}.compact-table dl{display:block;font-size:12px}.compact-table dt{margin-top:8px}.compact-table dd{margin-top:3px}.compact-table .badge{display:inline-block;padding:2px 5px;white-space:nowrap}.compact-table p{margin:4px 0}.compact-table .row-number{width:4%}.compact-table .priority{width:8%}.compact-table .subject{width:22%}.compact-table .state{width:22%}.compact-table .next{width:22%}.table-note{font-size:12px;color:#58697c}.compact-table .source-link{display:block;font-size:11px;margin-top:4px}@media(max-width:900px){.compact-table{min-width:1000px}body{padding:16px 10px}}@media print{body{max-width:none;padding:0}.compact-table{min-width:0;font-size:9px}.compact-table td,.compact-table th{padding:4px}.compact-table details:not([open]) dl{display:none}.metrics{gap:8px}thead{display:table-header-group}}
+`
+
+const compactColumnCSS = `#findings-table th:nth-child(1){width:3%}#findings-table th:nth-child(2){width:7%}#findings-table th:nth-child(3){width:20%}#findings-table th:nth-child(4){width:21%}#findings-table th:nth-child(5){width:23%}#findings-table th:nth-child(6){width:26%}#version-comparison th:nth-child(1){width:7%}#version-comparison th:nth-child(2){width:21%}#version-comparison th:nth-child(3){width:16%}#version-comparison th:nth-child(4){width:22%}#version-comparison th:nth-child(5){width:22%}#version-comparison th:nth-child(6){width:12%}`

@@ -27,7 +27,7 @@ func writeHTML(w io.Writer, report any, langs ...string) error {
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
 <title>Kubewiser report</title><style>
 :root{color-scheme:light dark;font-family:system-ui,sans-serif;line-height:1.5}body{max-width:1400px;margin:0 auto;padding:32px}h1{margin-bottom:8px}h2,h3{margin-top:32px}section{margin:16px 0}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #8886;text-align:left;vertical-align:top;padding:10px;white-space:pre-wrap;overflow-wrap:anywhere}th{background:#8882}tbody tr:nth-child(even){background:#8881}.muted{opacity:.7}li{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0}@media print{body{padding:0;font-size:11px}.table-wrap{overflow:visible}tr{break-inside:avoid}h2,h3{break-after:avoid}}
-` + reviewCSS + `</style></head><body><main>
+` + reviewCSS + compactCSS + compactColumnCSS + `</style></head><body><main>
 `)
 	if !reviewHTML(&b, value, lang) {
 		b.WriteString("<h1>Kubewiser report</h1>")
@@ -98,26 +98,6 @@ func htmlValue(b *strings.Builder, v any, depth int) {
 		}
 		if objects && len(columns) > 0 {
 			keys := markdownKeys(columns)
-			if len(keys) > 6 {
-				level := depth
-				if level > 6 {
-					level = 6
-				}
-				for i, item := range x {
-					m := item.(map[string]any)
-					title := m["rule_id"]
-					if title == nil {
-						title = m["id"]
-					}
-					if title == nil {
-						title = m["resource"]
-					}
-					fmt.Fprintf(b, "<section><h%d>%d. %s</h%d>\n", level, i+1, htmlCell(title), level)
-					htmlValue(b, m, depth+1)
-					b.WriteString("</section>\n")
-				}
-				return
-			}
 
 			start()
 			b.WriteString("<thead><tr>")

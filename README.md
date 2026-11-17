@@ -48,6 +48,20 @@ Inspect manifests, Helm charts and read-only snapshots with a CLI that compares 
 
 An actual generated HTML review: required actions first, current and recommended settings side by side, with source hashes and original evidence available on demand.
 
+### Compact migration review (main branch)
+
+HTML reports now list findings in a compact table with expandable evidence. Upgrade/AKS plans also show a separate As-Is/To-Be table of bundled API removals and reported behavior changes. This is a selected catalog, not every release change or proof of actual cluster usage.
+
+```sh
+kubewiser plan upgrade --source ./deploy --from 1.21 --to 1.36 --format html --lang en > upgrade-1.21-1.36.html
+```
+
+[1.21 → 1.36 HTML example](docs/examples/upgrade-1.21-1.36.ko.html) (synthetic example input; download to view). This layout is newer than alpha.5.
+
+![As-Is / To-Be compact version comparison](docs/images/upgrade-1.21-1.36.ko.png)
+
+Historical alpha.3 card layout:
+
 ![Report comparing current and recommended APIs with actions and verification](docs/images/html-report.png)
 
 [HTML file](docs/examples/report.html) · [Markdown report](docs/examples/report.md) · [Example input](docs/examples/manifest.yaml)
