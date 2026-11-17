@@ -135,6 +135,7 @@ See [installation details](docs/releases.md) for checksums, OS validation bounda
 | Command | Purpose |
 | --- | --- |
 | `scan files` | Inspect a manifest file or directory |
+| `scan lifecycle` | Review support retirement dates and identification gaps |
 | `scan cel` | Evaluate local CRD validation and transition rules |
 | `scan helm` | Render and inspect a local chart |
 | `collect` | Snapshot an explicit cluster context and namespace |
@@ -149,6 +150,30 @@ See [installation details](docs/releases.md) for checksums, OS validation bounda
 | `versions` / `--version` / `--help` | Schema inventory / binary information / help |
 
 Expand the sections below for commands, actual terminal output and exit codes.
+
+### Set current and target versions
+
+`--from` is the current version and `--to` is the target. Choose either local manifests with `--source` or a saved snapshot with `--snapshot`, never both.
+
+```sh
+kubewiser plan upgrade --source ./deploy --from 1.21 --to 1.36 --format html --lang en > upgrade-review.html
+kubewiser plan upgrade --snapshot ./snapshot.json --from 1.21 --to 1.36 --format html --lang en > snapshot-review.html
+```
+
+For AKS projects, edit `from_version` and `to_version` in the existing profile. This is a **field excerpt, not a complete profile**.
+
+```json
+{
+  "from_version": "1.21",
+  "to_version": "1.36"
+}
+```
+
+```sh
+kubewiser plan aks --snapshot ./snapshot.json --profile ./project.json --format html --lang en > aks-review.html
+```
+
+These commands generate local reports and do not execute upgrades. A minor-version sequence does not establish the upgrade path actually offered by AKS.
 
 ### AKS project planning (v0.2.0-alpha.4+)
 

@@ -135,6 +135,7 @@ Start-Process .\report.html
 | 명령 | 용도 |
 | --- | --- |
 | `scan files` | 파일·디렉터리 검사 |
+| `scan lifecycle` | 지원 종료·종료 예정·식별 필요 검사 |
 | `scan cel` | 로컬 CRD CEL·변경 규칙 검사 |
 | `scan helm` | 로컬 차트 렌더링 후 검사 |
 | `collect` | 선택한 클러스터·namespace에서 스냅샷 수집 |
@@ -149,6 +150,30 @@ Start-Process .\report.html
 | `versions` / `--version` / `--help` | 스키마 목록 / 실행 파일 정보 / 도움말 |
 
 아래 항목을 펼치면 실행 명령·터미널 출력·종료 코드까지 확인할 수 있습니다.
+
+### 현재 버전과 목표 버전 지정
+
+`--from`은 현재 버전, `--to`는 목표 버전입니다. 로컬 manifest는 `--source`, 저장된 스냅샷은 `--snapshot`으로 지정하며 둘 중 하나만 사용합니다.
+
+```sh
+kubewiser plan upgrade --source ./deploy --from 1.21 --to 1.36 --format html --lang ko > upgrade-review.html
+kubewiser plan upgrade --snapshot ./snapshot.json --from 1.21 --to 1.36 --format html --lang ko > snapshot-review.html
+```
+
+AKS 프로젝트에서는 기존 프로필의 `from_version`과 `to_version`을 수정합니다. 아래는 **전체 프로필이 아닌 해당 필드 발췌**입니다.
+
+```json
+{
+  "from_version": "1.21",
+  "to_version": "1.36"
+}
+```
+
+```sh
+kubewiser plan aks --snapshot ./snapshot.json --profile ./project.json --format html --lang ko > aks-review.html
+```
+
+위 명령은 로컬 보고서만 생성하며 실제 업그레이드를 실행하지 않습니다. 마이너 버전 순서는 실제 AKS에서 제공되는 업그레이드 경로를 보증하지 않습니다.
 
 ### AKS 프로젝트 계획 (v0.2.0-alpha.4 이상)
 
