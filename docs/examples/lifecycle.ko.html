@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Kubewiser report</title><style>
+:root{color-scheme:light dark;font-family:system-ui,sans-serif;line-height:1.5}body{max-width:1400px;margin:0 auto;padding:32px}h1{margin-bottom:8px}h2,h3{margin-top:32px}section{margin:16px 0}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #8886;text-align:left;vertical-align:top;padding:10px;white-space:pre-wrap;overflow-wrap:anywhere}th{background:#8882}tbody tr:nth-child(even){background:#8881}.muted{opacity:.7}li{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0}@media print{body{padding:0;font-size:11px}.table-wrap{overflow:visible}tr{break-inside:avoid}h2,h3{break-after:avoid}}
+
+:root{color-scheme:light;font-family:system-ui,sans-serif;color:#172b3a;background:#f3f6fa}body{max-width:1080px;padding:40px 24px}header{margin-bottom:24px}h1{font-size:32px;letter-spacing:-.03em}h2{font-size:22px;margin:12px 0}h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;margin:0 0 12px}.eyebrow{font-size:12px;font-weight:700;color:#486079;letter-spacing:.12em}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.metric{background:white;border:1px solid #d8e1ea;border-radius:12px;padding:18px 24px;border-top:4px solid #75869b}.metric.required{border-top-color:#b42318}.metric.conditional{border-top-color:#a66300}.metric.optional{border-top-color:#245eb0}.metric strong{font-size:34px;display:block}.metric span{font-size:14px}.notice{font-size:13px;color:#526277;background:#e8eef5;padding:12px 16px;border-radius:8px}.finding{background:white;border:1px solid #d8e1ea;border-radius:14px;padding:24px;margin:24px 0}.finding-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.badge{font-size:12px;font-weight:700;border-radius:6px;padding:4px 10px;background:#fff0d1;color:#795000}.required .badge{background:#fee6e3;color:#a42118}.optional .badge{background:#e6efff;color:#245eb0}.resource{font-family:ui-monospace,monospace;font-size:13px;overflow-wrap:anywhere;color:#486079}.comparison{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}.comparison section{margin:0;padding:18px;background:#f5f7fa;border-radius:8px;border:1px solid #dfe5ec}.comparison .recommended{background:#edf7f4;border-color:#b8dcd1}.comparison p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}dl{display:grid;grid-template-columns:130px 1fr;gap:12px;font-size:14px}dt{font-weight:650}dd{margin:0;overflow-wrap:anywhere}a{color:#245eb0}.coverage{border-top:1px solid #d8e1ea;padding-top:20px;font-size:14px}details{margin:24px 0;background:white;border:1px solid #d8e1ea;border-radius:8px;padding:16px}summary{cursor:pointer;font-weight:600}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}.muted{color:#58697c;opacity:1}@media(max-width:640px){body{padding:20px 12px}.comparison{grid-template-columns:1fr}.metrics{gap:8px}.metric{padding:12px}.metric strong{font-size:28px}dl{grid-template-columns:1fr;gap:6px}dd{margin-bottom:10px}}@media print{body{background:white}.finding{break-inside:avoid}details{display:block}details pre{display:block}}
+
+body{max-width:1680px;padding:24px}h1{font-size:26px}.metrics{display:flex;gap:12px}.metric{padding:8px 16px;display:flex;align-items:center;gap:12px}.metric strong{font-size:24px}.notice{padding:8px 12px}.compact-table{font-size:12px;line-height:1.45;table-layout:fixed;background:white}.compact-table th,.compact-table td{padding:8px;white-space:normal}.compact-table thead th{background:#e8eef5}.compact-table .resource{font-size:11px;margin-top:4px}.compact-table details{margin:4px 0 0;padding:0;border:0;background:transparent}.compact-table summary{font-size:11px;color:#245eb0}.compact-table dl{display:block;font-size:12px}.compact-table dt{margin-top:8px}.compact-table dd{margin-top:3px}.compact-table .badge{display:inline-block;padding:2px 5px;white-space:nowrap}.compact-table p{margin:4px 0}.compact-table .row-number{width:4%}.compact-table .priority{width:8%}.compact-table .subject{width:22%}.compact-table .state{width:22%}.compact-table .next{width:22%}.table-note{font-size:12px;color:#58697c}.compact-table .source-link{display:block;font-size:11px;margin-top:4px}@media(max-width:900px){.compact-table{min-width:1000px}body{padding:16px 10px}}@media print{body{max-width:none;padding:0}.compact-table{min-width:0;font-size:9px}.compact-table td,.compact-table th{padding:4px}.compact-table details:not([open]) dl{display:none}.metrics{gap:8px}thead{display:table-header-group}}
+#findings-table th:nth-child(1){width:3%}#findings-table th:nth-child(2){width:7%}#findings-table th:nth-child(3){width:20%}#findings-table th:nth-child(4){width:21%}#findings-table th:nth-child(5){width:23%}#findings-table th:nth-child(6){width:26%}#version-comparison th:nth-child(1){width:7%}#version-comparison th:nth-child(2){width:21%}#version-comparison th:nth-child(3){width:16%}#version-comparison th:nth-child(4){width:22%}#version-comparison th:nth-child(5){width:22%}#version-comparison th:nth-child(6){width:12%}</style></head><body><main>
+<header><p class="eyebrow">KUBEWISER · 근거 기반 검사</p><h1>유지보수 및 지원 종료 검토</h1><p>필수 조치부터 해결한 뒤, 조건부 권고가 실제 워크로드에 해당하는지 확인하세요.</p><p class="muted">로컬 근거 · 일부 지원 정책 카탈로그</p></header><div class="metrics"><div class="metric required"><strong>4</strong><span>필수 조치</span></div><div class="metric conditional"><strong>4</strong><span>조건 확인</span></div><div class="metric optional"><strong>0</strong><span>선택 권고</span></div></div><p class="notice">부분 검사 · 권장안은 워크로드별 검증 필요 · 변경 자동 적용 없음</p><section><h2>유지보수 / 지원 종료 검토</h2><p class="table-note">평가일: 2026-11-17 UTC · 공식 근거 확인일: 2026-11-17 · 일부 항목의 카탈로그 검사입니다. 모든 제품의 지원 상태를 보증하지 않습니다. 월 단위 기한은 정확한 종료일을 뜻하지 않습니다.</p><div class="table-wrap"><table class="compact-table" id="lifecycle-table"><thead><tr><th scope="col">구성요소 / 리소스</th><th scope="col">상태</th><th scope="col">종료 시점</th><th scope="col">지원 범위</th><th scope="col">식별 근거</th><th scope="col">대체 / 조치</th></tr></thead><tbody><tr><td><strong>AKS application routing NGINX</strong><div class="resource">EXAMPLE-managed-nginx</div></td><td>이번 달 종료 (정확한 일자 미명시)</td><td>2026-11</td><td>Microsoft critical security patches for the managed add-on only</td><td>Operator-declared component and support scope</td><td>Review AKS application routing Gateway API migration and feature parity<a class="source-link" rel="noreferrer" href="https://learn.microsoft.com/en-us/azure/aks/app-routing-nginx-to-gateway-api-migration">근거 문서 ↗</a></td></tr><tr><td><strong>AKS managed Pod Identity add-on</strong><div class="resource">EXAMPLE-managed-identity</div></td><td>지원 종료</td><td>2025-09</td><td>AKS managed add-on support</td><td>Operator-declared component and support scope</td><td>Migrate to Microsoft Entra Workload ID and validate application authentication<a class="source-link" rel="noreferrer" href="https://learn.microsoft.com/en-us/azure/aks/use-azure-ad-pod-identity">근거 문서 ↗</a></td></tr><tr><td><strong>AAD Pod Identity</strong><div class="resource">EXAMPLE-upstream-identity</div></td><td>지원 종료</td><td>2023-09</td><td>upstream project; managed/vendor coverage must be checked separately</td><td>Operator-declared component and support scope</td><td>Migrate to Microsoft Entra Workload ID; validate token acquisition and identity permissions<a class="source-link" rel="noreferrer" href="https://github.com/Azure/aad-pod-identity">근거 문서 ↗</a></td></tr><tr><td><strong>Azure Linux 2.0 on AKS</strong><div class="resource">EXAMPLE-old-nodepool</div></td><td>지원 종료</td><td>2025-11-30</td><td>AKS OS support and security updates</td><td>Operator-declared component and support scope</td><td>Migrate to a supported OS/node pool; check image availability, scaling and workload compatibility<a class="source-link" rel="noreferrer" href="https://learn.microsoft.com/en-us/azure/aks/upgrade-os-version">근거 문서 ↗</a></td></tr><tr><td><strong>AKS kubenet</strong><div class="resource">EXAMPLE-network</div></td><td>종료 예정</td><td>2028-03-31</td><td>AKS networking retirement</td><td>Operator-declared component and support scope</td><td>Plan migration to supported Azure CNI networking; verify IP capacity, routes and policies<a class="source-link" rel="noreferrer" href="https://learn.microsoft.com/en-us/azure/aks/configure-kubenet">근거 문서 ↗</a></td></tr><tr><td><strong>Community ingress-nginx</strong><div class="resource">v1/Pod/review/legacy-ingress-example</div></td><td>지원 종료</td><td>2026-03-24</td><td>upstream project; managed/vendor coverage must be checked separately</td><td>Known upstream controller image repository; managed coverage unverified</td><td>Migrate to a maintained Gateway API implementation or ingress controller; verify annotations, TLS and traffic behavior<a class="source-link" rel="noreferrer" href="https://kubernetes.io/blog/2026/04/22/kubernetes-v1-36-release/">근거 문서 ↗</a></td></tr><tr><td><strong>Community ingress-nginx</strong><div class="resource">v1/Pod/review/mirror-example</div></td><td>제품 / 지원 주체 확인 필요</td><td>2026-03-24</td><td>upstream project; managed/vendor coverage must be checked separately</td><td>Mirror-like image path only; identify actual product and support owner</td><td>Migrate to a maintained Gateway API implementation or ingress controller; verify annotations, TLS and traffic behavior<a class="source-link" rel="noreferrer" href="https://kubernetes.io/blog/2026/04/22/kubernetes-v1-36-release/">근거 문서 ↗</a></td></tr><tr><td><strong>Ubuntu 20.04 on AKS</strong><div class="resource">v1/Node//old-os-example</div></td><td>종료 예정</td><td>2027-03-17</td><td>AKS OS support and security updates; not a statement about all Ubuntu support contracts</td><td>Node status.osImage in declared AKS project</td><td>Plan a supported AKS node OS upgrade and validate workloads<a class="source-link" rel="noreferrer" href="https://learn.microsoft.com/en-us/azure/aks/upgrade-os-version">근거 문서 ↗</a></td></tr></tbody></table></div></section><section><h2>검사 결과 요약 (8)</h2><div class="table-wrap"><table class="compact-table" id="findings-table"><thead><tr><th scope="col">#</th><th scope="col">구분</th><th scope="col">검토 항목 / 리소스</th><th scope="col">현재 상태</th><th scope="col">권장 상태</th><th scope="col">조치 / 상세 근거</th></tr></thead><tbody><tr class="required"><td>1</td><td><span class="badge">필수 조치</span></td><td><strong>지원 종료 / 지원 기간 검토</strong><div class="resource">EXAMPLE-managed-identity</div><div class="muted">KW-LIFECYCLE</div></td><td>AKS managed Pod Identity add-on · ended · 2025-09</td><td>Migrate to Microsoft Entra Workload ID and validate application authentication</td><td>Confirm component identity, support owner and current vendor policy; test replacement before cutover<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>AKS managed add-on support; Operator-declared component and support scope</dd><dt>검증 방법</dt><dd>Confirm component identity, support owner and current vendor policy; test replacement before cutover</dd></dl><a class="source-link" rel="noreferrer" href="https://learn.microsoft.com/en-us/azure/aks/use-azure-ad-pod-identity">근거 문서 ↗</a></details></td></tr><tr class="required"><td>2</td><td><span class="badge">필수 조치</span></td><td><strong>지원 종료 / 지원 기간 검토</strong><div class="resource">EXAMPLE-upstream-identity</div><div class="muted">KW-LIFECYCLE</div></td><td>AAD Pod Identity · ended · 2023-09</td><td>Migrate to Microsoft Entra Workload ID; validate token acquisition and identity permissions</td><td>Confirm component identity, support owner and current vendor policy; test replacement before cutover<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>upstream project; managed/vendor coverage must be checked separately; Operator-declared component and support scope</dd><dt>검증 방법</dt><dd>Confirm component identity, support owner and current vendor policy; test replacement before cutover</dd></dl><a class="source-link" rel="noreferrer" href="https://github.com/Azure/aad-pod-identity">근거 문서 ↗</a></details></td></tr><tr class="required"><td>3</td><td><span class="badge">필수 조치</span></td><td><strong>지원 종료 / 지원 기간 검토</strong><div class="resource">EXAMPLE-old-nodepool</div><div class="muted">KW-LIFECYCLE</div></td><td>Azure Linux 2.0 on AKS · ended · 2025-11-30</td><td>Migrate to a supported OS/node pool; check image availability, scaling and workload compatibility</td><td>Confirm component identity, support owner and current vendor policy; test replacement before cutover<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>AKS OS support and security updates; Operator-declared component and support scope</dd><dt>검증 방법</dt><dd>Confirm component identity, support owner and current vendor policy; test replacement before cutover</dd></dl><a class="source-link" rel="noreferrer" href="https://learn.microsoft.com/en-us/azure/aks/upgrade-os-version">근거 문서 ↗</a></details></td></tr><tr class="required"><td>4</td><td><span class="badge">필수 조치</span></td><td><strong>지원 종료 / 지원 기간 검토</strong><div class="resource">v1/Pod/review/legacy-ingress-example</div><div class="muted">KW-LIFECYCLE</div></td><td>Community ingress-nginx · ended · 2026-03-24</td><td>Migrate to a maintained Gateway API implementation or ingress controller; verify annotations, TLS and traffic behavior</td><td>Confirm component identity, support owner and current vendor policy; test replacement before cutover<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>upstream project; managed/vendor coverage must be checked separately; Known upstream controller image repository; managed coverage unverified</dd><dt>검증 방법</dt><dd>Confirm component identity, support owner and current vendor policy; test replacement before cutover</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/blog/2026/04/22/kubernetes-v1-36-release/">근거 문서 ↗</a></details></td></tr><tr class="conditional"><td>5</td><td><span class="badge">조건 확인</span></td><td><strong>지원 종료 / 지원 기간 검토</strong><div class="resource">EXAMPLE-managed-nginx</div><div class="muted">KW-LIFECYCLE</div></td><td>AKS application routing NGINX · ending_this_month · 2026-11</td><td>Review AKS application routing Gateway API migration and feature parity</td><td>Confirm component identity, support owner and current vendor policy; test replacement before cutover<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>Microsoft critical security patches for the managed add-on only; Operator-declared component and support scope</dd><dt>검증 방법</dt><dd>Confirm component identity, support owner and current vendor policy; test replacement before cutover</dd></dl><a class="source-link" rel="noreferrer" href="https://learn.microsoft.com/en-us/azure/aks/app-routing-nginx-to-gateway-api-migration">근거 문서 ↗</a></details></td></tr><tr class="conditional"><td>6</td><td><span class="badge">조건 확인</span></td><td><strong>지원 종료 / 지원 기간 검토</strong><div class="resource">EXAMPLE-network</div><div class="muted">KW-LIFECYCLE</div></td><td>AKS kubenet · scheduled · 2028-03-31</td><td>Plan migration to supported Azure CNI networking; verify IP capacity, routes and policies</td><td>Confirm component identity, support owner and current vendor policy; test replacement before cutover<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>AKS networking retirement; Operator-declared component and support scope</dd><dt>검증 방법</dt><dd>Confirm component identity, support owner and current vendor policy; test replacement before cutover</dd></dl><a class="source-link" rel="noreferrer" href="https://learn.microsoft.com/en-us/azure/aks/configure-kubenet">근거 문서 ↗</a></details></td></tr><tr class="conditional"><td>7</td><td><span class="badge">조건 확인</span></td><td><strong>지원 종료 / 지원 기간 검토</strong><div class="resource">v1/Pod/review/mirror-example</div><div class="muted">KW-LIFECYCLE</div></td><td>Community ingress-nginx · identification_required · 2026-03-24</td><td>Migrate to a maintained Gateway API implementation or ingress controller; verify annotations, TLS and traffic behavior</td><td>Confirm component identity, support owner and current vendor policy; test replacement before cutover<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>upstream project; managed/vendor coverage must be checked separately; Mirror-like image path only; identify actual product and support owner</dd><dt>검증 방법</dt><dd>Confirm component identity, support owner and current vendor policy; test replacement before cutover</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/blog/2026/04/22/kubernetes-v1-36-release/">근거 문서 ↗</a></details></td></tr><tr class="conditional"><td>8</td><td><span class="badge">조건 확인</span></td><td><strong>지원 종료 / 지원 기간 검토</strong><div class="resource">v1/Node//old-os-example</div><div class="muted">KW-LIFECYCLE</div></td><td>Ubuntu 20.04 on AKS · scheduled · 2027-03-17</td><td>Plan a supported AKS node OS upgrade and validate workloads</td><td>Confirm component identity, support owner and current vendor policy; test replacement before cutover<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>AKS OS support and security updates; not a statement about all Ubuntu support contracts; Node status.osImage in declared AKS project</dd><dt>검증 방법</dt><dd>Confirm component identity, support owner and current vendor policy; test replacement before cutover</dd></dl><a class="source-link" rel="noreferrer" href="https://learn.microsoft.com/en-us/azure/aks/upgrade-os-version">근거 문서 ↗</a></details></td></tr></tbody></table></div></section><section class="coverage"><h2>검사하지 못한 항목</h2><p>발견 사항이 없어도 아래 검증 한계는 남아 있습니다.</p><ul><li>Selected, pinned lifecycle catalog only; absence of findings is not proof of support. No lifecycle databases or vendors are contacted.</li><li>Upstream retirement does not establish managed/vendor support coverage. Names, labels and mirror paths are hints only. Operator declarations are not independently verified.</li><li>Missing Node OS, controller resources, redacted annotations and snapshot scope may hide dependencies. Kubernetes API removal is evaluated separately by version scans and upgrade plans.</li></ul></section><details><summary>원본 근거·출처 해시·메타데이터</summary><pre>{
+  &#34;actions&#34;: [
+    {
+      &#34;current&#34;: &#34;AKS application routing NGINX · ending_this_month · 2026-11&#34;,
+      &#34;id&#34;: &#34;KW-LIFECYCLE&#34;,
+      &#34;message&#34;: &#34;Microsoft critical security patches for the managed add-on only; Operator-declared component and support scope&#34;,
+      &#34;recommended&#34;: &#34;Review AKS application routing Gateway API migration and feature parity&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;EXAMPLE-managed-nginx&#34;,
+      &#34;source&#34;: &#34;https://learn.microsoft.com/en-us/azure/aks/app-routing-nginx-to-gateway-api-migration&#34;,
+      &#34;verification&#34;: &#34;Confirm component identity, support owner and current vendor policy; test replacement before cutover&#34;
+    },
+    {
+      &#34;current&#34;: &#34;AKS managed Pod Identity add-on · ended · 2025-09&#34;,
+      &#34;id&#34;: &#34;KW-LIFECYCLE&#34;,
+      &#34;message&#34;: &#34;AKS managed add-on support; Operator-declared component and support scope&#34;,
+      &#34;recommended&#34;: &#34;Migrate to Microsoft Entra Workload ID and validate application authentication&#34;,
+      &#34;requirement&#34;: &#34;required&#34;,
+      &#34;resource&#34;: &#34;EXAMPLE-managed-identity&#34;,
+      &#34;source&#34;: &#34;https://learn.microsoft.com/en-us/azure/aks/use-azure-ad-pod-identity&#34;,
+      &#34;verification&#34;: &#34;Confirm component identity, support owner and current vendor policy; test replacement before cutover&#34;
+    },
+    {
+      &#34;current&#34;: &#34;AAD Pod Identity · ended · 2023-09&#34;,
+      &#34;id&#34;: &#34;KW-LIFECYCLE&#34;,
+      &#34;message&#34;: &#34;upstream project; managed/vendor coverage must be checked separately; Operator-declared component and support scope&#34;,
+      &#34;recommended&#34;: &#34;Migrate to Microsoft Entra Workload ID; validate token acquisition and identity permissions&#34;,
+      &#34;requirement&#34;: &#34;required&#34;,
+      &#34;resource&#34;: &#34;EXAMPLE-upstream-identity&#34;,
+      &#34;source&#34;: &#34;https://github.com/Azure/aad-pod-identity&#34;,
+      &#34;verification&#34;: &#34;Confirm component identity, support owner and current vendor policy; test replacement before cutover&#34;
+    },
+    {
+      &#34;current&#34;: &#34;Azure Linux 2.0 on AKS · ended · 2025-11-30&#34;,
+      &#34;id&#34;: &#34;KW-LIFECYCLE&#34;,
+      &#34;message&#34;: &#34;AKS OS support and security updates; Operator-declared component and support scope&#34;,
+      &#34;recommended&#34;: &#34;Migrate to a supported OS/node pool; check image availability, scaling and workload compatibility&#34;,
+      &#34;requirement&#34;: &#34;required&#34;,
+      &#34;resource&#34;: &#34;EXAMPLE-old-nodepool&#34;,
+      &#34;source&#34;: &#34;https://learn.microsoft.com/en-us/azure/aks/upgrade-os-version&#34;,
+      &#34;verification&#34;: &#34;Confirm component identity, support owner and current vendor policy; test replacement before cutover&#34;
+    },
+    {
+      &#34;current&#34;: &#34;AKS kubenet · scheduled · 2028-03-31&#34;,
+      &#34;id&#34;: &#34;KW-LIFECYCLE&#34;,
+      &#34;message&#34;: &#34;AKS networking retirement; Operator-declared component and support scope&#34;,
+      &#34;recommended&#34;: &#34;Plan migration to supported Azure CNI networking; verify IP capacity, routes and policies&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;EXAMPLE-network&#34;,
+      &#34;source&#34;: &#34;https://learn.microsoft.com/en-us/azure/aks/configure-kubenet&#34;,
+      &#34;verification&#34;: &#34;Confirm component identity, support owner and current vendor policy; test replacement before cutover&#34;
+    },
+    {
+      &#34;current&#34;: &#34;Community ingress-nginx · ended · 2026-03-24&#34;,
+      &#34;id&#34;: &#34;KW-LIFECYCLE&#34;,
+      &#34;message&#34;: &#34;upstream project; managed/vendor coverage must be checked separately; Known upstream controller image repository; managed coverage unverified&#34;,
+      &#34;recommended&#34;: &#34;Migrate to a maintained Gateway API implementation or ingress controller; verify annotations, TLS and traffic behavior&#34;,
+      &#34;requirement&#34;: &#34;required&#34;,
+      &#34;resource&#34;: &#34;v1/Pod/review/legacy-ingress-example&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/blog/2026/04/22/kubernetes-v1-36-release/&#34;,
+      &#34;verification&#34;: &#34;Confirm component identity, support owner and current vendor policy; test replacement before cutover&#34;
+    },
+    {
+      &#34;current&#34;: &#34;Community ingress-nginx · identification_required · 2026-03-24&#34;,
+      &#34;id&#34;: &#34;KW-LIFECYCLE&#34;,
+      &#34;message&#34;: &#34;upstream project; managed/vendor coverage must be checked separately; Mirror-like image path only; identify actual product and support owner&#34;,
+      &#34;recommended&#34;: &#34;Migrate to a maintained Gateway API implementation or ingress controller; verify annotations, TLS and traffic behavior&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;v1/Pod/review/mirror-example&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/blog/2026/04/22/kubernetes-v1-36-release/&#34;,
+      &#34;verification&#34;: &#34;Confirm component identity, support owner and current vendor policy; test replacement before cutover&#34;
+    },
+    {
+      &#34;current&#34;: &#34;Ubuntu 20.04 on AKS · scheduled · 2027-03-17&#34;,
+      &#34;id&#34;: &#34;KW-LIFECYCLE&#34;,
+      &#34;message&#34;: &#34;AKS OS support and security updates; not a statement about all Ubuntu support contracts; Node status.osImage in declared AKS project&#34;,
+      &#34;recommended&#34;: &#34;Plan a supported AKS node OS upgrade and validate workloads&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;v1/Node//old-os-example&#34;,
+      &#34;source&#34;: &#34;https://learn.microsoft.com/en-us/azure/aks/upgrade-os-version&#34;,
+      &#34;verification&#34;: &#34;Confirm component identity, support owner and current vendor policy; test replacement before cutover&#34;
+    }
+  ],
+  &#34;from&#34;: &#34;local inputs&#34;,
+  &#34;kind&#34;: &#34;lifecycle&#34;,
+  &#34;lifecycle&#34;: {
+    &#34;catalog_reviewed&#34;: &#34;2026-11-17&#34;,
+    &#34;evaluated_at&#34;: &#34;2026-11-17&#34;,
+    &#34;findings&#34;: [
+      {
+        &#34;component&#34;: &#34;AKS application routing NGINX&#34;,
+        &#34;end&#34;: &#34;2026-11&#34;,
+        &#34;evidence&#34;: &#34;Operator-declared component and support scope&#34;,
+        &#34;precision&#34;: &#34;month&#34;,
+        &#34;replacement&#34;: &#34;Review AKS application routing Gateway API migration and feature parity&#34;,
+        &#34;resource&#34;: &#34;EXAMPLE-managed-nginx&#34;,
+        &#34;scope&#34;: &#34;Microsoft critical security patches for the managed add-on only&#34;,
+        &#34;source&#34;: &#34;https://learn.microsoft.com/en-us/azure/aks/app-routing-nginx-to-gateway-api-migration&#34;,
+        &#34;status&#34;: &#34;ending_this_month&#34;
+      },
+      {
+        &#34;component&#34;: &#34;AKS managed Pod Identity add-on&#34;,
+        &#34;end&#34;: &#34;2025-09&#34;,
+        &#34;evidence&#34;: &#34;Operator-declared component and support scope&#34;,
+        &#34;precision&#34;: &#34;month&#34;,
+        &#34;replacement&#34;: &#34;Migrate to Microsoft Entra Workload ID and validate application authentication&#34;,
+        &#34;resource&#34;: &#34;EXAMPLE-managed-identity&#34;,
+        &#34;scope&#34;: &#34;AKS managed add-on support&#34;,
+        &#34;source&#34;: &#34;https://learn.microsoft.com/en-us/azure/aks/use-azure-ad-pod-identity&#34;,
+        &#34;status&#34;: &#34;ended&#34;
+      },
+      {
+        &#34;component&#34;: &#34;AAD Pod Identity&#34;,
+        &#34;end&#34;: &#34;2023-09&#34;,
+        &#34;evidence&#34;: &#34;Operator-declared component and support scope&#34;,
+        &#34;precision&#34;: &#34;month&#34;,
+        &#34;replacement&#34;: &#34;Migrate to Microsoft Entra Workload ID; validate token acquisition and identity permissions&#34;,
+        &#34;resource&#34;: &#34;EXAMPLE-upstream-identity&#34;,
+        &#34;scope&#34;: &#34;upstream project; managed/vendor coverage must be checked separately&#34;,
+        &#34;source&#34;: &#34;https://github.com/Azure/aad-pod-identity&#34;,
+        &#34;status&#34;: &#34;ended&#34;
+      },
+      {
+        &#34;component&#34;: &#34;Azure Linux 2.0 on AKS&#34;,
+        &#34;end&#34;: &#34;2025-11-30&#34;,
+        &#34;evidence&#34;: &#34;Operator-declared component and support scope&#34;,
+        &#34;precision&#34;: &#34;day&#34;,
+        &#34;replacement&#34;: &#34;Migrate to a supported OS/node pool; check image availability, scaling and workload compatibility&#34;,
+        &#34;resource&#34;: &#34;EXAMPLE-old-nodepool&#34;,
+        &#34;scope&#34;: &#34;AKS OS support and security updates&#34;,
+        &#34;source&#34;: &#34;https://learn.microsoft.com/en-us/azure/aks/upgrade-os-version&#34;,
+        &#34;status&#34;: &#34;ended&#34;
+      },
+      {
+        &#34;component&#34;: &#34;AKS kubenet&#34;,
+        &#34;end&#34;: &#34;2028-03-31&#34;,
+        &#34;evidence&#34;: &#34;Operator-declared component and support scope&#34;,
+        &#34;precision&#34;: &#34;day&#34;,
+        &#34;replacement&#34;: &#34;Plan migration to supported Azure CNI networking; verify IP capacity, routes and policies&#34;,
+        &#34;resource&#34;: &#34;EXAMPLE-network&#34;,
+        &#34;scope&#34;: &#34;AKS networking retirement&#34;,
+        &#34;source&#34;: &#34;https://learn.microsoft.com/en-us/azure/aks/configure-kubenet&#34;,
+        &#34;status&#34;: &#34;scheduled&#34;
+      },
+      {
+        &#34;component&#34;: &#34;Community ingress-nginx&#34;,
+        &#34;end&#34;: &#34;2026-03-24&#34;,
+        &#34;evidence&#34;: &#34;Known upstream controller image repository; managed coverage unverified&#34;,
+        &#34;precision&#34;: &#34;day&#34;,
+        &#34;replacement&#34;: &#34;Migrate to a maintained Gateway API implementation or ingress controller; verify annotations, TLS and traffic behavior&#34;,
+        &#34;resource&#34;: &#34;v1/Pod/review/legacy-ingress-example&#34;,
+        &#34;scope&#34;: &#34;upstream project; managed/vendor coverage must be checked separately&#34;,
+        &#34;source&#34;: &#34;https://kubernetes.io/blog/2026/04/22/kubernetes-v1-36-release/&#34;,
+        &#34;status&#34;: &#34;ended&#34;
+      },
+      {
+        &#34;component&#34;: &#34;Community ingress-nginx&#34;,
+        &#34;end&#34;: &#34;2026-03-24&#34;,
+        &#34;evidence&#34;: &#34;Mirror-like image path only; identify actual product and support owner&#34;,
+        &#34;precision&#34;: &#34;day&#34;,
+        &#34;replacement&#34;: &#34;Migrate to a maintained Gateway API implementation or ingress controller; verify annotations, TLS and traffic behavior&#34;,
+        &#34;resource&#34;: &#34;v1/Pod/review/mirror-example&#34;,
+        &#34;scope&#34;: &#34;upstream project; managed/vendor coverage must be checked separately&#34;,
+        &#34;source&#34;: &#34;https://kubernetes.io/blog/2026/04/22/kubernetes-v1-36-release/&#34;,
+        &#34;status&#34;: &#34;identification_required&#34;
+      },
+      {
+        &#34;component&#34;: &#34;Ubuntu 20.04 on AKS&#34;,
+        &#34;end&#34;: &#34;2027-03-17&#34;,
+        &#34;evidence&#34;: &#34;Node status.osImage in declared AKS project&#34;,
+        &#34;precision&#34;: &#34;day&#34;,
+        &#34;replacement&#34;: &#34;Plan a supported AKS node OS upgrade and validate workloads&#34;,
+        &#34;resource&#34;: &#34;v1/Node//old-os-example&#34;,
+        &#34;scope&#34;: &#34;AKS OS support and security updates; not a statement about all Ubuntu support contracts&#34;,
+        &#34;source&#34;: &#34;https://learn.microsoft.com/en-us/azure/aks/upgrade-os-version&#34;,
+        &#34;status&#34;: &#34;scheduled&#34;
+      }
+    ]
+  },
+  &#34;status&#34;: &#34;partial&#34;,
+  &#34;steps&#34;: [],
+  &#34;to&#34;: &#34;support lifecycle&#34;,
+  &#34;unchecked&#34;: [
+    &#34;Selected, pinned lifecycle catalog only; absence of findings is not proof of support. No lifecycle databases or vendors are contacted.&#34;,
+    &#34;Upstream retirement does not establish managed/vendor support coverage. Names, labels and mirror paths are hints only. Operator declarations are not independently verified.&#34;,
+    &#34;Missing Node OS, controller resources, redacted annotations and snapshot scope may hide dependencies. Kubernetes API removal is evaluated separately by version scans and upgrade plans.&#34;
+  ]
+}</pre></details></main></body></html>

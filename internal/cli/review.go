@@ -67,6 +67,10 @@ func buildReview(value any, lang string) (review, bool) {
 		rows = list(root["actions"])
 		r.Title = tr(lang, "Change plan", "변경 계획과 권장 조치")
 		r.Scope = fmt.Sprintf("%v → %v", root["from"], root["to"])
+		if root["kind"] == "lifecycle" {
+			r.Title = tr(lang, "Support lifecycle review", "유지보수 및 지원 종료 검토")
+			r.Scope = tr(lang, "Local evidence · selected support catalog", "로컬 근거 · 일부 지원 정책 카탈로그")
+		}
 		r.Steps = texts(root["steps"])
 	case root["changes"] != nil:
 		rows = list(root["changes"])
@@ -141,6 +145,9 @@ func explain(f map[string]any, lang string) reviewItem {
 		i.Verify = x
 	}
 	switch id {
+	case "KW-LIFECYCLE":
+		i.Title = tr(lang, "Review support lifecycle", "지원 종료 / 지원 기간 검토")
+		i.Action = i.Verify
 	case "KW-AKS-ROUTE":
 		i.Title = tr(lang, "Confirm the actual AKS upgrade route", "실제 AKS 업그레이드 경로 확인")
 		i.Current = tr(lang, "Requested version range; provider route has not been verified.", "요청한 버전 범위이며 공급자의 실제 경로는 확인되지 않았습니다.")

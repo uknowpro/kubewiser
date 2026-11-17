@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "provider": "aks",
+  "mode": "in-place",
+  "from_version": "1.21",
+  "to_version": "1.36",
+  "maintenance_window": "unknown",
+  "max_downtime": "unknown",
+  "rpo": "unknown",
+  "rto": "unknown",
+  "lifecycle_components": [
+    {"id": "aks-app-routing-nginx", "resource": "EXAMPLE-managed-nginx"},
+    {"id": "aks-pod-identity", "resource": "EXAMPLE-managed-identity"},
+    {"id": "aad-pod-identity", "resource": "EXAMPLE-upstream-identity"},
+    {"id": "aks-azurelinux2", "resource": "EXAMPLE-old-nodepool"},
+    {"id": "aks-kubenet", "resource": "EXAMPLE-network"}
+  ]
+}

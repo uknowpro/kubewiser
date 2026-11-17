@@ -30,6 +30,7 @@ const help = `Commands: kubewiser or kubewise
   scan network [--flows HUBBLE.jsonl] [--namespace NS] PATH
   scan network --snapshot FILE [--flows HUBBLE.jsonl]
   scan path --source PATH --source-pod NS/NAME --destination-pod NS/NAME --port PORT [--protocol TCP]
+  scan lifecycle --source PATH [--profile FILE] [--format html]
   collect --kubeconfig FILE --context NAME --namespace NS --output snapshot.json
   diff --source PATH --snapshot FILE [--namespace NS]
   diff --chart DIR --target-version VERSION --release NAME --snapshot FILE [--values FILE]
@@ -155,6 +156,32 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 		}
 		return emit(out, errOut, map[string]any{"status": "review_drafts", "output": *output, "files": files, "unchecked": []string{"Drafts require review; no infrastructure commands executed"}}, *format, 0, *lang)
 	case "scan":
+		if sub == "lifecycle" {
+			if fs.NArg() != 0 {
+				return fail(fmt.Errorf("scan lifecycle uses --source or --snapshot"))
+			}
+			set, e := load()
+			if e != nil {
+				return fail(e)
+			}
+			var project *analyze.ProjectProfile
+			if *profile != "" {
+				v, e := analyze.ReadProfile(*profile)
+				if e != nil {
+					return fail(e)
+				}
+				project = &v
+			}
+			p, e := analyze.Lifecycle(set, project, time.Now().UTC())
+			if e != nil {
+				return fail(e)
+			}
+			code := 0
+			if len(p.Actions) > 0 {
+				code = 1
+			}
+			return emit(out, errOut, p, *format, code, *lang)
+		}
 		if sub == "cel" {
 			if *source == "" || fs.NArg() != 0 {
 				return fail(fmt.Errorf("scan cel requires --source and optional --snapshot old values"))

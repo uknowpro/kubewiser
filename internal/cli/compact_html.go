@@ -133,3 +133,33 @@ func versionComparisonHTML(b *strings.Builder, root map[string]any, lang string)
 	}
 	b.WriteString(`</tbody></table></div></section>`)
 }
+
+func lifecycleHTML(b *strings.Builder, root map[string]any, lang string) {
+	life := obj(root["lifecycle"])
+	if life == nil {
+		return
+	}
+	fmt.Fprintf(b, `<section><h2>%s</h2><p class="table-note">%s: %s UTC · %s: %s · %s</p>`, tr(lang, "Support lifecycle", "유지보수 / 지원 종료 검토"), tr(lang, "Evaluated", "평가일"), htmlCell(life["evaluated_at"]), tr(lang, "Catalog reviewed", "공식 근거 확인일"), htmlCell(life["catalog_reviewed"]), tr(lang, "Selected catalog; not an exhaustive support audit. Month-only deadlines do not imply an exact day.", "일부 항목의 카탈로그 검사입니다. 모든 제품의 지원 상태를 보증하지 않습니다. 월 단위 기한은 정확한 종료일을 뜻하지 않습니다."))
+	tableHead(b, "lifecycle-table", []string{tr(lang, "Component / resource", "구성요소 / 리소스"), tr(lang, "Status", "상태"), tr(lang, "End of support", "종료 시점"), tr(lang, "Support scope", "지원 범위"), tr(lang, "Identification evidence", "식별 근거"), tr(lang, "Replacement / action", "대체 / 조치")})
+	for _, raw := range list(life["findings"]) {
+		f := obj(raw)
+		status := str(f, "status")
+		switch status {
+		case "ended":
+			status = tr(lang, "Ended", "지원 종료")
+		case "scheduled":
+			status = tr(lang, "Scheduled", "종료 예정")
+		case "ending_this_month":
+			status = tr(lang, "Ending this month (exact day unspecified)", "이번 달 종료 (정확한 일자 미명시)")
+		case "identification_required":
+			status = tr(lang, "Identification required", "제품 / 지원 주체 확인 필요")
+		}
+		fmt.Fprintf(b, `<tr><td><strong>%s</strong><div class="resource">%s</div></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s`, htmlCell(f["component"]), htmlCell(f["resource"]), htmlCell(status), htmlCell(f["end"]), htmlCell(f["scope"]), htmlCell(f["evidence"]), htmlCell(f["replacement"]))
+		referenceHTML(b, str(f, "source"), lang)
+		b.WriteString(`</td></tr>`)
+	}
+	if len(list(life["findings"])) == 0 {
+		fmt.Fprintf(b, `<tr><td colspan="6">%s</td></tr>`, tr(lang, "No catalog matches; support status of unrecognized components is not verified.", "카탈로그 일치 항목이 없습니다. 식별되지 않은 구성요소의 지원 상태는 미확인입니다."))
+	}
+	b.WriteString(`</tbody></table></div></section>`)
+}

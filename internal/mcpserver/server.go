@@ -11,6 +11,7 @@ import (
 	"github.com/uknowpro/kubewiser/internal/manifest"
 	"github.com/uknowpro/kubewiser/internal/render"
 	"github.com/uknowpro/kubewiser/internal/scan"
+	"time"
 )
 
 type Config struct {
@@ -67,6 +68,23 @@ func NewConfigured(c Config) *mcp.Server {
 			return nil, scan.Report{}, e
 		}
 		r, e := scan.Analyze(ctx, set, a.Target, a.Recommend)
+		r.Unchecked = append(r.Unchecked, snapshotGaps()...)
+		return nil, r, e
+	})
+	mcp.AddTool(s, &mcp.Tool{Name: "scan_lifecycle", Description: "Offline support lifecycle check using the pinned catalog and operator-fixed inputs/profile; no vendor calls."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Plan, error) {
+		set, e := load(ctx)
+		if e != nil {
+			return nil, analyze.Plan{}, e
+		}
+		var p *analyze.ProjectProfile
+		if c.Profile != "" {
+			v, e := analyze.ReadProfile(c.Profile)
+			if e != nil {
+				return nil, analyze.Plan{}, e
+			}
+			p = &v
+		}
+		r, e := analyze.Lifecycle(set, p, time.Now().UTC())
 		r.Unchecked = append(r.Unchecked, snapshotGaps()...)
 		return nil, r, e
 	})

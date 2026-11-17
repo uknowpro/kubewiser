@@ -48,6 +48,14 @@ Inspect manifests, Helm charts and read-only snapshots with a CLI that compares 
 
 An actual generated HTML review: required actions first, current and recommended settings side by side, with source hashes and original evidence available on demand.
 
+### Support lifecycle (v0.2.0-alpha.7)
+
+Inspect selected project, managed add-on and AKS node OS support deadlines in a separate table. Upstream and managed support are distinct; uncertain identities remain review hints. [Scope and seven catalog entries](docs/lifecycle.md).
+
+```sh
+kubewiser scan lifecycle --source ./deploy --format html --lang en > lifecycle.html
+```
+
 ### Compact migration review (v0.2.0-alpha.6)
 
 HTML reports now list findings in a compact table with expandable evidence. Upgrade/AKS plans also show a separate As-Is/To-Be table of bundled API removals and reported behavior changes. This is a selected catalog, not every release change or proof of actual cluster usage.

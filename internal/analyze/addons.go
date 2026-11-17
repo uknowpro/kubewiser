@@ -50,6 +50,10 @@ func addonActions(set manifest.Set, from, to int) []Action {
 			if i >= 0 {
 				repo, tag = ref[:i], ref[i+1:]
 			}
+			// Retired ingress controllers are evaluated by the scoped lifecycle catalog.
+			if repo == "registry.k8s.io/ingress-nginx/controller" {
+				continue
+			}
 			known, matched := false, false
 			for _, rule := range rules {
 				if repo != rule.Image {

@@ -32,22 +32,23 @@ type AddonEvidence struct {
 	Reviewed      string `json:"reviewed"`
 }
 type ProjectProfile struct {
-	TargetPlatform    *Platform            `json:"target_platform,omitempty"`
-	Images            []ImageEvidence      `json:"image_indexes,omitempty"`
-	Templates         *TemplateConfig      `json:"templates,omitempty"`
-	ClusterID         string               `json:"cluster_id,omitempty"`
-	UpgradeEvidence   *AKSEvidence         `json:"upgrade_evidence,omitempty"`
-	Addons            []AddonEvidence      `json:"addons,omitempty"`
-	Version           int                  `json:"schema_version"`
-	Provider          string               `json:"provider"`
-	Mode              string               `json:"mode"`
-	From              string               `json:"from_version"`
-	To                string               `json:"to_version"`
-	MaintenanceWindow string               `json:"maintenance_window"`
-	MaxDowntime       string               `json:"max_downtime"`
-	RPO               string               `json:"rpo"`
-	RTO               string               `json:"rto"`
-	Changes           []ArchitectureChange `json:"architecture_changes,omitempty"`
+	LifecycleComponents []LifecycleComponent `json:"lifecycle_components,omitempty"`
+	TargetPlatform      *Platform            `json:"target_platform,omitempty"`
+	Images              []ImageEvidence      `json:"image_indexes,omitempty"`
+	Templates           *TemplateConfig      `json:"templates,omitempty"`
+	ClusterID           string               `json:"cluster_id,omitempty"`
+	UpgradeEvidence     *AKSEvidence         `json:"upgrade_evidence,omitempty"`
+	Addons              []AddonEvidence      `json:"addons,omitempty"`
+	Version             int                  `json:"schema_version"`
+	Provider            string               `json:"provider"`
+	Mode                string               `json:"mode"`
+	From                string               `json:"from_version"`
+	To                  string               `json:"to_version"`
+	MaintenanceWindow   string               `json:"maintenance_window"`
+	MaxDowntime         string               `json:"max_downtime"`
+	RPO                 string               `json:"rpo"`
+	RTO                 string               `json:"rto"`
+	Changes             []ArchitectureChange `json:"architecture_changes,omitempty"`
 }
 
 func ReadProfile(path string) (ProjectProfile, error) {
@@ -67,6 +68,9 @@ func ReadProfile(path string) (ProjectProfile, error) {
 	return p, ValidateProfile(p)
 }
 func ValidateProfile(p ProjectProfile) error {
+	if err := validateLifecycleComponents(p.LifecycleComponents); err != nil {
+		return err
+	}
 	if p.Version != 1 || p.Provider != "aks" || p.Mode != "in-place" {
 		return fmt.Errorf("profile requires schema_version 1, provider aks, mode in-place")
 	}
@@ -116,6 +120,18 @@ func Project(ctx context.Context, set manifest.Set, profile ProjectProfile) (Pla
 	if e != nil {
 		return p, e
 	}
+	life, lifeErr := Lifecycle(set, &profile, time.Now().UTC())
+	if lifeErr != nil {
+		return p, lifeErr
+	}
+	p.Lifecycle = life.Lifecycle
+	filtered := p.Actions[:0]
+	for _, action := range p.Actions {
+		if action.ID != "KW-LIFECYCLE" {
+			filtered = append(filtered, action)
+		}
+	}
+	p.Actions = append(filtered, life.Actions...)
 	runtimeChecks, runtimeGaps, err := runtimeActions(set, profile)
 	if err != nil {
 		return p, err

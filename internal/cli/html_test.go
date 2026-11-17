@@ -60,3 +60,21 @@ func TestCompactVersionComparisonScope(t *testing.T) {
 		t.Fatal("invented version range")
 	}
 }
+
+func TestLifecycleCLIAndHTML(t *testing.T) {
+	var out, errs bytes.Buffer
+	code := Run([]string{"scan", "lifecycle", "--source", "../../docs/examples/lifecycle.yaml", "--format", "html", "--lang", "ko"}, &out, &errs)
+	if code != 1 {
+		t.Fatal(code, errs.String())
+	}
+	for _, s := range []string{`id="lifecycle-table"`, "지원 종료", "2026-03-24", "제품 / 지원 주체 확인 필요", "공식 근거 확인일"} {
+		if !strings.Contains(out.String(), s) {
+			t.Fatal(s)
+		}
+	}
+	out.Reset()
+	errs.Reset()
+	if code := Run([]string{"scan", "lifecycle"}, &out, &errs); code != 2 {
+		t.Fatal("missing source accepted", code)
+	}
+}

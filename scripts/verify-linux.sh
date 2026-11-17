@@ -6,6 +6,9 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 verify_dir=$(mktemp -d)
 trap 'rm -rf "$verify_dir"' EXIT
 "$binary" --version
+lifecycle_exit=0
+"$binary" scan lifecycle --source "$root/docs/examples/lifecycle.yaml" --profile "$root/docs/examples/lifecycle-project.json" > "$verify_dir/lifecycle.json" || lifecycle_exit=$?
+if [ "$lifecycle_exit" -ne 1 ]; then echo 'ERROR: lifecycle findings exit code'; exit 1; fi
 "$binary" scan cel --source "$root/docs/examples/advanced/cel.yaml" > "$verify_dir/cel.json"
 "$binary" generate --profile "$root/docs/examples/advanced/project.json" --output "$verify_dir/configured" > "$verify_dir/configured.json"
 "$binary" plan aks --source "$root/docs/examples/manifest.yaml" --profile "$root/docs/examples/project/aks.json" --format json > "$verify_dir/plan.json"
@@ -20,6 +23,9 @@ import json, os
 from pathlib import Path
 p=Path(os.environ['VERIFY_DIR']);plan=json.loads((p/'plan.json').read_text())
 assert plan['status']=='review_required'
+life=json.loads((p/'lifecycle.json').read_text())
+assert len(life['lifecycle']['findings']) == 8
+assert any(f['status']=='identification_required' for f in life['lifecycle']['findings'])
 assert not json.loads((p/'cel.json').read_text())['actions']
 assert json.loads((p/'configured/nodepool.auto.tfvars.json').read_text())['enable_canary_pool'] is False
 assert any(a['id']=='KW-AKS-ROUTE' for a in plan['actions'])
@@ -46,7 +52,12 @@ if command -v strace > /dev/null; then
   if test -s "$verify_dir/cel-network.trace"; then
     echo 'ERROR: unexpected network call during CEL validation' >&2; exit 1
   fi
-  echo 'PASS: no network system calls during offline AKS plan or CEL validation'
+  lifecycle_exit=0
+  strace -f -qq -e signal=none -e trace=network -o "$verify_dir/lifecycle-network.trace" "$binary" scan lifecycle --source "$root/docs/examples/lifecycle.yaml" > /dev/null || lifecycle_exit=$?
+  if [ "$lifecycle_exit" -ne 1 ] || test -s "$verify_dir/lifecycle-network.trace"; then
+    echo 'ERROR: lifecycle scan failed or made network calls' >&2; exit 1
+  fi
+  echo 'PASS: no network system calls during offline AKS plan, CEL and lifecycle validation'
 else
   echo 'SKIP: strace unavailable; network syscall check not performed'
 fi
