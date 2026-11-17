@@ -48,7 +48,7 @@ manifest, Helm 차트, 읽기 전용 스냅샷을 검사하고 **현재 상태 �
 
 실제 생성한 한국어 HTML 보고서입니다. 필수 조치를 먼저 보여주고 현재·권장 상태를 비교합니다. 원본 해시와 상세 근거는 펼쳐서 확인할 수 있습니다.
 
-### 표 중심 마이그레이션 검토 (main 브랜치)
+### 표 중심 마이그레이션 검토 (v0.2.0-alpha.6)
 
 HTML 결과는 행 단위 표로 표시하며 상세 근거는 펼쳐볼 수 있습니다. 업그레이드·AKS 계획에는 내장 API 제거 규칙과 동작 변경을 모은 As-Is/To-Be 표도 표시합니다. 전체 릴리스 변경 목록이나 실제 클러스터 사용 현황을 보증하는 표는 아닙니다.
 
@@ -56,7 +56,7 @@ HTML 결과는 행 단위 표로 표시하며 상세 근거는 펼쳐볼 수 있
 kubewiser plan upgrade --source ./deploy --from 1.21 --to 1.36 --format html --lang ko > upgrade-1.21-1.36.html
 ```
 
-[1.21 → 1.36 HTML 예시](docs/examples/upgrade-1.21-1.36.ko.html) — 저장소 예제 입력으로 생성했으며 다운로드 후 브라우저로 확인하세요. 이 레이아웃은 alpha.5 이후 변경입니다.
+[1.21 → 1.36 HTML 예시](docs/examples/upgrade-1.21-1.36.ko.html) — 저장소 예제 입력으로 생성했으며 다운로드 후 브라우저로 확인하세요. v0.2.0-alpha.6부터 사용할 수 있습니다.
 
 ![As-Is / To-Be compact version comparison](docs/images/upgrade-1.21-1.36.ko.png)
 
