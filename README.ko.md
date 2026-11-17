@@ -48,6 +48,14 @@ manifest, Helm 차트, 읽기 전용 스냅샷을 검사하고 **현재 상태 �
 
 실제 생성한 한국어 HTML 보고서입니다. 필수 조치를 먼저 보여주고 현재·권장 상태를 비교합니다. 원본 해시와 상세 근거는 펼쳐서 확인할 수 있습니다.
 
+### cgroup 현재·목표 비교 (v0.2.0-alpha.8)
+
+노드풀별 v1/v2/혼합 모드를 비교하고, 근거 충돌·미확인·커널/런타임/드라이버 조건·워크로드의 v1 의존 단서를 표로 표시합니다. [근거 입력과 검사 범위](docs/cgroup.md). 실제 노드 명령은 실행하지 않습니다.
+
+```sh
+kubewiser plan upgrade --source ./deploy --from 1.21 --to 1.36 --cgroup-evidence ./pools.json --format html --lang ko > upgrade-review.html
+```
+
 ### 지원 종료 검사 (v0.2.0-alpha.7)
 
 프로젝트·관리형 애드온·AKS 노드 OS의 지원 종료와 종료 예정을 별도 표로 확인합니다. 관리형 지원과 커뮤니티 지원을 구분하고 식별이 불확실하면 확인 필요로 표시합니다. [검사 범위와 7개 카탈로그 항목](docs/lifecycle.md).
@@ -135,6 +143,7 @@ Start-Process .\report.html
 | 명령 | 용도 |
 | --- | --- |
 | `scan files` | 파일·디렉터리 검사 |
+| `scan cgroup` | 현재·목표 cgroup 모드 및 전환 영향 비교 |
 | `scan lifecycle` | 지원 종료·종료 예정·식별 필요 검사 |
 | `scan cel` | 로컬 CRD CEL·변경 규칙 검사 |
 | `scan helm` | 로컬 차트 렌더링 후 검사 |

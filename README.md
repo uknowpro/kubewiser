@@ -48,6 +48,14 @@ Inspect manifests, Helm charts and read-only snapshots with a CLI that compares 
 
 An actual generated HTML review: required actions first, current and recommended settings side by side, with source hashes and original evidence available on demand.
 
+### Cgroup As-Is / To-Be (v0.2.0-alpha.8)
+
+Compare per-pool v1/v2/hybrid modes, conflicting or missing evidence, target prerequisites and workload v1 dependency hints. [Evidence format and coverage](docs/cgroup.md). No node commands are executed.
+
+```sh
+kubewiser plan upgrade --source ./deploy --from 1.21 --to 1.36 --cgroup-evidence ./pools.json --format html --lang en > upgrade-review.html
+```
+
 ### Support lifecycle (v0.2.0-alpha.7)
 
 Inspect selected project, managed add-on and AKS node OS support deadlines in a separate table. Upstream and managed support are distinct; uncertain identities remain review hints. [Scope and seven catalog entries](docs/lifecycle.md).
@@ -135,6 +143,7 @@ See [installation details](docs/releases.md) for checksums, OS validation bounda
 | Command | Purpose |
 | --- | --- |
 | `scan files` | Inspect a manifest file or directory |
+| `scan cgroup` | Compare current/target cgroup modes and migration dependencies |
 | `scan lifecycle` | Review support retirement dates and identification gaps |
 | `scan cel` | Evaluate local CRD validation and transition rules |
 | `scan helm` | Render and inspect a local chart |

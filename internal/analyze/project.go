@@ -32,6 +32,7 @@ type AddonEvidence struct {
 	Reviewed      string `json:"reviewed"`
 }
 type ProjectProfile struct {
+	CgroupPools         []CgroupPool         `json:"cgroup_pools,omitempty"`
 	LifecycleComponents []LifecycleComponent `json:"lifecycle_components,omitempty"`
 	TargetPlatform      *Platform            `json:"target_platform,omitempty"`
 	Images              []ImageEvidence      `json:"image_indexes,omitempty"`
@@ -68,6 +69,9 @@ func ReadProfile(path string) (ProjectProfile, error) {
 	return p, ValidateProfile(p)
 }
 func ValidateProfile(p ProjectProfile) error {
+	if e := ValidateCgroups(p.CgroupPools); e != nil {
+		return e
+	}
 	if err := validateLifecycleComponents(p.LifecycleComponents); err != nil {
 		return err
 	}
@@ -120,6 +124,9 @@ func Project(ctx context.Context, set manifest.Set, profile ProjectProfile) (Pla
 	if e != nil {
 		return p, e
 	}
+	if e := AttachCgroups(&p, set, profile.CgroupPools, profile.To); e != nil {
+		return p, e
+	}
 	life, lifeErr := Lifecycle(set, &profile, time.Now().UTC())
 	if lifeErr != nil {
 		return p, lifeErr
@@ -139,6 +146,12 @@ func Project(ctx context.Context, set manifest.Set, profile ProjectProfile) (Pla
 	p.Actions = append(p.Actions, runtimeChecks...)
 	p.Unchecked = append(p.Unchecked, runtimeGaps...)
 	p.Kind = "aks-project"
+	// Keep raw mount namespaces out of report metadata; normalized evidence is in p.Cgroup.
+	profile.CgroupPools = append([]CgroupPool(nil), profile.CgroupPools...)
+	for i := range profile.CgroupPools {
+		profile.CgroupPools[i].Current.MountInfo = ""
+		profile.CgroupPools[i].Target.MountInfo = ""
+	}
 	p.Project = &profile
 	p.Status = "review_required"
 	if profile.UpgradeEvidence != nil {

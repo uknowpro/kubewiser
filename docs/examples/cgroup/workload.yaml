@@ -1,0 +1,20 @@
+# Synthetic review input, never deployed by kubewiser.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: legacy-agent-example
+  namespace: review
+spec:
+  containers:
+  - name: agent
+    image: example.invalid/agent:review
+    args: ['cat /host-cgroup/memory/memory.limit_in_bytes']
+    volumeMounts:
+    - name: cgroup
+      mountPath: /host-cgroup
+      readOnly: true
+  volumes:
+  - name: cgroup
+    hostPath:
+      path: /sys/fs/cgroup
+      type: Directory

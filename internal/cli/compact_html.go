@@ -163,3 +163,49 @@ func lifecycleHTML(b *strings.Builder, root map[string]any, lang string) {
 	}
 	b.WriteString(`</tbody></table></div></section>`)
 }
+
+func cgroupHTML(b *strings.Builder, root map[string]any, lang string) {
+	report := obj(root["cgroup"])
+	if report == nil {
+		return
+	}
+	fmt.Fprintf(b, `<section><h2>%s</h2><p class="table-note">%s · %s: %s</p>`, tr(lang, "Cgroup As-Is / To-Be", "cgroup As-Is / To-Be 비교"), tr(lang, "Supplied node evidence or declarations; same mode does not certify application compatibility. No node commands executed.", "제공된 노드 근거 또는 선언값 기준입니다. 동일 모드는 앱 호환 보증이 아닙니다. 노드 명령을 실행하지 않습니다."), tr(lang, "Rules reviewed", "규칙 확인일"), htmlCell(report["reviewed"]))
+	tableHead(b, "cgroup-table", []string{tr(lang, "Node pool", "노드풀"), "As-Is", "To-Be", tr(lang, "Verdict", "판정"), tr(lang, "Evidence", "판별 근거"), tr(lang, "Prerequisites / actions", "선행 조건 / 조치")})
+	for _, raw := range list(report["pools"]) {
+		r := obj(raw)
+		state := str(r, "status")
+		switch state {
+		case "same_mode":
+			state = tr(lang, "Same mode; runtime validation remains", "동일 모드 · 앱 검증 별도")
+		case "mode_change":
+			state = tr(lang, "Mode change required", "모드 변경 · 전환 조치 필요")
+		case "unknown":
+			state = tr(lang, "Insufficient evidence", "근거 부족 / 미확인")
+		case "conflicting_evidence":
+			state = tr(lang, "Conflicting evidence", "근거 충돌")
+		case "hybrid_review":
+			state = tr(lang, "Hybrid hierarchy review", "혼합 계층 · 별도 검증 필요")
+		}
+		fmt.Fprintf(b, `<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><details><summary>As-Is</summary>%s</details><details><summary>To-Be</summary>%s</details></td><td>`, htmlCell(r["pool"]), htmlCell(r["current"]), htmlCell(r["target"]), htmlCell(state), htmlCell(r["current_evidence"]), htmlCell(r["target_evidence"]))
+		required, unknown, minimum := 0, 0, 0
+		for _, check := range texts(r["checks"]) {
+			switch {
+			case strings.HasPrefix(check, "required:"):
+				required++
+			case strings.HasPrefix(check, "unknown:"):
+				unknown++
+			default:
+				minimum++
+			}
+		}
+		fmt.Fprintf(b, `<p>%s %d · %s %d · %s %d</p><details><summary>%s</summary>`, tr(lang, "Required", "필수"), required, tr(lang, "Unknown", "미확인"), unknown, tr(lang, "Baseline met", "최소조건 충족"), minimum, tr(lang, "Details / actions", "상세 조건 / 조치"))
+		for _, check := range texts(r["checks"]) {
+			fmt.Fprintf(b, `<p>%s</p>`, htmlCell(check))
+		}
+		b.WriteString(`</details></td></tr>`)
+	}
+	if len(list(report["pools"])) == 0 {
+		fmt.Fprintf(b, `<tr><td colspan="6">%s</td></tr>`, tr(lang, "No current/target cgroup evidence supplied; mode cannot be inferred from Kubernetes or OS version alone.", "현재·목표 cgroup 근거가 없습니다. Kubernetes·OS 버전만으로 모드를 단정하지 않습니다."))
+	}
+	b.WriteString(`</tbody></table></div></section>`)
+}

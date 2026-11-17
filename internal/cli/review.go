@@ -67,6 +67,10 @@ func buildReview(value any, lang string) (review, bool) {
 		rows = list(root["actions"])
 		r.Title = tr(lang, "Change plan", "변경 계획과 권장 조치")
 		r.Scope = fmt.Sprintf("%v → %v", root["from"], root["to"])
+		if root["kind"] == "cgroup" {
+			r.Title = tr(lang, "Cgroup migration review", "cgroup 전환 영향 검토")
+			r.Scope = tr(lang, "Current and target node-pool evidence", "현재·목표 노드풀 근거 비교")
+		}
 		if root["kind"] == "lifecycle" {
 			r.Title = tr(lang, "Support lifecycle review", "유지보수 및 지원 종료 검토")
 			r.Scope = tr(lang, "Local evidence · selected support catalog", "로컬 근거 · 일부 지원 정책 카탈로그")
@@ -145,6 +149,9 @@ func explain(f map[string]any, lang string) reviewItem {
 		i.Verify = x
 	}
 	switch id {
+	case "KW-CGROUP-MODE", "KW-CGROUP-PREREQUISITE", "KW-CGROUP-V1-REFERENCE", "KW-CGROUP-HOST-MOUNT":
+		i.Title = tr(lang, "Review cgroup mode and dependencies", "cgroup 모드와 의존성 검토")
+		i.Action = i.Verify
 	case "KW-LIFECYCLE":
 		i.Title = tr(lang, "Review support lifecycle", "지원 종료 / 지원 기간 검토")
 		i.Action = i.Verify

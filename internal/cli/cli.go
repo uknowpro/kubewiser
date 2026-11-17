@@ -30,6 +30,7 @@ const help = `Commands: kubewiser or kubewise
   scan network [--flows HUBBLE.jsonl] [--namespace NS] PATH
   scan network --snapshot FILE [--flows HUBBLE.jsonl]
   scan path --source PATH --source-pod NS/NAME --destination-pod NS/NAME --port PORT [--protocol TCP]
+  scan cgroup --source PATH [--cgroup-evidence FILE] [--target-version VERSION]
   scan lifecycle --source PATH [--profile FILE] [--format html]
   collect --kubeconfig FILE --context NAME --namespace NS --output snapshot.json
   diff --source PATH --snapshot FILE [--namespace NS]
@@ -92,6 +93,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 	protocol := fs.String("protocol", "TCP", "TCP, UDP or SCTP")
 	crdDefaults := fs.Bool("crd-defaults", false, "normalize local CRD defaults during diff")
 	crdConversion := fs.Bool("crd-conversion", false, "simulate local CRD strategy None conversion during diff")
+	cgroupEvidence := fs.String("cgroup-evidence", "", "local JSON current/target node-pool cgroup evidence")
 	profile := fs.String("profile", "", "local AKS project profile JSON")
 	source := fs.String("source", "", "desired manifest path")
 	snapshot := fs.String("snapshot", "", "snapshot file")
@@ -116,6 +118,9 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 	allowCluster := fs.Bool("allow-cluster", false, "explicitly enable scoped MCP collection")
 	if e := fs.Parse(restArgs); e != nil {
 		return 2
+	}
+	if *cgroupEvidence != "" && !((cmd == "scan" && sub == "cgroup") || (cmd == "plan" && sub == "upgrade")) {
+		return fail(fmt.Errorf("--cgroup-evidence is supported by scan cgroup and plan upgrade; use cgroup_pools in AKS profiles"))
 	}
 	if *format != "json" && *format != "text" && *format != "markdown" && *format != "html" {
 		return fail(fmt.Errorf("format must be json, text, markdown or html"))
@@ -156,6 +161,31 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 		}
 		return emit(out, errOut, map[string]any{"status": "review_drafts", "output": *output, "files": files, "unchecked": []string{"Drafts require review; no infrastructure commands executed"}}, *format, 0, *lang)
 	case "scan":
+		if sub == "cgroup" {
+			if fs.NArg() != 0 {
+				return fail(fmt.Errorf("scan cgroup uses --source or --snapshot"))
+			}
+			set, e := load()
+			if e != nil {
+				return fail(e)
+			}
+			var pools []analyze.CgroupPool
+			if *cgroupEvidence != "" {
+				pools, e = analyze.ReadCgroups(*cgroupEvidence)
+				if e != nil {
+					return fail(e)
+				}
+			}
+			p, e := analyze.Cgroups(set, pools, *target)
+			if e != nil {
+				return fail(e)
+			}
+			code := 0
+			if len(p.Actions) > 0 {
+				code = 1
+			}
+			return emit(out, errOut, p, *format, code, *lang)
+		}
 		if sub == "lifecycle" {
 			if fs.NArg() != 0 {
 				return fail(fmt.Errorf("scan lifecycle uses --source or --snapshot"))
@@ -432,6 +462,13 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 		switch sub {
 		case "upgrade":
 			p, e = analyze.Upgrade(ctx, set, *from, *to)
+			if e == nil && *cgroupEvidence != "" {
+				var pools []analyze.CgroupPool
+				pools, e = analyze.ReadCgroups(*cgroupEvidence)
+				if e == nil {
+					e = analyze.AttachCgroups(&p, set, pools, *to)
+				}
+			}
 		case "aks":
 			var project analyze.ProjectProfile
 			project, e = analyze.ReadProfile(*profile)

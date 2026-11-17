@@ -78,3 +78,21 @@ func TestLifecycleCLIAndHTML(t *testing.T) {
 		t.Fatal("missing source accepted", code)
 	}
 }
+
+func TestCgroupCLIComparison(t *testing.T) {
+	var out, errs bytes.Buffer
+	args := []string{"scan", "cgroup", "--source", "../../docs/examples/cgroup/workload.yaml", "--cgroup-evidence", "../../docs/examples/cgroup/pools.json", "--target-version", "1.36", "--format", "html", "--lang", "ko"}
+	if code := Run(args, &out, &errs); code != 1 {
+		t.Fatal(code, errs.String())
+	}
+	for _, s := range []string{`id="cgroup-table"`, "모드 변경", "v1", "v2", "KW-CGROUP-V1-REFERENCE"} {
+		if !strings.Contains(out.String(), s) {
+			t.Fatal(s)
+		}
+	}
+	out.Reset()
+	errs.Reset()
+	if code := Run([]string{"plan", "upgrade", "--source", "../../docs/examples/cgroup/workload.yaml", "--from", "1.21", "--to", "1.36", "--cgroup-evidence", "../../docs/examples/cgroup/pools.json", "--format", "html"}, &out, &errs); code != 0 || !strings.Contains(out.String(), `id="cgroup-table"`) {
+		t.Fatal(code, errs.String())
+	}
+}

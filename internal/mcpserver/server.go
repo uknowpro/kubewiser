@@ -71,6 +71,25 @@ func NewConfigured(c Config) *mcp.Server {
 		r.Unchecked = append(r.Unchecked, snapshotGaps()...)
 		return nil, r, e
 	})
+	mcp.AddTool(s, &mcp.Tool{Name: "scan_cgroup", Description: "Compare current/target cgroups from the operator-fixed AKS profile and inspect supplied workload references; no node commands."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Plan, error) {
+		set, e := load(ctx)
+		if e != nil {
+			return nil, analyze.Plan{}, e
+		}
+		var pools []analyze.CgroupPool
+		target := ""
+		if c.Profile != "" {
+			p, e := analyze.ReadProfile(c.Profile)
+			if e != nil {
+				return nil, analyze.Plan{}, e
+			}
+			pools = p.CgroupPools
+			target = p.To
+		}
+		r, e := analyze.Cgroups(set, pools, target)
+		r.Unchecked = append(r.Unchecked, snapshotGaps()...)
+		return nil, r, e
+	})
 	mcp.AddTool(s, &mcp.Tool{Name: "scan_lifecycle", Description: "Offline support lifecycle check using the pinned catalog and operator-fixed inputs/profile; no vendor calls."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Plan, error) {
 		set, e := load(ctx)
 		if e != nil {

@@ -6,6 +6,9 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 verify_dir=$(mktemp -d)
 trap 'rm -rf "$verify_dir"' EXIT
 "$binary" --version
+cgroup_exit=0
+"$binary" scan cgroup --source "$root/docs/examples/cgroup/workload.yaml" --cgroup-evidence "$root/docs/examples/cgroup/pools.json" --target-version 1.36 > "$verify_dir/cgroup.json" || cgroup_exit=$?
+if [ "$cgroup_exit" -ne 1 ]; then echo 'ERROR: cgroup review exit code'; exit 1; fi
 lifecycle_exit=0
 "$binary" scan lifecycle --source "$root/docs/examples/lifecycle.yaml" --profile "$root/docs/examples/lifecycle-project.json" > "$verify_dir/lifecycle.json" || lifecycle_exit=$?
 if [ "$lifecycle_exit" -ne 1 ]; then echo 'ERROR: lifecycle findings exit code'; exit 1; fi
@@ -23,6 +26,9 @@ import json, os
 from pathlib import Path
 p=Path(os.environ['VERIFY_DIR']);plan=json.loads((p/'plan.json').read_text())
 assert plan['status']=='review_required'
+cg=json.loads((p/'cgroup.json').read_text())
+assert cg['cgroup']['pools'][0]['status']=='mode_change'
+assert any(a['id']=='KW-CGROUP-V1-REFERENCE' for a in cg['actions'])
 life=json.loads((p/'lifecycle.json').read_text())
 assert len(life['lifecycle']['findings']) == 8
 assert any(f['status']=='identification_required' for f in life['lifecycle']['findings'])
@@ -57,7 +63,12 @@ if command -v strace > /dev/null; then
   if [ "$lifecycle_exit" -ne 1 ] || test -s "$verify_dir/lifecycle-network.trace"; then
     echo 'ERROR: lifecycle scan failed or made network calls' >&2; exit 1
   fi
-  echo 'PASS: no network system calls during offline AKS plan, CEL and lifecycle validation'
+  cgroup_exit=0
+  strace -f -qq -e signal=none -e trace=network -o "$verify_dir/cgroup-network.trace" "$binary" scan cgroup --source "$root/docs/examples/cgroup/workload.yaml" --cgroup-evidence "$root/docs/examples/cgroup/pools.json" --target-version 1.36 > /dev/null || cgroup_exit=$?
+  if [ "$cgroup_exit" -ne 1 ] || test -s "$verify_dir/cgroup-network.trace"; then
+    echo 'ERROR: cgroup review failed or made network calls' >&2; exit 1
+  fi
+  echo 'PASS: no network system calls during offline AKS plan, CEL, lifecycle and cgroup validation'
 else
   echo 'SKIP: strace unavailable; network syscall check not performed'
 fi

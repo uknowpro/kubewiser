@@ -271,6 +271,7 @@ type Action struct {
 	Before       string `json:"before_version,omitempty"`
 }
 type Plan struct {
+	Cgroup    *CgroupReport    `json:"cgroup,omitempty"`
 	Lifecycle *LifecycleReport `json:"lifecycle,omitempty"`
 	Route     *AKSRoute        `json:"aks_route,omitempty"`
 	Project   *ProjectProfile  `json:"project,omitempty"`
@@ -326,6 +327,9 @@ func Upgrade(ctx context.Context, set manifest.Set, from, to string) (Plan, erro
 		if n > b || b-n > maxSkew {
 			p.Actions = append(p.Actions, Action{ID: "KW-KUBELET-SKEW", Resource: res.ID(), Requirement: "required", Message: "Kubelet version is outside the target control-plane skew window", Verification: "Plan compatible kubelet versions at every minor upgrade step", Source: "https://kubernetes.io/releases/version-skew-policy/", Before: to})
 		}
+	}
+	if e := AttachCgroups(&p, set, nil, to); e != nil {
+		return p, e
 	}
 	p.Actions = append(p.Actions, behaviorActions(set, a, b)...)
 	p.Actions = append(p.Actions, addonActions(set, a, b)...)

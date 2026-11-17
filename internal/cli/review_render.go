@@ -61,6 +61,7 @@ func reviewHTML(b *strings.Builder, value any, lang string) bool {
 	}
 	b.WriteString("</div>")
 	fmt.Fprintf(b, "<p class=\"notice\">%s</p>", tr(lang, "Partial coverage · Recommendations require workload validation · No automatic changes", "부분 검사 · 권장안은 워크로드별 검증 필요 · 변경 자동 적용 없음"))
+	cgroupHTML(b, obj(value), lang)
 	lifecycleHTML(b, obj(value), lang)
 	versionComparisonHTML(b, obj(value), lang)
 	compactFindingsHTML(b, r, lang)
