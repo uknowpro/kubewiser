@@ -27,3 +27,9 @@ The first rows summarize current-input coverage. Additional manifest-field rows 
 현재 입력 검사와 변경 후 검사는 구분됩니다. 원본 필드 값은 출력하지 않고 변경 경로·추가·제거·변경 여부를 제공합니다. Secret 값도 출력하지 않지만 이름과 필드 경로는 표시됩니다. cgroup은 제공된 관측 자료/운영자 선언을 사용하며 Kubernetes 버전에서 추정하지 않습니다. 커널·런타임·드라이버의 현재 값이 없어도 목표 최소조건은 별도로 검사할 수 있습니다. cgroup v2가 아닌 대상의 상세 최소조건 검사는 미확인으로 남을 수 있습니다.
 
 No cluster connection, node commands, uploads or external runtime lookups are added. The example HTML uses synthetic inputs, not production evidence.
+
+## Compact grouping / 셀 병합
+
+HTML groups rows into Manifest/API, platform/nodes, components/operations and proposed changes. Group and resource/pool cells use vertical `rowspan`; verdict cells are never merged. Rows are grouped and stably sorted by resource within each group. Markdown/text use group headings because Markdown tables do not support cell merging. JSON retains individual structured rows.
+
+HTML은 그룹·노드풀·리소스의 중복 표기를 병합하고, 판정은 항목마다 유지합니다. 상세 근거는 펼쳐서 확인합니다.

@@ -52,9 +52,9 @@ manifest, Helm 차트, 읽기 전용 스냅샷을 검사하고 **현재 상태 �
 
 <a id="comparison-matrix"></a>
 
-### Manifest · 환경 전후 비교 매트릭스 (v0.2.0-alpha.9)
+### Manifest · 환경 전후 비교 매트릭스 (v0.2.0-alpha.10)
 
-`plan upgrade`와 `plan aks`는 전체 검토표를 제공합니다. cgroup·커널·런타임·드라이버 자료가 없으면 **입력 부족**, 아직 판정기가 없는 항목은 **판정기 미지원**으로 표시합니다. `--after`를 생략하면 목표 구성은 권장안이며 실제 변경 후 상태로 취급하지 않습니다.
+`plan upgrade`와 `plan aks`는 전체 검토표를 제공합니다. HTML은 그룹과 리소스·노드풀 셀을 세로 병합하며 항목별 판정은 유지합니다. Markdown·터미널도 같은 그룹 순서로 보여줍니다. cgroup·커널·런타임·드라이버 자료가 없으면 **입력 부족**, 아직 판정기가 없는 항목은 **판정기 미지원**으로 표시합니다. `--after`를 생략하면 목표 구성은 권장안이며 실제 변경 후 상태로 취급하지 않습니다.
 
 ```bash
 kubewiser plan upgrade --source ./before --after ./after \

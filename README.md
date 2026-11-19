@@ -52,9 +52,9 @@ Current generated reports from synthetic inputs: the full review matrix appears 
 
 <a id="comparison-matrix"></a>
 
-### Manifest and environment comparison matrix (v0.2.0-alpha.9)
+### Manifest and environment comparison matrix (v0.2.0-alpha.10)
 
-`plan upgrade` and `plan aks` include a coverage matrix. Missing cgroup/kernel/runtime/driver evidence remains visible as **input missing**; unsupported analyzers are identified separately. Without `--after`, the target is a recommendation, not an actual proposed manifest.
+`plan upgrade` and `plan aks` include a coverage matrix. HTML merges group and resource/pool cells vertically; individual verdicts remain separate. Markdown/text use the same group order. Missing cgroup/kernel/runtime/driver evidence remains visible as **input missing**; unsupported analyzers are identified separately. Without `--after`, the target is a recommendation, not an actual proposed manifest.
 
 ```bash
 kubewiser plan upgrade --source ./before --after ./after \
