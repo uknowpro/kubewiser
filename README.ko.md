@@ -675,3 +675,15 @@ go vet ./...
 재현 가능한 문제는 [GitHub Issues](https://github.com/uknowpro/kubewiser/issues)에 명령어·목표 버전·비식별화한 최소 입력과 함께 남겨주세요. kubeconfig 인증정보, Secret, 검토하지 않은 운영 스냅샷은 첨부하지 마세요.
 
 [로드맵](docs/roadmap.md) · [릴리스 노트](https://github.com/uknowpro/kubewiser/releases) · [라이선스](LICENSE) · [외부 라이선스 고지](THIRD_PARTY_NOTICES.txt)
+
+## Manifest · 환경 전후 비교 매트릭스
+
+`plan upgrade`와 `plan aks`는 전체 검토표를 제공합니다. cgroup·커널·런타임·드라이버 자료가 없으면 **입력 부족**, 아직 판정기가 없는 항목은 **판정기 미지원**으로 표시합니다. `--after`를 생략하면 목표 구성은 권장안이며 실제 변경 후 상태로 취급하지 않습니다.
+
+```bash
+kubewiser plan upgrade --source ./before --after ./after \
+  --from 1.21 --to 1.36 --cgroup-evidence ./pools.json \
+  --format html --lang ko > comparison.html
+```
+
+[사용법·판정 범위](docs/matrix.md) · [합성 HTML 예제](docs/examples/matrix.ko.html)

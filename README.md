@@ -631,3 +631,15 @@ Selected exact patch schemas and separate CRD CEL inspection are available; the 
 Report reproducible problems through [GitHub Issues](https://github.com/uknowpro/kubewiser/issues). Include the command, target version and a small sanitized example. Do not attach kubeconfig credentials, Secrets or unreviewed production snapshots.
 
 [Roadmap](docs/roadmap.md) · [Release notes](https://github.com/uknowpro/kubewiser/releases) · [License](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.txt)
+
+## Manifest and environment comparison matrix
+
+`plan upgrade` and `plan aks` include a coverage matrix. Missing cgroup/kernel/runtime/driver evidence remains visible as **input missing**; unsupported analyzers are identified separately. Without `--after`, the target is a recommendation, not an actual proposed manifest.
+
+```bash
+kubewiser plan upgrade --source ./before --after ./after \
+  --from 1.21 --to 1.36 --cgroup-evidence ./pools.json \
+  --format html --lang en > comparison.html
+```
+
+[Usage and verdict scope](docs/matrix.md) · [Synthetic HTML example](docs/examples/matrix.ko.html)

@@ -21,6 +21,7 @@ func reviewMarkdown(b *strings.Builder, value any, lang string) bool {
 	fmt.Fprintf(b, "# %s\n\n%s\n\n%s\n\n", r.Title, r.Summary, markdownCell(r.Scope))
 	fmt.Fprintf(b, "| %s | %s | %s |\n| --- | --- | --- |\n| %d | %d | %d |\n\n", requirement(lang, "required"), requirement(lang, "conditional"), requirement(lang, "optional"), r.Required, r.Conditional, r.Optional)
 	fmt.Fprintf(b, "> %s\n\n", tr(lang, "Partial coverage. No automatic changes are applied. Recommendations must be validated for your workload.", "검사 범위는 부분적입니다. 변경은 자동 적용되지 않으며 권장안은 실제 워크로드에서 검증해야 합니다."))
+	matrixMarkdown(b, obj(value), lang)
 	for n, i := range r.Items {
 		fmt.Fprintf(b, "## %d. %s · %s\n\n%s\n\n", n+1, requirement(lang, i.Requirement), markdownCell(i.Title), markdownCell(i.Resource))
 		fmt.Fprintf(b, "| %s | %s |\n| --- | --- |\n| %s | %s |\n\n", tr(lang, "Current state", "현재 상태"), tr(lang, "Recommended state", "권장 상태"), markdownCell(i.Current), markdownCell(i.Recommended))
@@ -61,6 +62,7 @@ func reviewHTML(b *strings.Builder, value any, lang string) bool {
 	}
 	b.WriteString("</div>")
 	fmt.Fprintf(b, "<p class=\"notice\">%s</p>", tr(lang, "Partial coverage · Recommendations require workload validation · No automatic changes", "부분 검사 · 권장안은 워크로드별 검증 필요 · 변경 자동 적용 없음"))
+	matrixHTML(b, obj(value), lang)
 	cgroupHTML(b, obj(value), lang)
 	lifecycleHTML(b, obj(value), lang)
 	versionComparisonHTML(b, obj(value), lang)
@@ -89,6 +91,7 @@ func writeTextReview(w io.Writer, value any, lang string) (bool, error) {
 	}
 	var b strings.Builder
 	fmt.Fprintf(&b, "%s\n%s\n%s\n%s: %d | %s: %d | %s: %d\n\n", r.Title, r.Scope, r.Summary, requirement(lang, "required"), r.Required, requirement(lang, "conditional"), r.Conditional, requirement(lang, "optional"), r.Optional)
+	matrixMarkdown(&b, obj(value), lang)
 	for n, i := range r.Items {
 		fmt.Fprintf(&b, "%d. [%s] %s (%s)\n   %s\n", n+1, requirement(lang, i.Requirement), i.Title, i.Rule, i.Resource)
 		for _, row := range [][2]string{{tr(lang, "Current", "현재"), i.Current}, {tr(lang, "Recommended", "권장"), i.Recommended}, {tr(lang, "Why", "이유"), i.Why}, {tr(lang, "Action", "조치"), i.Action}, {tr(lang, "Verify", "검증"), i.Verify}, {tr(lang, "Location", "위치"), i.Location}, {tr(lang, "Source", "근거"), i.Source}} {

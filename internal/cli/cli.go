@@ -35,7 +35,7 @@ const help = `Commands: kubewiser or kubewise
   collect --kubeconfig FILE --context NAME --namespace NS --output snapshot.json
   diff --source PATH --snapshot FILE [--namespace NS]
   diff --chart DIR --target-version VERSION --release NAME --snapshot FILE [--values FILE]
-  plan upgrade --source PATH --from VERSION --to VERSION
+  plan upgrade --source PATH --from VERSION --to VERSION [--after PATH] [--cgroup-evidence FILE]
   plan upgrade --snapshot FILE --from VERSION --to VERSION
   plan migrate --source PATH --from eks --to aks
   plan aks --source PATH --profile project.json
@@ -93,6 +93,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 	protocol := fs.String("protocol", "TCP", "TCP, UDP or SCTP")
 	crdDefaults := fs.Bool("crd-defaults", false, "normalize local CRD defaults during diff")
 	crdConversion := fs.Bool("crd-conversion", false, "simulate local CRD strategy None conversion during diff")
+	after := fs.String("after", "", "optional proposed manifest path for plan upgrade/aks comparison")
 	cgroupEvidence := fs.String("cgroup-evidence", "", "local JSON current/target node-pool cgroup evidence")
 	profile := fs.String("profile", "", "local AKS project profile JSON")
 	source := fs.String("source", "", "desired manifest path")
@@ -118,6 +119,9 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 	allowCluster := fs.Bool("allow-cluster", false, "explicitly enable scoped MCP collection")
 	if e := fs.Parse(restArgs); e != nil {
 		return 2
+	}
+	if *after != "" && !(cmd == "plan" && (sub == "upgrade" || sub == "aks")) {
+		return fail(fmt.Errorf("--after requires plan upgrade or plan aks"))
 	}
 	if *cgroupEvidence != "" && !((cmd == "scan" && sub == "cgroup") || (cmd == "plan" && sub == "upgrade")) {
 		return fail(fmt.Errorf("--cgroup-evidence is supported by scan cgroup and plan upgrade; use cgroup_pools in AKS profiles"))
@@ -482,6 +486,18 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 		}
 		if e != nil {
 			return fail(e)
+		}
+		if sub == "upgrade" || sub == "aks" {
+			analyze.BuildMatrix(&p)
+			if *after != "" {
+				proposed, err := manifest.Load(ctx, *after)
+				if err != nil {
+					return fail(err)
+				}
+				if err = analyze.CompareManifests(ctx, &p, set, proposed, *ns); err != nil {
+					return fail(err)
+				}
+			}
 		}
 		if *snapshot != "" {
 			s, _ := cluster.Read(*snapshot)

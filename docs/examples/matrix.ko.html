@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Kubewiser report</title><style>
+:root{color-scheme:light dark;font-family:system-ui,sans-serif;line-height:1.5}body{max-width:1400px;margin:0 auto;padding:32px}h1{margin-bottom:8px}h2,h3{margin-top:32px}section{margin:16px 0}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #8886;text-align:left;vertical-align:top;padding:10px;white-space:pre-wrap;overflow-wrap:anywhere}th{background:#8882}tbody tr:nth-child(even){background:#8881}.muted{opacity:.7}li{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0}@media print{body{padding:0;font-size:11px}.table-wrap{overflow:visible}tr{break-inside:avoid}h2,h3{break-after:avoid}}
+
+:root{color-scheme:light;font-family:system-ui,sans-serif;color:#172b3a;background:#f3f6fa}body{max-width:1080px;padding:40px 24px}header{margin-bottom:24px}h1{font-size:32px;letter-spacing:-.03em}h2{font-size:22px;margin:12px 0}h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;margin:0 0 12px}.eyebrow{font-size:12px;font-weight:700;color:#486079;letter-spacing:.12em}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.metric{background:white;border:1px solid #d8e1ea;border-radius:12px;padding:18px 24px;border-top:4px solid #75869b}.metric.required{border-top-color:#b42318}.metric.conditional{border-top-color:#a66300}.metric.optional{border-top-color:#245eb0}.metric strong{font-size:34px;display:block}.metric span{font-size:14px}.notice{font-size:13px;color:#526277;background:#e8eef5;padding:12px 16px;border-radius:8px}.finding{background:white;border:1px solid #d8e1ea;border-radius:14px;padding:24px;margin:24px 0}.finding-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.badge{font-size:12px;font-weight:700;border-radius:6px;padding:4px 10px;background:#fff0d1;color:#795000}.required .badge{background:#fee6e3;color:#a42118}.optional .badge{background:#e6efff;color:#245eb0}.resource{font-family:ui-monospace,monospace;font-size:13px;overflow-wrap:anywhere;color:#486079}.comparison{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}.comparison section{margin:0;padding:18px;background:#f5f7fa;border-radius:8px;border:1px solid #dfe5ec}.comparison .recommended{background:#edf7f4;border-color:#b8dcd1}.comparison p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}dl{display:grid;grid-template-columns:130px 1fr;gap:12px;font-size:14px}dt{font-weight:650}dd{margin:0;overflow-wrap:anywhere}a{color:#245eb0}.coverage{border-top:1px solid #d8e1ea;padding-top:20px;font-size:14px}details{margin:24px 0;background:white;border:1px solid #d8e1ea;border-radius:8px;padding:16px}summary{cursor:pointer;font-weight:600}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}.muted{color:#58697c;opacity:1}@media(max-width:640px){body{padding:20px 12px}.comparison{grid-template-columns:1fr}.metrics{gap:8px}.metric{padding:12px}.metric strong{font-size:28px}dl{grid-template-columns:1fr;gap:6px}dd{margin-bottom:10px}}@media print{body{background:white}.finding{break-inside:avoid}details{display:block}details pre{display:block}}
+
+body{max-width:1680px;padding:24px}h1{font-size:26px}.metrics{display:flex;gap:12px}.metric{padding:8px 16px;display:flex;align-items:center;gap:12px}.metric strong{font-size:24px}.notice{padding:8px 12px}.compact-table{font-size:12px;line-height:1.45;table-layout:fixed;background:white}.compact-table th,.compact-table td{padding:8px;white-space:normal}.compact-table thead th{background:#e8eef5}.compact-table .resource{font-size:11px;margin-top:4px}.compact-table details{margin:4px 0 0;padding:0;border:0;background:transparent}.compact-table summary{font-size:11px;color:#245eb0}.compact-table dl{display:block;font-size:12px}.compact-table dt{margin-top:8px}.compact-table dd{margin-top:3px}.compact-table .badge{display:inline-block;padding:2px 5px;white-space:nowrap}.compact-table p{margin:4px 0}.compact-table .row-number{width:4%}.compact-table .priority{width:8%}.compact-table .subject{width:22%}.compact-table .state{width:22%}.compact-table .next{width:22%}.table-note{font-size:12px;color:#58697c}.compact-table .source-link{display:block;font-size:11px;margin-top:4px}@media(max-width:900px){.compact-table{min-width:1000px}body{padding:16px 10px}}@media print{body{max-width:none;padding:0}.compact-table{min-width:0;font-size:9px}.compact-table td,.compact-table th{padding:4px}.compact-table details:not([open]) dl{display:none}.metrics{gap:8px}thead{display:table-header-group}}
+#findings-table th:nth-child(1){width:3%}#findings-table th:nth-child(2){width:7%}#findings-table th:nth-child(3){width:20%}#findings-table th:nth-child(4){width:21%}#findings-table th:nth-child(5){width:23%}#findings-table th:nth-child(6){width:26%}#version-comparison th:nth-child(1){width:7%}#version-comparison th:nth-child(2){width:21%}#version-comparison th:nth-child(3){width:16%}#version-comparison th:nth-child(4){width:22%}#version-comparison th:nth-child(5){width:22%}#version-comparison th:nth-child(6){width:12%}</style></head><body><main>
+<header><p class="eyebrow">KUBEWISER · 근거 기반 검사</p><h1>변경 계획과 권장 조치</h1><p>필수 조치부터 해결한 뒤, 조건부 권고가 실제 워크로드에 해당하는지 확인하세요.</p><p class="muted">1.21 → 1.36</p></header><div class="metrics"><div class="metric required"><strong>3</strong><span>필수 조치</span></div><div class="metric conditional"><strong>8</strong><span>조건 확인</span></div><div class="metric optional"><strong>1</strong><span>선택 권고</span></div></div><p class="notice">부분 검사 · 권장안은 워크로드별 검증 필요 · 변경 자동 적용 없음</p><section><h2>Manifest · 환경 전체 검토 매트릭스</h2><p class="table-note">호환 보증이 아닌 검토 범위표입니다. 입력 부족·판정 미지원 항목도 표시합니다. 변경 후 manifest는 제안 상태이며 필드 원문 값은 표시하지 않습니다.</p><div class="table-wrap"><table class="compact-table" id="review-matrix"><thead><tr><th scope="col">항목 / 리소스</th><th scope="col">As-Is</th><th scope="col">To-Be</th><th scope="col">판정</th><th scope="col">근거 / 조치</th></tr></thead><tbody><tr><td><strong>Manifest 전후 비교</strong><div class="resource">—</div></td><td>1 resources</td><td>1 proposed resources; schema v1.36.0</td><td>검토 필요</td><td><details><summary>근거 / 조치</summary><p>2 structural differences; 3 target findings</p><p>Proposed configuration, not an applied state. Values omitted; defaults, admission and runtime behavior require separate validation</p></details></td></tr><tr><td><strong>API 버전</strong><div class="resource">—</div></td><td>1.21</td><td>1.36</td><td>지원 범위 내 미발견</td><td><details><summary>근거 / 조치</summary><p>No matching finding; coverage is partial</p><p>Review removed APIs and API clients; absence in supplied manifests is not proof of absence</p></details></td></tr><tr><td><strong>목표 스키마</strong><div class="resource">—</div></td><td>1.21</td><td>1.36</td><td>지원 범위 내 미발견</td><td><details><summary>근거 / 조치</summary><p>No matching finding; coverage is partial</p><p>Review target schema findings and exact bundled schema version; admission remains separate</p></details></td></tr><tr><td><strong>기본값 / 동작 변경</strong><div class="resource">—</div></td><td>1.21</td><td>1.36</td><td>검토 필요</td><td><details><summary>근거 / 조치</summary><p>3 related findings; see inspection details</p><p>Review selected behavior changes; exhaustive default/feature-gate comparison is not implemented</p></details></td></tr><tr><td><strong>유지보수 종료</strong><div class="resource">—</div></td><td>Not established from supplied inputs</td><td>Target requirements require evidence</td><td>지원 범위 내 미발견</td><td><details><summary>근거 / 조치</summary><p>No matching finding; coverage is partial</p><p>Verify components outside the selected lifecycle catalog</p></details></td></tr><tr><td><strong>Ingress</strong><div class="resource">—</div></td><td>Not established from supplied inputs</td><td>Target requirements require evidence</td><td>판정기 미지원</td><td><details><summary>근거 / 조치</summary><p>No matching finding; coverage is partial</p><p>Validate target controller annotations, TLS and routing; general controller conversion is not implemented</p></details></td></tr><tr><td><strong>스토리지 / CSI</strong><div class="resource">—</div></td><td>Not established from supplied inputs</td><td>Target requirements require evidence</td><td>판정기 미지원</td><td><details><summary>근거 / 조치</summary><p>No matching finding; coverage is partial</p><p>Verify CSI, access modes, zones and restore behavior</p></details></td></tr><tr><td><strong>CPU / 이미지 플랫폼</strong><div class="resource">—</div></td><td>Not established from supplied inputs</td><td>Target requirements require evidence</td><td>입력 부족</td><td><details><summary>근거 / 조치</summary><p>No matching finding; coverage is partial</p><p>Provide target platform and local OCI evidence in an AKS profile; test native dependencies</p></details></td></tr><tr><td><strong>OS</strong><div class="resource">—</div></td><td>Not established from supplied inputs</td><td>Target requirements require evidence</td><td>입력 부족</td><td><details><summary>근거 / 조치</summary><p>No matching finding; coverage is partial</p><p>Provide current/target OS architecture declarations and verify vendor support</p></details></td></tr><tr><td><strong>애플리케이션 동작</strong><div class="resource">—</div></td><td>Configuration references cgroup v1-specific resource files (raw values omitted)</td><td>Review and migrate readers for the selected target hierarchy</td><td>조치 필요</td><td><details><summary>근거 / 조치</summary><p>1 related findings; see inspection details</p><p>Test memory/OOM, CPU throttling, application runtimes and agents on target nodes</p></details></td></tr><tr><td><strong>cgroup 모드</strong><div class="resource">example-linux-pool</div></td><td>v1</td><td>v2</td><td>조치 필요</td><td><details><summary>근거 / 조치</summary><p>Supplied node mountinfo sha256:45f51ec02d7263293a19189966665a00da5d7f5113b920b5d75e75b1a2c4a90f; node identity/freshness not independently verified; Operator declaration: SYNTHETIC target specification; replace with reviewed node-pool evidence; not independently verified</p><p>evidence_meets_minimum: Target kernel meets generic 5.8 baseline; not a vendor support guarantee; evidence_meets_minimum: Runtime meets generic v2 baseline; exact Kubernetes/provider compatibility remains unchecked; evidence_meets_minimum: Declared kubelet and runtime drivers both systemd; required: v2 changes hierarchy and resource files (memory.limit_in_bytes to memory.max, cpu.cfs_* to cpu.max); migrate direct readers and validate JVM, Node.js, Go automaxprocs and monitoring/security agents where used; their versions are not inferred from image names</p></details></td></tr><tr><td><strong>커널</strong><div class="resource">example-linux-pool</div></td><td>unknown</td><td>6.8.0-azure</td><td>목표 최소조건 충족 (제공 근거)</td><td><details><summary>근거 / 조치</summary><p>evidence_meets_minimum: Target kernel meets generic 5.8 baseline; not a vendor support guarantee</p><p>Baseline checks do not certify exact provider or application compatibility</p></details></td></tr><tr><td><strong>컨테이너 런타임</strong><div class="resource">example-linux-pool</div></td><td>unknown</td><td>containerd 2.0.0</td><td>목표 최소조건 충족 (제공 근거)</td><td><details><summary>근거 / 조치</summary><p>evidence_meets_minimum: Runtime meets generic v2 baseline; exact Kubernetes/provider compatibility remains unchecked</p><p>Baseline checks do not certify exact provider or application compatibility</p></details></td></tr><tr><td><strong>kubelet / 런타임 드라이버</strong><div class="resource">example-linux-pool</div></td><td>unknown</td><td>systemd / systemd</td><td>목표 최소조건 충족 (제공 근거)</td><td><details><summary>근거 / 조치</summary><p>evidence_meets_minimum: Declared kubelet and runtime drivers both systemd</p><p>Baseline checks do not certify exact provider or application compatibility</p></details></td></tr><tr><td><strong>Manifest 필드 변경</strong><div class="resource">/Pod/review/legacy-agent-example#/spec/containers/agent/args</div></td><td>present</td><td>changed</td><td>검토 필요</td><td><details><summary>근거 / 조치</summary><p>Structural comparison; raw values omitted</p><p>Review proposed change and target validation findings</p></details></td></tr><tr><td><strong>Manifest 필드 변경</strong><div class="resource">/Pod/review/legacy-agent-example#/spec/containers/agent/image</div></td><td>present</td><td>changed</td><td>검토 필요</td><td><details><summary>근거 / 조치</summary><p>Structural comparison; raw values omitted</p><p>Review proposed change and target validation findings</p></details></td></tr><tr><td><strong>변경 후 manifest 검증</strong><div class="resource">v1/Pod/review/legacy-agent-example#/spec/containers/0/resources/requests</div></td><td>Current findings remain in inspection table</td><td>Set workload-appropriate resource requests after measuring usage</td><td>검토 필요</td><td><details><summary>근거 / 조치</summary><p>KW-REQUESTS</p><p>Resolve or verify this finding in the proposed manifest</p></details></td></tr><tr><td><strong>변경 후 manifest 검증</strong><div class="resource">v1/Pod/review/legacy-agent-example#/spec/containers/0/readinessProbe</div></td><td>Current findings remain in inspection table</td><td>If serving traffic, define a readiness probe appropriate to the application</td><td>검토 필요</td><td><details><summary>근거 / 조치</summary><p>KW-READINESS</p><p>Resolve or verify this finding in the proposed manifest</p></details></td></tr><tr><td><strong>변경 후 manifest 검증</strong><div class="resource">v1/Pod/review/legacy-agent-example#/spec/volumes/0/hostPath</div></td><td>Current findings remain in inspection table</td><td>Host filesystem dependency requires node OS/path verification before upgrade or migration</td><td>검토 필요</td><td><details><summary>근거 / 조치</summary><p>KW-HOSTPATH</p><p>Resolve or verify this finding in the proposed manifest</p></details></td></tr></tbody></table></div></section><section><h2>cgroup As-Is / To-Be 비교</h2><p class="table-note">제공된 노드 근거 또는 선언값 기준입니다. 동일 모드는 앱 호환 보증이 아닙니다. 노드 명령을 실행하지 않습니다. · 규칙 확인일: 2026-11-17</p><div class="table-wrap"><table class="compact-table" id="cgroup-table"><thead><tr><th scope="col">노드풀</th><th scope="col">As-Is</th><th scope="col">To-Be</th><th scope="col">판정</th><th scope="col">판별 근거</th><th scope="col">선행 조건 / 조치</th></tr></thead><tbody><tr><td>example-linux-pool</td><td>v1</td><td>v2</td><td>모드 변경 · 전환 조치 필요</td><td><details><summary>As-Is</summary>Supplied node mountinfo sha256:45f51ec02d7263293a19189966665a00da5d7f5113b920b5d75e75b1a2c4a90f; node identity/freshness not independently verified</details><details><summary>To-Be</summary>Operator declaration: SYNTHETIC target specification; replace with reviewed node-pool evidence; not independently verified</details></td><td><p>필수 1 · 미확인 0 · 최소조건 충족 3</p><details><summary>상세 조건 / 조치</summary><p>evidence_meets_minimum: Target kernel meets generic 5.8 baseline; not a vendor support guarantee</p><p>evidence_meets_minimum: Runtime meets generic v2 baseline; exact Kubernetes/provider compatibility remains unchecked</p><p>evidence_meets_minimum: Declared kubelet and runtime drivers both systemd</p><p>required: v2 changes hierarchy and resource files (memory.limit_in_bytes to memory.max, cpu.cfs_* to cpu.max); migrate direct readers and validate JVM, Node.js, Go automaxprocs and monitoring/security agents where used; their versions are not inferred from image names</p></details></td></tr></tbody></table></div></section><section><h2>유지보수 / 지원 종료 검토</h2><p class="table-note">평가일: 2026-11-19 UTC · 공식 근거 확인일: 2026-11-17 · 일부 항목의 카탈로그 검사입니다. 모든 제품의 지원 상태를 보증하지 않습니다. 월 단위 기한은 정확한 종료일을 뜻하지 않습니다.</p><div class="table-wrap"><table class="compact-table" id="lifecycle-table"><thead><tr><th scope="col">구성요소 / 리소스</th><th scope="col">상태</th><th scope="col">종료 시점</th><th scope="col">지원 범위</th><th scope="col">식별 근거</th><th scope="col">대체 / 조치</th></tr></thead><tbody><tr><td colspan="6">카탈로그 일치 항목이 없습니다. 식별되지 않은 구성요소의 지원 상태는 미확인입니다.</td></tr></tbody></table></div></section><section><h2>As-Is / To-Be 버전 변경 요약 · 1.21 → 1.36</h2><p class="table-note">내장 API 제거 규칙과 보고된 동작 변경을 최초 영향 버전순으로 표시합니다. 전체 릴리스 변경 목록이나 검증된 AKS 업그레이드 경로는 아닙니다. 미발견은 미사용을 뜻하지 않습니다. As-Is 이전부터 존재한 문제는 아래 검사 결과 표에서 확인하세요.</p><div class="table-wrap"><table class="compact-table" id="version-comparison"><thead><tr><th scope="col">최초 영향</th><th scope="col">변경 항목</th><th scope="col">As-Is 1.21</th><th scope="col">To-Be 1.36</th><th scope="col">검토 / 조치</th><th scope="col">입력 근거</th></tr></thead><tbody><tr><td>1.22</td><td>CSIDriver · storage.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: storage.k8s.io/v1beta1</td><td>제공 중단 · 대체: storage.k8s.io/v1</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.22</td><td>CSINode · storage.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: storage.k8s.io/v1beta1</td><td>제공 중단 · 대체: storage.k8s.io/v1</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.22</td><td>CertificateSigningRequest · certificates.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: certificates.k8s.io/v1beta1</td><td>제공 중단 · 대체: certificates.k8s.io/v1; signerName required</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.22</td><td>ClusterRole · rbac.authorization.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: rbac.authorization.k8s.io/v1beta1</td><td>제공 중단 · 대체: rbac.authorization.k8s.io/v1</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.22</td><td>ClusterRoleBinding · rbac.authorization.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: rbac.authorization.k8s.io/v1beta1</td><td>제공 중단 · 대체: rbac.authorization.k8s.io/v1</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.22</td><td>CustomResourceDefinition · apiextensions.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: apiextensions.k8s.io/v1beta1</td><td>제공 중단 · 대체: apiextensions.k8s.io/v1; structural schemas and per-version fields required</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.22</td><td>Ingress · extensions/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: extensions/v1beta1</td><td>제공 중단 · 대체: networking.k8s.io/v1; convert backend fields and specify pathType</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.22</td><td>Ingress · networking.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: networking.k8s.io/v1beta1</td><td>제공 중단 · 대체: networking.k8s.io/v1; convert backend fields and specify pathType</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.22</td><td>MutatingWebhookConfiguration · admissionregistration.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: admissionregistration.k8s.io/v1beta1</td><td>제공 중단 · 대체: admissionregistration.k8s.io/v1; review sideEffects, admissionReviewVersions and failurePolicy</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.22</td><td>Role · rbac.authorization.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: rbac.authorization.k8s.io/v1beta1</td><td>제공 중단 · 대체: rbac.authorization.k8s.io/v1</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.22</td><td>RoleBinding · rbac.authorization.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: rbac.authorization.k8s.io/v1beta1</td><td>제공 중단 · 대체: rbac.authorization.k8s.io/v1</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.22</td><td>StorageClass · storage.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: storage.k8s.io/v1beta1</td><td>제공 중단 · 대체: storage.k8s.io/v1</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.22</td><td>ValidatingWebhookConfiguration · admissionregistration.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: admissionregistration.k8s.io/v1beta1</td><td>제공 중단 · 대체: admissionregistration.k8s.io/v1; review sideEffects, admissionReviewVersions and failurePolicy</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.22</td><td>VolumeAttachment · storage.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: storage.k8s.io/v1beta1</td><td>제공 중단 · 대체: storage.k8s.io/v1</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.24</td><td>KW-BEHAVIOR-DOCKERSHIM<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/tasks/administer-cluster/migrating-from-dockershim/">근거 문서 ↗</a></td><td>내장 dockershim 제공</td><td>내장 dockershim 제거 · CRI 런타임 확인</td><td>Verify the configured CRI runtime and run runtime-dependent agents on a test node</td><td>버전 구간 검토 · 실제 영향 미확인</td></tr><tr><td>1.24</td><td>KW-BEHAVIOR-SA-TOKEN<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/security/service-accounts/">근거 문서 ↗</a></td><td>ServiceAccount 토큰 Secret 자동 생성</td><td>기본 자동 생성 중단 · 토큰 사용 주체 확인</td><td>Test projected token rotation and external clients without copying credentials into reports</td><td>버전 구간 검토 · 실제 영향 미확인</td></tr><tr><td>1.25</td><td>CronJob · batch/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: batch/v1beta1</td><td>제공 중단 · 대체: batch/v1</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.25</td><td>EndpointSlice · discovery.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: discovery.k8s.io/v1beta1</td><td>제공 중단 · 대체: discovery.k8s.io/v1; topology fields changed</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.25</td><td>Event · events.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: events.k8s.io/v1beta1</td><td>제공 중단 · 대체: events.k8s.io/v1</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.25</td><td>HorizontalPodAutoscaler · autoscaling/v2beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: autoscaling/v2beta1</td><td>제공 중단 · 대체: autoscaling/v2; convert metric target fields</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.25</td><td>KW-BEHAVIOR-PSP<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/security/pod-security-policy/">근거 문서 ↗</a></td><td>PodSecurityPolicy</td><td>제거됨 · 대체 admission 정책 검증</td><td>Test allowed and rejected workloads in staging; do not assume equivalent policies</td><td>버전 구간 검토 · 실제 영향 미확인</td></tr><tr><td>1.25</td><td>PodDisruptionBudget · policy/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: policy/v1beta1</td><td>제공 중단 · 대체: policy/v1; empty selector {} selects all pods, unlike v1beta1</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.25</td><td>PodSecurityPolicy · policy/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: policy/v1beta1</td><td>제공 중단 · 대체: Pod Security Admission or alternative policy controller; no direct API replacement</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.26</td><td>FlowSchema · flowcontrol.apiserver.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: flowcontrol.apiserver.k8s.io/v1beta1</td><td>제공 중단 · 대체: flowcontrol.apiserver.k8s.io/v1; review concurrency field changes</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.26</td><td>HorizontalPodAutoscaler · autoscaling/v2beta2<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: autoscaling/v2beta2</td><td>제공 중단 · 대체: autoscaling/v2</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.26</td><td>PriorityLevelConfiguration · flowcontrol.apiserver.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: flowcontrol.apiserver.k8s.io/v1beta1</td><td>제공 중단 · 대체: flowcontrol.apiserver.k8s.io/v1; review concurrency field changes</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.27</td><td>CSIStorageCapacity · storage.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: storage.k8s.io/v1beta1</td><td>제공 중단 · 대체: storage.k8s.io/v1</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.29</td><td>FlowSchema · flowcontrol.apiserver.k8s.io/v1beta2<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: flowcontrol.apiserver.k8s.io/v1beta2</td><td>제공 중단 · 대체: flowcontrol.apiserver.k8s.io/v1; review nominalConcurrencyShares</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.29</td><td>PriorityLevelConfiguration · flowcontrol.apiserver.k8s.io/v1beta2<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: flowcontrol.apiserver.k8s.io/v1beta2</td><td>제공 중단 · 대체: flowcontrol.apiserver.k8s.io/v1; review nominalConcurrencyShares</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.32</td><td>FlowSchema · flowcontrol.apiserver.k8s.io/v1beta3<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: flowcontrol.apiserver.k8s.io/v1beta3</td><td>제공 중단 · 대체: flowcontrol.apiserver.k8s.io/v1; explicit zero nominalConcurrencyShares is no longer defaulted to 30</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr><tr><td>1.32</td><td>PriorityLevelConfiguration · flowcontrol.apiserver.k8s.io/v1beta3<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">근거 문서 ↗</a></td><td>제공되는 API: flowcontrol.apiserver.k8s.io/v1beta3</td><td>제공 중단 · 대체: flowcontrol.apiserver.k8s.io/v1; explicit zero nominalConcurrencyShares is no longer defaulted to 30</td><td>사용 시 필수: 제거 전에 필드·API 클라이언트 이전</td><td>입력에서 미발견 · 실제 사용 여부 미확인</td></tr></tbody></table></div></section><section><h2>검사 결과 요약 (12)</h2><div class="table-wrap"><table class="compact-table" id="findings-table"><thead><tr><th scope="col">#</th><th scope="col">구분</th><th scope="col">검토 항목 / 리소스</th><th scope="col">현재 상태</th><th scope="col">권장 상태</th><th scope="col">조치 / 상세 근거</th></tr></thead><tbody><tr class="required"><td>1</td><td><span class="badge">필수 조치</span></td><td><strong>cgroup 모드와 의존성 검토</strong><div class="resource">example-linux-pool</div><div class="muted">KW-CGROUP-MODE</div></td><td>v1</td><td>v2</td><td>Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>Cgroup comparison: mode_change; same_mode is not an application compatibility verdict</dd><dt>검증 방법</dt><dd>Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/architecture/cgroups/">근거 문서 ↗</a></details></td></tr><tr class="required"><td>2</td><td><span class="badge">필수 조치</span></td><td><strong>cgroup 모드와 의존성 검토</strong><div class="resource">example-linux-pool</div><div class="muted">KW-CGROUP-PREREQUISITE</div></td><td>v2</td><td>Validated target prerequisites</td><td>Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>v2 changes hierarchy and resource files (memory.limit_in_bytes to memory.max, cpu.cfs_* to cpu.max); migrate direct readers and validate JVM, Node.js, Go automaxprocs and monitoring/security agents where used; their versions are not inferred from image names</dd><dt>검증 방법</dt><dd>Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/architecture/cgroups/">근거 문서 ↗</a></details></td></tr><tr class="required"><td>3</td><td><span class="badge">필수 조치</span></td><td><strong>cgroup 모드와 의존성 검토</strong><div class="resource">v1/Pod/review/legacy-agent-example</div><div class="muted">KW-CGROUP-V1-REFERENCE</div></td><td>Configuration references cgroup v1-specific resource files (raw values omitted)</td><td>Review and migrate readers for the selected target hierarchy</td><td>Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>Static text reference, not proof of executed code; verify workload scheduling and actual access</dd><dt>검증 방법</dt><dd>Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/architecture/cgroups/">근거 문서 ↗</a></details></td></tr><tr class="conditional"><td>4</td><td><span class="badge">조건 확인</span></td><td><strong>트래픽을 받기 전 준비 상태 확인</strong><div class="resource">v1/Pod/review/legacy-agent-example</div><div class="muted">KW-READINESS</div></td><td>readinessProbe가 선언되지 않았습니다.</td><td>서비스 트래픽을 받는 컨테이너라면 앱에 맞는 readiness 검사. 배치 전용 작업에는 필요하지 않을 수 있습니다.</td><td>트래픽 처리 여부부터 확인하고 실제 상태 확인 경로나 검사를 정하세요. 경로나 포트는 임의로 제시하지 않습니다.<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>프로세스가 실행 중이어도 요청을 처리할 준비가 된 것은 아닙니다.</dd><dt>검증 방법</dt><dd>Re-run target validation and test workload behavior in staging</dd><dt>위치 / 조치 시점</dt><dd> · 조치 시점: 1.36</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">근거 문서 ↗</a></details></td></tr><tr class="conditional"><td>5</td><td><span class="badge">조건 확인</span></td><td><strong>노드 로컬 저장소 의존성 검토</strong><div class="resource">v1/Pod/review/legacy-agent-example</div><div class="muted">KW-HOSTPATH</div></td><td>hostPath 볼륨이 설정돼 있습니다. 실제 경로는 보고서에 표시하지 않습니다.</td><td>적합한 경우 이식 가능한 저장소 사용, 또는 명시적으로 검증한 호스트 의존성.</td><td>영속성·권한·대상 OS 경로를 확인하고 저장소 교체 전 데이터 이전을 계획하세요.<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>Host filesystem dependency requires node OS/path verification before upgrade or migration</dd><dt>검증 방법</dt><dd>Re-run target validation and test workload behavior in staging</dd><dt>위치 / 조치 시점</dt><dd> · 조치 시점: 1.36</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/storage/volumes/#hostpath">근거 문서 ↗</a></details></td></tr><tr class="conditional"><td>6</td><td><span class="badge">조건 확인</span></td><td><strong>버전별 동작 변경 검토</strong><div class="resource"></div><div class="muted">KW-BEHAVIOR-DOCKERSHIM</div></td><td>검토가 필요한 조건이 감지됐습니다. 아래 원본 근거를 확인하세요.</td><td>목표 환경에 적용되는 공식 요구사항을 확인하세요.</td><td>Verify the configured CRI runtime and run runtime-dependent agents on a test node<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>Dockershim is removed: review Docker socket mounts, runtime monitoring and image build dependencies</dd><dt>검증 방법</dt><dd>Verify the configured CRI runtime and run runtime-dependent agents on a test node</dd><dt>위치 / 조치 시점</dt><dd> · 조치 시점: 1.24</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/tasks/administer-cluster/migrating-from-dockershim/">근거 문서 ↗</a></details></td></tr><tr class="conditional"><td>7</td><td><span class="badge">조건 확인</span></td><td><strong>버전별 동작 변경 검토</strong><div class="resource"></div><div class="muted">KW-BEHAVIOR-SA-TOKEN</div></td><td>검토가 필요한 조건이 감지됐습니다. 아래 원본 근거를 확인하세요.</td><td>목표 환경에 적용되는 공식 요구사항을 확인하세요.</td><td>Test projected token rotation and external clients without copying credentials into reports<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>ServiceAccount token Secrets are no longer automatically generated; review clients expecting them</dd><dt>검증 방법</dt><dd>Test projected token rotation and external clients without copying credentials into reports</dd><dt>위치 / 조치 시점</dt><dd> · 조치 시점: 1.24</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/security/service-accounts/">근거 문서 ↗</a></details></td></tr><tr class="conditional"><td>8</td><td><span class="badge">조건 확인</span></td><td><strong>버전별 동작 변경 검토</strong><div class="resource"></div><div class="muted">KW-BEHAVIOR-PSP</div></td><td>검토가 필요한 조건이 감지됐습니다. 아래 원본 근거를 확인하세요.</td><td>목표 환경에 적용되는 공식 요구사항을 확인하세요.</td><td>Test allowed and rejected workloads in staging; do not assume equivalent policies<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>PodSecurityPolicy is removed; validate replacement admission controls and namespace policy before upgrade</dd><dt>검증 방법</dt><dd>Test allowed and rejected workloads in staging; do not assume equivalent policies</dd><dt>위치 / 조치 시점</dt><dd> · 조치 시점: 1.25</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/security/pod-security-policy/">근거 문서 ↗</a></details></td></tr><tr class="conditional"><td>9</td><td><span class="badge">조건 확인</span></td><td><strong>노드·런타임 의존 조건 검증</strong><div class="resource">v1/Pod/review/legacy-agent-example</div><div class="muted">KW-NODE-DEPENDENCY</div></td><td>호스트 네임스페이스, runtimeClass 또는 sysctl 의존성이 감지됐습니다.</td><td>필요한 호스트 기능만 사용하고 대상 노드에서 지원 여부를 검증하세요.</td><td>해당 리소스와 근거 문서를 확인한 뒤 설정을 수정하세요.<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>Node-dependent configuration: host filesystem</dd><dt>검증 방법</dt><dd>Validate target OS image, kernel modules, cgroup mode, CRI runtime and CPU image architecture on a canary node</dd><dt>위치 / 조치 시점</dt><dd> · 조치 시점: 1.36</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/architecture/nodes/">근거 문서 ↗</a></details></td></tr><tr class="conditional"><td>10</td><td><span class="badge">조건 확인</span></td><td><strong>구성요소 호환성 확인</strong><div class="resource"></div><div class="muted">KW-ADDON-MATRIX</div></td><td>kubelet 버전 차이 또는 애드온 호환성 검토가 필요합니다. 원본 판정을 확인하세요.</td><td>각 마이너 업그레이드 단계에서 호환되는 구성요소 버전.</td><td>각 단계에서 Kubernetes 버전 차이 정책과 CNI·CSI·Ingress·Webhook 공급자 지원표를 확인하세요.<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>Verify CNI, CSI, ingress, admission webhooks and managed-provider upgrade support for each step</dd><dt>검증 방법</dt><dd>Use vendor version matrices and staging tests; these dependencies are not inferred from Kubernetes schemas</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/releases/version-skew-policy/">근거 문서 ↗</a></details></td></tr><tr class="conditional"><td>11</td><td><span class="badge">조건 확인</span></td><td><strong>cgroup 모드와 의존성 검토</strong><div class="resource">v1/Pod/review/legacy-agent-example</div><div class="muted">KW-CGROUP-HOST-MOUNT</div></td><td>Host mount can expose cgroup files (path omitted)</td><td>Validate monitoring/security agents and direct cgroup access on target nodes</td><td>Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>A mount is an access capability, not proof that the application reads cgroups</dd><dt>검증 방법</dt><dd>Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/architecture/cgroups/">근거 문서 ↗</a></details></td></tr><tr class="optional"><td>12</td><td><span class="badge">선택 권고</span></td><td><strong>워크로드 자원 요청량 설정</strong><div class="resource">v1/Pod/review/legacy-agent-example</div><div class="muted">KW-REQUESTS</div></td><td>이 컨테이너에 자원 요청량이 선언되지 않았습니다.</td><td>실측 사용량에 근거한 CPU·메모리 requests. 현재 입력만으로 적정 수치를 계산할 수 없습니다.</td><td>대표 부하에서 사용량을 측정하고 담당자와 요청량을 정한 뒤 부하 테스트로 확인하세요.<details><summary>상세 / 검증 방법</summary><dl><dt>이유</dt><dd>스케줄러가 적절한 용량을 확보하려면 자원 요청량이 필요합니다.</dd><dt>검증 방법</dt><dd>Re-run target validation and test workload behavior in staging</dd><dt>위치 / 조치 시점</dt><dd> · 조치 시점: 1.36</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/">근거 문서 ↗</a></details></td></tr></tbody></table></div></section><section><h2>업그레이드 / 이전 단계</h2><ol><li>1.22: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.23: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.24: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.25: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.26: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.27: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.28: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.29: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.30: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.31: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.32: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.33: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.34: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.35: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.36: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li></ol></section><section class="coverage"><h2>검사하지 못한 항목</h2><p>발견 사항이 없어도 아래 검증 한계는 남아 있습니다.</p><ul><li>Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated</li><li>OpenAPI validation does not replace Kubernetes admission or server semantic validation</li><li>Requested version uses bundled v1.36.0; other patch-specific changes are not inferred</li><li>Cgroup results compare supplied evidence/declarations, not live nodes. OS or Kubernetes versions alone never establish the active cgroup mode.</li><li>Equal modes or minimum prerequisites do not certify application compatibility. Test memory limits/OOM, CPU throttling, agents and application runtime versions on target nodes.</li><li>Workload hints are not mapped to individual pools; scheduling and node-pool membership require validation. Redacted snapshots can hide commands, environment values and host paths.</li><li>Selected, pinned lifecycle catalog only; absence of findings is not proof of support. No lifecycle databases or vendors are contacted.</li><li>Upstream retirement does not establish managed/vendor support coverage. Names, labels and mirror paths are hints only. Operator declarations are not independently verified.</li><li>Missing Node OS, controller resources, redacted annotations and snapshot scope may hide dependencies. Kubernetes API removal is evaluated separately by version scans and upgrade plans.</li><li>Audit logs/API client usage, add-on release matrices, actual node kernel/cgroup and image runtime dependencies are not automatically established</li><li>Observed-only fields may be defaults or controller additions; no server mutation or dry-run was performed</li><li>CRD list semantics use supplied local schemas; webhook conversion is not performed; optional local None conversion is explicitly reported; sensitive paths are omitted</li><li>Recorded field managers are ownership hints, not proof of drift cause or permission to overwrite; unsupported managedFields encodings are not inferred</li></ul></section><details><summary>원본 근거·출처 해시·메타데이터</summary><pre>{
+  &#34;actions&#34;: [
+    {
+      &#34;before_version&#34;: &#34;1.36&#34;,
+      &#34;id&#34;: &#34;KW-REQUESTS&#34;,
+      &#34;message&#34;: &#34;Set workload-appropriate resource requests after measuring usage&#34;,
+      &#34;requirement&#34;: &#34;optional&#34;,
+      &#34;resource&#34;: &#34;v1/Pod/review/legacy-agent-example&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/&#34;,
+      &#34;verification&#34;: &#34;Re-run target validation and test workload behavior in staging&#34;
+    },
+    {
+      &#34;before_version&#34;: &#34;1.36&#34;,
+      &#34;id&#34;: &#34;KW-READINESS&#34;,
+      &#34;message&#34;: &#34;If serving traffic, define a readiness probe appropriate to the application&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;v1/Pod/review/legacy-agent-example&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/&#34;,
+      &#34;verification&#34;: &#34;Re-run target validation and test workload behavior in staging&#34;
+    },
+    {
+      &#34;before_version&#34;: &#34;1.36&#34;,
+      &#34;id&#34;: &#34;KW-HOSTPATH&#34;,
+      &#34;message&#34;: &#34;Host filesystem dependency requires node OS/path verification before upgrade or migration&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;v1/Pod/review/legacy-agent-example&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/storage/volumes/#hostpath&#34;,
+      &#34;verification&#34;: &#34;Re-run target validation and test workload behavior in staging&#34;
+    },
+    {
+      &#34;before_version&#34;: &#34;1.24&#34;,
+      &#34;id&#34;: &#34;KW-BEHAVIOR-DOCKERSHIM&#34;,
+      &#34;message&#34;: &#34;Dockershim is removed: review Docker socket mounts, runtime monitoring and image build dependencies&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/tasks/administer-cluster/migrating-from-dockershim/&#34;,
+      &#34;verification&#34;: &#34;Verify the configured CRI runtime and run runtime-dependent agents on a test node&#34;
+    },
+    {
+      &#34;before_version&#34;: &#34;1.24&#34;,
+      &#34;id&#34;: &#34;KW-BEHAVIOR-SA-TOKEN&#34;,
+      &#34;message&#34;: &#34;ServiceAccount token Secrets are no longer automatically generated; review clients expecting them&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/security/service-accounts/&#34;,
+      &#34;verification&#34;: &#34;Test projected token rotation and external clients without copying credentials into reports&#34;
+    },
+    {
+      &#34;before_version&#34;: &#34;1.25&#34;,
+      &#34;id&#34;: &#34;KW-BEHAVIOR-PSP&#34;,
+      &#34;message&#34;: &#34;PodSecurityPolicy is removed; validate replacement admission controls and namespace policy before upgrade&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/security/pod-security-policy/&#34;,
+      &#34;verification&#34;: &#34;Test allowed and rejected workloads in staging; do not assume equivalent policies&#34;
+    },
+    {
+      &#34;before_version&#34;: &#34;1.36&#34;,
+      &#34;id&#34;: &#34;KW-NODE-DEPENDENCY&#34;,
+      &#34;message&#34;: &#34;Node-dependent configuration: host filesystem&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;v1/Pod/review/legacy-agent-example&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/architecture/nodes/&#34;,
+      &#34;verification&#34;: &#34;Validate target OS image, kernel modules, cgroup mode, CRI runtime and CPU image architecture on a canary node&#34;
+    },
+    {
+      &#34;id&#34;: &#34;KW-ADDON-MATRIX&#34;,
+      &#34;message&#34;: &#34;Verify CNI, CSI, ingress, admission webhooks and managed-provider upgrade support for each step&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/releases/version-skew-policy/&#34;,
+      &#34;verification&#34;: &#34;Use vendor version matrices and staging tests; these dependencies are not inferred from Kubernetes schemas&#34;
+    },
+    {
+      &#34;current&#34;: &#34;v1&#34;,
+      &#34;id&#34;: &#34;KW-CGROUP-MODE&#34;,
+      &#34;message&#34;: &#34;Cgroup comparison: mode_change; same_mode is not an application compatibility verdict&#34;,
+      &#34;recommended&#34;: &#34;v2&#34;,
+      &#34;requirement&#34;: &#34;required&#34;,
+      &#34;resource&#34;: &#34;example-linux-pool&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/architecture/cgroups/&#34;,
+      &#34;verification&#34;: &#34;Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed&#34;
+    },
+    {
+      &#34;current&#34;: &#34;v2&#34;,
+      &#34;id&#34;: &#34;KW-CGROUP-PREREQUISITE&#34;,
+      &#34;message&#34;: &#34;v2 changes hierarchy and resource files (memory.limit_in_bytes to memory.max, cpu.cfs_* to cpu.max); migrate direct readers and validate JVM, Node.js, Go automaxprocs and monitoring/security agents where used; their versions are not inferred from image names&#34;,
+      &#34;recommended&#34;: &#34;Validated target prerequisites&#34;,
+      &#34;requirement&#34;: &#34;required&#34;,
+      &#34;resource&#34;: &#34;example-linux-pool&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/architecture/cgroups/&#34;,
+      &#34;verification&#34;: &#34;Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed&#34;
+    },
+    {
+      &#34;current&#34;: &#34;Configuration references cgroup v1-specific resource files (raw values omitted)&#34;,
+      &#34;id&#34;: &#34;KW-CGROUP-V1-REFERENCE&#34;,
+      &#34;message&#34;: &#34;Static text reference, not proof of executed code; verify workload scheduling and actual access&#34;,
+      &#34;recommended&#34;: &#34;Review and migrate readers for the selected target hierarchy&#34;,
+      &#34;requirement&#34;: &#34;required&#34;,
+      &#34;resource&#34;: &#34;v1/Pod/review/legacy-agent-example&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/architecture/cgroups/&#34;,
+      &#34;verification&#34;: &#34;Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed&#34;
+    },
+    {
+      &#34;current&#34;: &#34;Host mount can expose cgroup files (path omitted)&#34;,
+      &#34;id&#34;: &#34;KW-CGROUP-HOST-MOUNT&#34;,
+      &#34;message&#34;: &#34;A mount is an access capability, not proof that the application reads cgroups&#34;,
+      &#34;recommended&#34;: &#34;Validate monitoring/security agents and direct cgroup access on target nodes&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;v1/Pod/review/legacy-agent-example&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/architecture/cgroups/&#34;,
+      &#34;verification&#34;: &#34;Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed&#34;
+    }
+  ],
+  &#34;after_report&#34;: {
+    &#34;documents&#34;: 1,
+    &#34;findings&#34;: [
+      {
+        &#34;document&#34;: 1,
+        &#34;evidence&#34;: &#34;confirmed&#34;,
+        &#34;field&#34;: &#34;/spec/containers/0/resources/requests&#34;,
+        &#34;file&#34;: &#34;docs/examples/cgroup/proposed.yaml&#34;,
+        &#34;line&#34;: 2,
+        &#34;message&#34;: &#34;Set workload-appropriate resource requests after measuring usage&#34;,
+        &#34;requirement&#34;: &#34;optional&#34;,
+        &#34;resource&#34;: &#34;v1/Pod/review/legacy-agent-example&#34;,
+        &#34;rule_id&#34;: &#34;KW-REQUESTS&#34;,
+        &#34;severity&#34;: &#34;warning&#34;,
+        &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/&#34;
+      },
+      {
+        &#34;document&#34;: 1,
+        &#34;evidence&#34;: &#34;confirmed&#34;,
+        &#34;field&#34;: &#34;/spec/containers/0/readinessProbe&#34;,
+        &#34;file&#34;: &#34;docs/examples/cgroup/proposed.yaml&#34;,
+        &#34;line&#34;: 2,
+        &#34;message&#34;: &#34;If serving traffic, define a readiness probe appropriate to the application&#34;,
+        &#34;requirement&#34;: &#34;conditional&#34;,
+        &#34;resource&#34;: &#34;v1/Pod/review/legacy-agent-example&#34;,
+        &#34;rule_id&#34;: &#34;KW-READINESS&#34;,
+        &#34;severity&#34;: &#34;warning&#34;,
+        &#34;source&#34;: &#34;https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/&#34;
+      },
+      {
+        &#34;document&#34;: 1,
+        &#34;evidence&#34;: &#34;confirmed&#34;,
+        &#34;field&#34;: &#34;/spec/volumes/0/hostPath&#34;,
+        &#34;file&#34;: &#34;docs/examples/cgroup/proposed.yaml&#34;,
+        &#34;line&#34;: 19,
+        &#34;message&#34;: &#34;Host filesystem dependency requires node OS/path verification before upgrade or migration&#34;,
+        &#34;requirement&#34;: &#34;conditional&#34;,
+        &#34;resource&#34;: &#34;v1/Pod/review/legacy-agent-example&#34;,
+        &#34;rule_id&#34;: &#34;KW-HOSTPATH&#34;,
+        &#34;severity&#34;: &#34;warning&#34;,
+        &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/storage/volumes/#hostpath&#34;
+      }
+    ],
+    &#34;inputs&#34;: [
+      {
+        &#34;file&#34;: &#34;docs/examples/cgroup/proposed.yaml&#34;,
+        &#34;sha256&#34;: &#34;001dd66d189cded987151aa4902475b78617df61cd1d5309c8174908864a61cf&#34;
+      }
+    ],
+    &#34;rules_version&#34;: &#34;2026-11-15&#34;,
+    &#34;schema&#34;: {
+      &#34;bundle_sha256&#34;: &#34;97930915a59788eeef6e732ab28fb1c0e427d0d0cf1141e1f3e483d1f7f49204&#34;,
+      &#34;reviewed&#34;: &#34;2026-11-16&#34;,
+      &#34;source&#34;: &#34;https://raw.githubusercontent.com/kubernetes/kubernetes/v1.36.0/api/openapi-spec/swagger.json&#34;,
+      &#34;source_sha256&#34;: &#34;dcede2063da1d7ad62ecb5af8adb6d7fabd0b52385a7fa0048afb491dac90450&#34;,
+      &#34;version&#34;: &#34;v1.36.0&#34;
+    },
+    &#34;schema_checked&#34;: 1,
+    &#34;schema_version&#34;: &#34;2&#34;,
+    &#34;status&#34;: &#34;partial&#34;,
+    &#34;target_version&#34;: &#34;1.36&#34;,
+    &#34;unchecked&#34;: [
+      &#34;Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated&#34;,
+      &#34;OpenAPI validation does not replace Kubernetes admission or server semantic validation&#34;,
+      &#34;Requested version uses bundled v1.36.0; other patch-specific changes are not inferred&#34;
+    ]
+  },
+  &#34;cgroup&#34;: {
+    &#34;pools&#34;: [
+      {
+        &#34;checks&#34;: [
+          &#34;evidence_meets_minimum: Target kernel meets generic 5.8 baseline; not a vendor support guarantee&#34;,
+          &#34;evidence_meets_minimum: Runtime meets generic v2 baseline; exact Kubernetes/provider compatibility remains unchecked&#34;,
+          &#34;evidence_meets_minimum: Declared kubelet and runtime drivers both systemd&#34;,
+          &#34;required: v2 changes hierarchy and resource files (memory.limit_in_bytes to memory.max, cpu.cfs_* to cpu.max); migrate direct readers and validate JVM, Node.js, Go automaxprocs and monitoring/security agents where used; their versions are not inferred from image names&#34;
+        ],
+        &#34;current&#34;: &#34;v1&#34;,
+        &#34;current_config&#34;: {
+          &#34;root_fs_type&#34;: &#34;tmpfs&#34;,
+          &#34;scope&#34;: &#34;node&#34;
+        },
+        &#34;current_evidence&#34;: &#34;Supplied node mountinfo sha256:45f51ec02d7263293a19189966665a00da5d7f5113b920b5d75e75b1a2c4a90f; node identity/freshness not independently verified&#34;,
+        &#34;pool&#34;: &#34;example-linux-pool&#34;,
+        &#34;status&#34;: &#34;mode_change&#34;,
+        &#34;target&#34;: &#34;v2&#34;,
+        &#34;target_config&#34;: {
+          &#34;evidence&#34;: &#34;SYNTHETIC target specification; replace with reviewed node-pool evidence&#34;,
+          &#34;kernel&#34;: &#34;6.8.0-azure&#34;,
+          &#34;kubelet_driver&#34;: &#34;systemd&#34;,
+          &#34;mode&#34;: &#34;v2&#34;,
+          &#34;runtime&#34;: &#34;containerd&#34;,
+          &#34;runtime_driver&#34;: &#34;systemd&#34;,
+          &#34;runtime_version&#34;: &#34;2.0.0&#34;
+        },
+        &#34;target_evidence&#34;: &#34;Operator declaration: SYNTHETIC target specification; replace with reviewed node-pool evidence; not independently verified&#34;
+      }
+    ],
+    &#34;reviewed&#34;: &#34;2026-11-17&#34;
+  },
+  &#34;from&#34;: &#34;1.21&#34;,
+  &#34;kind&#34;: &#34;upgrade&#34;,
+  &#34;lifecycle&#34;: {
+    &#34;catalog_reviewed&#34;: &#34;2026-11-17&#34;,
+    &#34;evaluated_at&#34;: &#34;2026-11-19&#34;,
+    &#34;findings&#34;: []
+  },
+  &#34;matrix&#34;: [
+    {
+      &#34;action&#34;: &#34;Proposed configuration, not an applied state. Values omitted; defaults, admission and runtime behavior require separate validation&#34;,
+      &#34;current&#34;: &#34;1 resources&#34;,
+      &#34;evidence&#34;: &#34;2 structural differences; 3 target findings&#34;,
+      &#34;status&#34;: &#34;review_required&#34;,
+      &#34;target&#34;: &#34;1 proposed resources; schema v1.36.0&#34;,
+      &#34;topic&#34;: &#34;manifest&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Review removed APIs and API clients; absence in supplied manifests is not proof of absence&#34;,
+      &#34;current&#34;: &#34;1.21&#34;,
+      &#34;evidence&#34;: &#34;No matching finding; coverage is partial&#34;,
+      &#34;status&#34;: &#34;not_detected&#34;,
+      &#34;target&#34;: &#34;1.36&#34;,
+      &#34;topic&#34;: &#34;api&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Review target schema findings and exact bundled schema version; admission remains separate&#34;,
+      &#34;current&#34;: &#34;1.21&#34;,
+      &#34;evidence&#34;: &#34;No matching finding; coverage is partial&#34;,
+      &#34;status&#34;: &#34;not_detected&#34;,
+      &#34;target&#34;: &#34;1.36&#34;,
+      &#34;topic&#34;: &#34;schema&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Review selected behavior changes; exhaustive default/feature-gate comparison is not implemented&#34;,
+      &#34;current&#34;: &#34;1.21&#34;,
+      &#34;evidence&#34;: &#34;3 related findings; see inspection details&#34;,
+      &#34;status&#34;: &#34;review_required&#34;,
+      &#34;target&#34;: &#34;1.36&#34;,
+      &#34;topic&#34;: &#34;defaults&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Verify components outside the selected lifecycle catalog&#34;,
+      &#34;current&#34;: &#34;Not established from supplied inputs&#34;,
+      &#34;evidence&#34;: &#34;No matching finding; coverage is partial&#34;,
+      &#34;status&#34;: &#34;not_detected&#34;,
+      &#34;target&#34;: &#34;Target requirements require evidence&#34;,
+      &#34;topic&#34;: &#34;lifecycle&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Validate target controller annotations, TLS and routing; general controller conversion is not implemented&#34;,
+      &#34;current&#34;: &#34;Not established from supplied inputs&#34;,
+      &#34;evidence&#34;: &#34;No matching finding; coverage is partial&#34;,
+      &#34;status&#34;: &#34;analyzer_unsupported&#34;,
+      &#34;target&#34;: &#34;Target requirements require evidence&#34;,
+      &#34;topic&#34;: &#34;ingress&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Verify CSI, access modes, zones and restore behavior&#34;,
+      &#34;current&#34;: &#34;Not established from supplied inputs&#34;,
+      &#34;evidence&#34;: &#34;No matching finding; coverage is partial&#34;,
+      &#34;status&#34;: &#34;analyzer_unsupported&#34;,
+      &#34;target&#34;: &#34;Target requirements require evidence&#34;,
+      &#34;topic&#34;: &#34;storage&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Provide target platform and local OCI evidence in an AKS profile; test native dependencies&#34;,
+      &#34;current&#34;: &#34;Not established from supplied inputs&#34;,
+      &#34;evidence&#34;: &#34;No matching finding; coverage is partial&#34;,
+      &#34;status&#34;: &#34;input_missing&#34;,
+      &#34;target&#34;: &#34;Target requirements require evidence&#34;,
+      &#34;topic&#34;: &#34;cpu&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Provide current/target OS architecture declarations and verify vendor support&#34;,
+      &#34;current&#34;: &#34;Not established from supplied inputs&#34;,
+      &#34;evidence&#34;: &#34;No matching finding; coverage is partial&#34;,
+      &#34;status&#34;: &#34;input_missing&#34;,
+      &#34;target&#34;: &#34;Target requirements require evidence&#34;,
+      &#34;topic&#34;: &#34;os&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Test memory/OOM, CPU throttling, application runtimes and agents on target nodes&#34;,
+      &#34;current&#34;: &#34;Configuration references cgroup v1-specific resource files (raw values omitted)&#34;,
+      &#34;evidence&#34;: &#34;1 related findings; see inspection details&#34;,
+      &#34;status&#34;: &#34;action_required&#34;,
+      &#34;target&#34;: &#34;Review and migrate readers for the selected target hierarchy&#34;,
+      &#34;topic&#34;: &#34;application&#34;
+    },
+    {
+      &#34;action&#34;: &#34;evidence_meets_minimum: Target kernel meets generic 5.8 baseline; not a vendor support guarantee; evidence_meets_minimum: Runtime meets generic v2 baseline; exact Kubernetes/provider compatibility remains unchecked; evidence_meets_minimum: Declared kubelet and runtime drivers both systemd; required: v2 changes hierarchy and resource files (memory.limit_in_bytes to memory.max, cpu.cfs_* to cpu.max); migrate direct readers and validate JVM, Node.js, Go automaxprocs and monitoring/security agents where used; their versions are not inferred from image names&#34;,
+      &#34;current&#34;: &#34;v1&#34;,
+      &#34;evidence&#34;: &#34;Supplied node mountinfo sha256:45f51ec02d7263293a19189966665a00da5d7f5113b920b5d75e75b1a2c4a90f; node identity/freshness not independently verified; Operator declaration: SYNTHETIC target specification; replace with reviewed node-pool evidence; not independently verified&#34;,
+      &#34;resource&#34;: &#34;example-linux-pool&#34;,
+      &#34;status&#34;: &#34;action_required&#34;,
+      &#34;target&#34;: &#34;v2&#34;,
+      &#34;topic&#34;: &#34;cgroup&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Baseline checks do not certify exact provider or application compatibility&#34;,
+      &#34;current&#34;: &#34;unknown&#34;,
+      &#34;evidence&#34;: &#34;evidence_meets_minimum: Target kernel meets generic 5.8 baseline; not a vendor support guarantee&#34;,
+      &#34;resource&#34;: &#34;example-linux-pool&#34;,
+      &#34;status&#34;: &#34;baseline_met&#34;,
+      &#34;target&#34;: &#34;6.8.0-azure&#34;,
+      &#34;topic&#34;: &#34;kernel&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Baseline checks do not certify exact provider or application compatibility&#34;,
+      &#34;current&#34;: &#34;unknown&#34;,
+      &#34;evidence&#34;: &#34;evidence_meets_minimum: Runtime meets generic v2 baseline; exact Kubernetes/provider compatibility remains unchecked&#34;,
+      &#34;resource&#34;: &#34;example-linux-pool&#34;,
+      &#34;status&#34;: &#34;baseline_met&#34;,
+      &#34;target&#34;: &#34;containerd 2.0.0&#34;,
+      &#34;topic&#34;: &#34;runtime&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Baseline checks do not certify exact provider or application compatibility&#34;,
+      &#34;current&#34;: &#34;unknown&#34;,
+      &#34;evidence&#34;: &#34;evidence_meets_minimum: Declared kubelet and runtime drivers both systemd&#34;,
+      &#34;resource&#34;: &#34;example-linux-pool&#34;,
+      &#34;status&#34;: &#34;baseline_met&#34;,
+      &#34;target&#34;: &#34;systemd / systemd&#34;,
+      &#34;topic&#34;: &#34;drivers&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Review proposed change and target validation findings&#34;,
+      &#34;current&#34;: &#34;present&#34;,
+      &#34;evidence&#34;: &#34;Structural comparison; raw values omitted&#34;,
+      &#34;resource&#34;: &#34;/Pod/review/legacy-agent-example#/spec/containers/agent/args&#34;,
+      &#34;status&#34;: &#34;review_required&#34;,
+      &#34;target&#34;: &#34;changed&#34;,
+      &#34;topic&#34;: &#34;manifest-field&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Review proposed change and target validation findings&#34;,
+      &#34;current&#34;: &#34;present&#34;,
+      &#34;evidence&#34;: &#34;Structural comparison; raw values omitted&#34;,
+      &#34;resource&#34;: &#34;/Pod/review/legacy-agent-example#/spec/containers/agent/image&#34;,
+      &#34;status&#34;: &#34;review_required&#34;,
+      &#34;target&#34;: &#34;changed&#34;,
+      &#34;topic&#34;: &#34;manifest-field&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Resolve or verify this finding in the proposed manifest&#34;,
+      &#34;current&#34;: &#34;Current findings remain in inspection table&#34;,
+      &#34;evidence&#34;: &#34;KW-REQUESTS&#34;,
+      &#34;resource&#34;: &#34;v1/Pod/review/legacy-agent-example#/spec/containers/0/resources/requests&#34;,
+      &#34;status&#34;: &#34;review_required&#34;,
+      &#34;target&#34;: &#34;Set workload-appropriate resource requests after measuring usage&#34;,
+      &#34;topic&#34;: &#34;target-validation&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Resolve or verify this finding in the proposed manifest&#34;,
+      &#34;current&#34;: &#34;Current findings remain in inspection table&#34;,
+      &#34;evidence&#34;: &#34;KW-READINESS&#34;,
+      &#34;resource&#34;: &#34;v1/Pod/review/legacy-agent-example#/spec/containers/0/readinessProbe&#34;,
+      &#34;status&#34;: &#34;review_required&#34;,
+      &#34;target&#34;: &#34;If serving traffic, define a readiness probe appropriate to the application&#34;,
+      &#34;topic&#34;: &#34;target-validation&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Resolve or verify this finding in the proposed manifest&#34;,
+      &#34;current&#34;: &#34;Current findings remain in inspection table&#34;,
+      &#34;evidence&#34;: &#34;KW-HOSTPATH&#34;,
+      &#34;resource&#34;: &#34;v1/Pod/review/legacy-agent-example#/spec/volumes/0/hostPath&#34;,
+      &#34;status&#34;: &#34;review_required&#34;,
+      &#34;target&#34;: &#34;Host filesystem dependency requires node OS/path verification before upgrade or migration&#34;,
+      &#34;topic&#34;: &#34;target-validation&#34;
+    }
+  ],
+  &#34;report&#34;: {
+    &#34;documents&#34;: 1,
+    &#34;findings&#34;: [
+      {
+        &#34;document&#34;: 1,
+        &#34;evidence&#34;: &#34;confirmed&#34;,
+        &#34;field&#34;: &#34;/spec/containers/0/resources/requests&#34;,
+        &#34;file&#34;: &#34;docs/examples/cgroup/workload.yaml&#34;,
+        &#34;line&#34;: 2,
+        &#34;message&#34;: &#34;Set workload-appropriate resource requests after measuring usage&#34;,
+        &#34;requirement&#34;: &#34;optional&#34;,
+        &#34;resource&#34;: &#34;v1/Pod/review/legacy-agent-example&#34;,
+        &#34;rule_id&#34;: &#34;KW-REQUESTS&#34;,
+        &#34;severity&#34;: &#34;warning&#34;,
+        &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/&#34;
+      },
+      {
+        &#34;document&#34;: 1,
+        &#34;evidence&#34;: &#34;confirmed&#34;,
+        &#34;field&#34;: &#34;/spec/containers/0/readinessProbe&#34;,
+        &#34;file&#34;: &#34;docs/examples/cgroup/workload.yaml&#34;,
+        &#34;line&#34;: 2,
+        &#34;message&#34;: &#34;If serving traffic, define a readiness probe appropriate to the application&#34;,
+        &#34;requirement&#34;: &#34;conditional&#34;,
+        &#34;resource&#34;: &#34;v1/Pod/review/legacy-agent-example&#34;,
+        &#34;rule_id&#34;: &#34;KW-READINESS&#34;,
+        &#34;severity&#34;: &#34;warning&#34;,
+        &#34;source&#34;: &#34;https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/&#34;
+      },
+      {
+        &#34;document&#34;: 1,
+        &#34;evidence&#34;: &#34;confirmed&#34;,
+        &#34;field&#34;: &#34;/spec/volumes/0/hostPath&#34;,
+        &#34;file&#34;: &#34;docs/examples/cgroup/workload.yaml&#34;,
+        &#34;line&#34;: 19,
+        &#34;message&#34;: &#34;Host filesystem dependency requires node OS/path verification before upgrade or migration&#34;,
+        &#34;requirement&#34;: &#34;conditional&#34;,
+        &#34;resource&#34;: &#34;v1/Pod/review/legacy-agent-example&#34;,
+        &#34;rule_id&#34;: &#34;KW-HOSTPATH&#34;,
+        &#34;severity&#34;: &#34;warning&#34;,
+        &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/storage/volumes/#hostpath&#34;
+      }
+    ],
+    &#34;inputs&#34;: [
+      {
+        &#34;file&#34;: &#34;docs/examples/cgroup/workload.yaml&#34;,
+        &#34;sha256&#34;: &#34;4738c32de5f39084fc9a99631c01e273a37b6635213aea79c936f80211782d9d&#34;
+      }
+    ],
+    &#34;rules_version&#34;: &#34;2026-11-15&#34;,
+    &#34;schema&#34;: {
+      &#34;bundle_sha256&#34;: &#34;97930915a59788eeef6e732ab28fb1c0e427d0d0cf1141e1f3e483d1f7f49204&#34;,
+      &#34;reviewed&#34;: &#34;2026-11-16&#34;,
+      &#34;source&#34;: &#34;https://raw.githubusercontent.com/kubernetes/kubernetes/v1.36.0/api/openapi-spec/swagger.json&#34;,
+      &#34;source_sha256&#34;: &#34;dcede2063da1d7ad62ecb5af8adb6d7fabd0b52385a7fa0048afb491dac90450&#34;,
+      &#34;version&#34;: &#34;v1.36.0&#34;
+    },
+    &#34;schema_checked&#34;: 1,
+    &#34;schema_version&#34;: &#34;2&#34;,
+    &#34;status&#34;: &#34;partial&#34;,
+    &#34;target_version&#34;: &#34;1.36&#34;,
+    &#34;unchecked&#34;: [
+      &#34;Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated&#34;,
+      &#34;OpenAPI validation does not replace Kubernetes admission or server semantic validation&#34;,
+      &#34;Requested version uses bundled v1.36.0; other patch-specific changes are not inferred&#34;
+    ]
+  },
+  &#34;steps&#34;: [
+    &#34;1.22: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.23: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.24: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.25: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.26: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.27: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.28: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.29: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.30: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.31: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.32: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.33: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.34: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.35: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.36: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;
+  ],
+  &#34;to&#34;: &#34;1.36&#34;,
+  &#34;unchecked&#34;: [
+    &#34;Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated&#34;,
+    &#34;OpenAPI validation does not replace Kubernetes admission or server semantic validation&#34;,
+    &#34;Requested version uses bundled v1.36.0; other patch-specific changes are not inferred&#34;,
+    &#34;Cgroup results compare supplied evidence/declarations, not live nodes. OS or Kubernetes versions alone never establish the active cgroup mode.&#34;,
+    &#34;Equal modes or minimum prerequisites do not certify application compatibility. Test memory limits/OOM, CPU throttling, agents and application runtime versions on target nodes.&#34;,
+    &#34;Workload hints are not mapped to individual pools; scheduling and node-pool membership require validation. Redacted snapshots can hide commands, environment values and host paths.&#34;,
+    &#34;Selected, pinned lifecycle catalog only; absence of findings is not proof of support. No lifecycle databases or vendors are contacted.&#34;,
+    &#34;Upstream retirement does not establish managed/vendor support coverage. Names, labels and mirror paths are hints only. Operator declarations are not independently verified.&#34;,
+    &#34;Missing Node OS, controller resources, redacted annotations and snapshot scope may hide dependencies. Kubernetes API removal is evaluated separately by version scans and upgrade plans.&#34;,
+    &#34;Audit logs/API client usage, add-on release matrices, actual node kernel/cgroup and image runtime dependencies are not automatically established&#34;,
+    &#34;Observed-only fields may be defaults or controller additions; no server mutation or dry-run was performed&#34;,
+    &#34;CRD list semantics use supplied local schemas; webhook conversion is not performed; optional local None conversion is explicitly reported; sensitive paths are omitted&#34;,
+    &#34;Recorded field managers are ownership hints, not proof of drift cause or permission to overwrite; unsupported managedFields encodings are not inferred&#34;
+  ]
+}</pre></details></main></body></html>

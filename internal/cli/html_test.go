@@ -96,3 +96,27 @@ func TestCgroupCLIComparison(t *testing.T) {
 		t.Fatal(code, errs.String())
 	}
 }
+
+func TestMatrixFormatsAndAfterFlag(t *testing.T) {
+	for _, format := range []string{"html", "markdown", "json"} {
+		var out, errs bytes.Buffer
+		args := []string{"plan", "upgrade", "--source", "../../docs/examples/cgroup/workload.yaml", "--after", "../../docs/examples/cgroup/workload.yaml", "--from", "1.21", "--to", "1.36", "--format", format, "--lang", "ko"}
+		if code := Run(args, &out, &errs); code != 0 {
+			t.Fatal(code, errs.String())
+		}
+		want := "입력 부족"
+		if format == "json" {
+			want = "input_missing"
+		}
+		if !strings.Contains(out.String(), want) {
+			t.Fatal(format, "missing coverage")
+		}
+		if format == "html" && !strings.Contains(out.String(), `id="review-matrix"`) {
+			t.Fatal("missing matrix")
+		}
+	}
+	var out, errs bytes.Buffer
+	if code := Run([]string{"scan", "cgroup", "--after", "x"}, &out, &errs); code != 2 {
+		t.Fatal(code)
+	}
+}

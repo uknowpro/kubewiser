@@ -34,13 +34,15 @@ type CgroupPool struct {
 	Target  CgroupSide `json:"target"`
 }
 type CgroupComparison struct {
-	Pool            string   `json:"pool"`
-	Current         string   `json:"current"`
-	Target          string   `json:"target"`
-	Status          string   `json:"status"`
-	CurrentEvidence string   `json:"current_evidence"`
-	TargetEvidence  string   `json:"target_evidence"`
-	Checks          []string `json:"checks"`
+	CurrentConfig   CgroupSide `json:"current_config"`
+	TargetConfig    CgroupSide `json:"target_config"`
+	Pool            string     `json:"pool"`
+	Current         string     `json:"current"`
+	Target          string     `json:"target"`
+	Status          string     `json:"status"`
+	CurrentEvidence string     `json:"current_evidence"`
+	TargetEvidence  string     `json:"target_evidence"`
+	Checks          []string   `json:"checks"`
 }
 type CgroupReport struct {
 	Reviewed string             `json:"reviewed"`
@@ -197,6 +199,8 @@ func Cgroups(set manifest.Set, pools []CgroupPool, target string) (Plan, error) 
 			return p, e
 		}
 		row := CgroupComparison{Pool: pool.Name, Current: current, Target: next, CurrentEvidence: ce, TargetEvidence: te, Checks: []string{}}
+		row.CurrentConfig, row.TargetConfig = pool.Current, pool.Target
+		row.CurrentConfig.MountInfo, row.TargetConfig.MountInfo = "", ""
 		req := "conditional"
 		switch {
 		case current == "conflict" || next == "conflict":

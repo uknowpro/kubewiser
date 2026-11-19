@@ -206,5 +206,6 @@ func Project(ctx context.Context, set manifest.Set, profile ProjectProfile) (Pla
 	}
 	p.Steps = append([]string{"Gate 1: inventory and approve requirements, upgrade route, add-on compatibility and recovery evidence", "Gate 2: rehearse version and architecture changes separately in staging; capture baseline and acceptance metrics"}, p.Steps...)
 	p.Steps = append(p.Steps, "Gate 3: perform only the next provider-supported control-plane step, then compatible canary nodes; validate before continuing", "Gate 4: stop on PDB/drain failure, unhealthy workloads, data integrity failure or exceeded error/downtime budget; use the rehearsed recovery runbook", "Gate 5: complete the observation window and owner sign-off before retiring old pools or backups")
+	BuildMatrix(&p)
 	return p, nil
 }
