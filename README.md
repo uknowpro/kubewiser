@@ -14,6 +14,7 @@ Inspect manifests, Helm charts and read-only snapshots with a CLI that compares 
 
 - [✨ Features](#features)
 - [📊 Report preview](#report-preview)
+- [🧮 Before/after matrix](#comparison-matrix)
 - [🚀 Quick start](#quick-start)
 - [📦 Installation](#installation)
 - [🛠️ Commands at a glance](#commands-at-a-glance)
@@ -34,6 +35,7 @@ Inspect manifests, Helm charts and read-only snapshots with a CLI that compares 
 | --- | --- |
 | 🔍 Manifest & API inspection | Find schema errors and deprecated/removed APIs using official Kubernetes 1.16–1.37 `.0` schemas, selected exact patches and supplied local CRDs. |
 | 🎯 Actionable recommendations | Review required, conditional and optional actions with current/recommended comparisons, reasons and verification steps. |
+| 🧮 Before/after matrix | Compare current/proposed manifests and target validation alongside cgroup, kernel and runtime coverage. |
 | ⚖️ Helm & manifest drift | Render local charts and compare desired resources with explicitly scoped, GET-only snapshots. |
 | 🪜 Upgrade planning | Review minor-version steps and workload API changes before upgrading. Provider availability and runtime compatibility need separate verification. |
 | ☁️ Cloud migration review | Inventory EKS/AKS/GKE storage, load balancer and identity dependencies. Cross-cloud provisioning and data migration are not performed; AKS review scaffolds are available separately. |
@@ -47,6 +49,20 @@ Inspect manifests, Helm charts and read-only snapshots with a CLI that compares 
 ## 📊 Report preview
 
 An actual generated HTML review: required actions first, current and recommended settings side by side, with source hashes and original evidence available on demand.
+
+<a id="comparison-matrix"></a>
+
+### Manifest and environment comparison matrix (v0.2.0-alpha.9)
+
+`plan upgrade` and `plan aks` include a coverage matrix. Missing cgroup/kernel/runtime/driver evidence remains visible as **input missing**; unsupported analyzers are identified separately. Without `--after`, the target is a recommendation, not an actual proposed manifest.
+
+```bash
+kubewiser plan upgrade --source ./before --after ./after \
+  --from 1.21 --to 1.36 --cgroup-evidence ./pools.json \
+  --format html --lang en > comparison.html
+```
+
+[Usage and verdict scope](docs/matrix.md) · [Synthetic HTML example](docs/examples/matrix.ko.html)
 
 ### Cgroup As-Is / To-Be (v0.2.0-alpha.8)
 
@@ -631,15 +647,3 @@ Selected exact patch schemas and separate CRD CEL inspection are available; the 
 Report reproducible problems through [GitHub Issues](https://github.com/uknowpro/kubewiser/issues). Include the command, target version and a small sanitized example. Do not attach kubeconfig credentials, Secrets or unreviewed production snapshots.
 
 [Roadmap](docs/roadmap.md) · [Release notes](https://github.com/uknowpro/kubewiser/releases) · [License](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.txt)
-
-## Manifest and environment comparison matrix
-
-`plan upgrade` and `plan aks` include a coverage matrix. Missing cgroup/kernel/runtime/driver evidence remains visible as **input missing**; unsupported analyzers are identified separately. Without `--after`, the target is a recommendation, not an actual proposed manifest.
-
-```bash
-kubewiser plan upgrade --source ./before --after ./after \
-  --from 1.21 --to 1.36 --cgroup-evidence ./pools.json \
-  --format html --lang en > comparison.html
-```
-
-[Usage and verdict scope](docs/matrix.md) · [Synthetic HTML example](docs/examples/matrix.ko.html)

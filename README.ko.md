@@ -14,6 +14,7 @@ manifest, Helm 차트, 읽기 전용 스냅샷을 검사하고 **현재 상태 �
 
 - [✨ 주요 기능](#주요-기능)
 - [📊 보고서 미리보기](#보고서-미리보기)
+- [🧮 전후 비교 매트릭스](#comparison-matrix)
 - [🚀 빠른 시작](#빠른-시작)
 - [📦 설치](#설치)
 - [🛠️ 명령어 한눈에 보기](#명령어-한눈에-보기)
@@ -34,6 +35,7 @@ manifest, Helm 차트, 읽기 전용 스냅샷을 검사하고 **현재 상태 �
 | --- | --- |
 | 🔍 Manifest·API 검사 | Kubernetes 1.16~1.37 `.0`·일부 정확한 패치 스키마와 제공한 로컬 CRD로 스키마 오류, API 폐기·제거 여부를 확인합니다. |
 | 🎯 실행 가능한 권장안 | 필수·조건부·선택 조치를 구분하고 현재·권장 상태, 변경 이유와 검증 방법을 비교합니다. |
+| 🧮 전후 비교 매트릭스 | 현재·제안 manifest 차이와 목표 검증, cgroup·커널·런타임의 검토 상태를 한 표에서 확인합니다. |
 | ⚖️ Helm·manifest 차이 비교 | 로컬 차트를 렌더링하고 원하는 상태와 명시한 범위의 GET 전용 스냅샷을 비교합니다. |
 | 🪜 업그레이드 계획 | 마이너 버전별 단계와 워크로드 API 변경을 검토합니다. 플랫폼의 업그레이드 가능 여부와 실제 동작은 별도 검증이 필요합니다. |
 | ☁️ 클라우드 이전 검토 | EKS/AKS/GKE의 스토리지·로드밸런서·ID 의존성을 정리합니다. 클라우드 간 인프라 생성·데이터 이전은 수행하지 않으며 AKS 검토 초안 생성은 별도로 제공합니다. |
@@ -47,6 +49,20 @@ manifest, Helm 차트, 읽기 전용 스냅샷을 검사하고 **현재 상태 �
 ## 📊 보고서 미리보기
 
 실제 생성한 한국어 HTML 보고서입니다. 필수 조치를 먼저 보여주고 현재·권장 상태를 비교합니다. 원본 해시와 상세 근거는 펼쳐서 확인할 수 있습니다.
+
+<a id="comparison-matrix"></a>
+
+### Manifest · 환경 전후 비교 매트릭스 (v0.2.0-alpha.9)
+
+`plan upgrade`와 `plan aks`는 전체 검토표를 제공합니다. cgroup·커널·런타임·드라이버 자료가 없으면 **입력 부족**, 아직 판정기가 없는 항목은 **판정기 미지원**으로 표시합니다. `--after`를 생략하면 목표 구성은 권장안이며 실제 변경 후 상태로 취급하지 않습니다.
+
+```bash
+kubewiser plan upgrade --source ./before --after ./after \
+  --from 1.21 --to 1.36 --cgroup-evidence ./pools.json \
+  --format html --lang ko > comparison.html
+```
+
+[사용법·판정 범위](docs/matrix.md) · [합성 HTML 예제](docs/examples/matrix.ko.html)
 
 ### cgroup 현재·목표 비교 (v0.2.0-alpha.8)
 
@@ -675,15 +691,3 @@ go vet ./...
 재현 가능한 문제는 [GitHub Issues](https://github.com/uknowpro/kubewiser/issues)에 명령어·목표 버전·비식별화한 최소 입력과 함께 남겨주세요. kubeconfig 인증정보, Secret, 검토하지 않은 운영 스냅샷은 첨부하지 마세요.
 
 [로드맵](docs/roadmap.md) · [릴리스 노트](https://github.com/uknowpro/kubewiser/releases) · [라이선스](LICENSE) · [외부 라이선스 고지](THIRD_PARTY_NOTICES.txt)
-
-## Manifest · 환경 전후 비교 매트릭스
-
-`plan upgrade`와 `plan aks`는 전체 검토표를 제공합니다. cgroup·커널·런타임·드라이버 자료가 없으면 **입력 부족**, 아직 판정기가 없는 항목은 **판정기 미지원**으로 표시합니다. `--after`를 생략하면 목표 구성은 권장안이며 실제 변경 후 상태로 취급하지 않습니다.
-
-```bash
-kubewiser plan upgrade --source ./before --after ./after \
-  --from 1.21 --to 1.36 --cgroup-evidence ./pools.json \
-  --format html --lang ko > comparison.html
-```
-
-[사용법·판정 범위](docs/matrix.md) · [합성 HTML 예제](docs/examples/matrix.ko.html)
