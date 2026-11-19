@@ -48,7 +48,7 @@ manifest, Helm 차트, 읽기 전용 스냅샷을 검사하고 **현재 상태 �
 
 ## 📊 보고서 미리보기
 
-실제 생성한 한국어 HTML 보고서입니다. 필수 조치를 먼저 보여주고 현재·권장 상태를 비교합니다. 원본 해시와 상세 근거는 펼쳐서 확인할 수 있습니다.
+합성 예제 입력으로 생성한 최신 보고서입니다. 전체 검토 매트릭스를 먼저 보여주고 cgroup·지원 종료·버전 변경·검사 결과 표가 이어집니다. 상세 근거는 펼쳐서 확인할 수 있습니다.
 
 <a id="comparison-matrix"></a>
 
@@ -62,7 +62,9 @@ kubewiser plan upgrade --source ./before --after ./after \
   --format html --lang ko > comparison.html
 ```
 
-[사용법·판정 범위](docs/matrix.md) · [합성 HTML 예제](docs/examples/matrix.ko.html)
+[사용법·판정 범위](docs/matrix.md) · [HTML 결과](docs/examples/matrix.ko.html) · [현재 입력](docs/examples/cgroup/workload.yaml) · [변경 후 입력](docs/examples/cgroup/proposed.yaml)
+
+![Manifest 전후 변경과 cgroup·커널·런타임 판정을 함께 보여주는 매트릭스](docs/images/matrix.ko.png)
 
 ### cgroup 현재·목표 비교 (v0.2.0-alpha.8)
 
@@ -92,13 +94,7 @@ kubewiser plan upgrade --source ./deploy --from 1.21 --to 1.36 --format html --l
 
 ![As-Is / To-Be compact version comparison](docs/images/upgrade-1.21-1.36.ko.png)
 
-이전 alpha.3 카드형 화면 참고:
-
-![현재 API와 권장 API, 필수 조치와 검증 방법을 비교하는 보고서](docs/images/html-report.ko.png)
-
-[HTML 파일](docs/examples/report.ko.html) · [Markdown 결과](docs/examples/report.ko.md) · [예제 입력](docs/examples/manifest.yaml)
-
-HTML은 내려받아 브라우저로 여세요. 외부 폰트·스크립트 없이 파일 하나로 동작합니다. 위 비교 화면은 v0.2.0-alpha.3부터 제공합니다.
+HTML은 내려받아 브라우저로 여세요. 외부 폰트·스크립트 없이 파일 하나로 동작합니다.
 
 <a id="빠른-시작"></a>
 

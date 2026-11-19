@@ -48,7 +48,7 @@ Inspect manifests, Helm charts and read-only snapshots with a CLI that compares 
 
 ## 📊 Report preview
 
-An actual generated HTML review: required actions first, current and recommended settings side by side, with source hashes and original evidence available on demand.
+Current generated reports from synthetic inputs: the full review matrix appears first, followed by cgroup, lifecycle, version-change and finding tables. Evidence can be expanded.
 
 <a id="comparison-matrix"></a>
 
@@ -62,7 +62,9 @@ kubewiser plan upgrade --source ./before --after ./after \
   --format html --lang en > comparison.html
 ```
 
-[Usage and verdict scope](docs/matrix.md) · [Synthetic HTML example](docs/examples/matrix.ko.html)
+[Usage and verdict scope](docs/matrix.md) · [HTML report](docs/examples/matrix.html) · [Current input](docs/examples/cgroup/workload.yaml) · [Proposed input](docs/examples/cgroup/proposed.yaml)
+
+![Manifest changes and cgroup, kernel and runtime verdicts in a single review matrix](docs/images/matrix.png)
 
 ### Cgroup As-Is / To-Be (v0.2.0-alpha.8)
 
@@ -92,13 +94,7 @@ kubewiser plan upgrade --source ./deploy --from 1.21 --to 1.36 --format html --l
 
 ![As-Is / To-Be compact version comparison](docs/images/upgrade-1.21-1.36.ko.png)
 
-Historical alpha.3 card layout:
-
-![Report comparing current and recommended APIs with actions and verification](docs/images/html-report.png)
-
-[HTML file](docs/examples/report.html) · [Markdown report](docs/examples/report.md) · [Example input](docs/examples/manifest.yaml)
-
-Download the HTML file and open it locally. It loads no external fonts or scripts. The comparison view shown above is available from v0.2.0-alpha.3.
+Download the HTML file and open it locally. It loads no external fonts or scripts.
 
 <a id="quick-start"></a>
 
