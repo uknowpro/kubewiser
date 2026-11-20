@@ -610,7 +610,9 @@ Scan exits with `0` for no findings, `1` for findings and `2` for argument/opera
 kubewiser mcp --input /absolute/path/deploy --snapshot /absolute/path/snapshot.json
 ```
 
-An MCP-capable client can connect a local DeepSeek/Ollama model to this stdio server. Kubewiser does not launch or call an LLM. Tools: `scan_files`, `plan_upgrade`, `plan_migrate`, `scan_network`; `compare_drift` requires input and snapshot, `scan_helm` requires `--chart`. Paths and cluster scope are fixed by the operator at startup, not chosen by the model. Use `--namespace` when the desired manifests omit it.
+An MCP-capable client can connect a local DeepSeek/Ollama model to this stdio server. Kubewiser does not launch or call an LLM. Tools: `scan_files`, `scan_cgroup`, `scan_lifecycle`, `plan_upgrade`, `plan_migrate`, `scan_network`; `scan_cel` requires input, `plan_aks` requires a profile; `compare_drift` requires input and snapshot, `scan_helm` requires `--chart`. Paths and cluster scope are fixed by the operator at startup, not chosen by the model. Use `--namespace` when the desired manifests omit it.
+
+All MCP tools now declare four explicit behavior hints and have named protocol-call tests. MCP collection rejects authentication subprocesses; use explicit CLI collection and a saved snapshot when exec authentication is needed. [Verification evidence and M8ven follow-up](docs/mcp-trust.md) · [Security policy](SECURITY.md).
 
 Collection is absent by default. Enabling `--allow-cluster` also requires explicit `--kubeconfig`, `--context`, `--namespace`; collection returns a redacted snapshot to the MCP client. The client/model can transmit received data: use a local-only client configuration if external transmission is prohibited. Paths, hashes, resource names, IPs and remaining snapshot metadata can still be sensitive. Treat chosen charts and manifests as trusted local inputs.
 

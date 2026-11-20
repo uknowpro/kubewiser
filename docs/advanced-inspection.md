@@ -13,7 +13,7 @@ kubewiser collect --kubeconfig ~/.kube/config --context my-aks --namespace my-ap
 
 The selected kubeconfig command must match that path or its basename. No shell is used. The plugin gets no interactive stdin, has a 30-second deadline and a 1 MiB stdout limit. Plugin output/errors are never printed; only a validated token or certificate pair is used in memory. There is no automatic credential refresh. `Always` interactive mode, `provideClusterInfo`, and legacy auth-provider plugins remain rejected. Authenticate separately when your login workflow requires interaction.
 
-**This option authorizes an external authentication program.** It can contact identity servers, access its credential cache or launch child processes (for example Azure CLI); those operations are not confined by kubewiser's API-origin guard. Default analysis remains offline. The API collection itself remains bounded GET-only with verified TLS, no redirects and no proxy. MCP can use it only when the operator also enables the fixed-scope `--allow-cluster` tool; the model cannot change the approved executable.
+**This option authorizes an external authentication program.** It can contact identity servers, access its credential cache or launch child processes (for example Azure CLI); those operations are not confined by kubewiser's API-origin guard. Default analysis remains offline. The API collection itself remains bounded GET-only with verified TLS, no redirects and no proxy. As of v0.2.0-alpha.11, MCP rejects exec authentication. Explicit CLI collection can still use it; pass the resulting saved snapshot to MCP. Static-credential MCP collection remains separately gated by `--allow-cluster`.
 
 ## Saved AKS upgrade evidence
 

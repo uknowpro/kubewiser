@@ -654,7 +654,9 @@ scan은 발견 사항이 없으면 `0`, 있으면 `1`, 인자·실행 오류는 
 
 ## 🤖 로컬 MCP와 로컬 모델
 
-MCP 지원 클라이언트를 통해 로컬 DeepSeek/Ollama 모델과 연결할 수 있습니다. kubewiser 자체는 LLM을 실행하거나 호출하지 않습니다. 기본 도구는 `scan_files`, `plan_upgrade`, `plan_migrate`, `scan_network`입니다. `compare_drift`는 input과 snapshot, `scan_helm`은 chart 설정이 필요합니다. 파일 경로와 클러스터 범위는 시작할 때 운영자가 고정하며 모델이 변경할 수 없습니다.
+MCP 지원 클라이언트를 통해 로컬 DeepSeek/Ollama 모델과 연결할 수 있습니다. kubewiser 자체는 LLM을 실행하거나 호출하지 않습니다. 기본 도구는 `scan_files`, `scan_cgroup`, `scan_lifecycle`, `plan_upgrade`, `plan_migrate`, `scan_network`입니다. `scan_cel`은 input, `plan_aks`는 profile 설정 시 제공됩니다. `compare_drift`는 input과 snapshot, `scan_helm`은 chart 설정이 필요합니다. 파일 경로와 클러스터 범위는 시작할 때 운영자가 고정하며 모델이 변경할 수 없습니다.
+
+모든 MCP 도구에 네 가지 동작 속성과 실제 호출 테스트를 추가했습니다. MCP 수집은 인증 실행 파일을 거부합니다. exec 인증이 필요하면 CLI에서 명시적으로 수집한 뒤 스냅샷을 MCP에 제공하세요. [검증 근거·M8ven 후속 절차](docs/mcp-trust.md) · [보안 정책](SECURITY.md).
 
 수집 도구는 기본으로 제공하지 않습니다. `--allow-cluster`로 활성화하려면 `--kubeconfig`, `--context`, `--namespace`도 명시해야 합니다. 수집 결과는 지정 필드를 제거한 스냅샷으로 MCP 클라이언트에 전달됩니다. 클라이언트·모델이 데이터를 외부로 보낼 수 있으므로 외부 전송을 금지하려면 로컬 전용 클라이언트 설정을 사용하세요. 경로·해시·리소스명·IP와 남은 메타데이터도 민감할 수 있습니다. 신뢰할 수 있는 로컬 차트와 manifest를 입력하세요.
 

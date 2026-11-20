@@ -62,7 +62,7 @@ func NewConfigured(c Config) *mcp.Server {
 		}
 		return gaps
 	}
-	mcp.AddTool(s, &mcp.Tool{Name: "scan_files", Description: "Offline pinned official-schema and API rule validation. No remote schema loading."}, func(ctx context.Context, req *mcp.CallToolRequest, a Args) (*mcp.CallToolResult, scan.Report, error) {
+	mcp.AddTool(s, tool("scan_files", "Offline pinned official-schema and API rule validation. No remote schema loading.", false), func(ctx context.Context, req *mcp.CallToolRequest, a Args) (*mcp.CallToolResult, scan.Report, error) {
 		set, e := load(ctx)
 		if e != nil {
 			return nil, scan.Report{}, e
@@ -71,7 +71,7 @@ func NewConfigured(c Config) *mcp.Server {
 		r.Unchecked = append(r.Unchecked, snapshotGaps()...)
 		return nil, r, e
 	})
-	mcp.AddTool(s, &mcp.Tool{Name: "scan_cgroup", Description: "Compare current/target cgroups from the operator-fixed AKS profile and inspect supplied workload references; no node commands."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Plan, error) {
+	mcp.AddTool(s, tool("scan_cgroup", "Compare current/target cgroups from the operator-fixed AKS profile and inspect supplied workload references; no node commands.", false), func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Plan, error) {
 		set, e := load(ctx)
 		if e != nil {
 			return nil, analyze.Plan{}, e
@@ -90,7 +90,7 @@ func NewConfigured(c Config) *mcp.Server {
 		r.Unchecked = append(r.Unchecked, snapshotGaps()...)
 		return nil, r, e
 	})
-	mcp.AddTool(s, &mcp.Tool{Name: "scan_lifecycle", Description: "Offline support lifecycle check using the pinned catalog and operator-fixed inputs/profile; no vendor calls."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Plan, error) {
+	mcp.AddTool(s, tool("scan_lifecycle", "Offline support lifecycle check using the pinned catalog and operator-fixed inputs/profile; no vendor calls.", false), func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Plan, error) {
 		set, e := load(ctx)
 		if e != nil {
 			return nil, analyze.Plan{}, e
@@ -107,7 +107,7 @@ func NewConfigured(c Config) *mcp.Server {
 		r.Unchecked = append(r.Unchecked, snapshotGaps()...)
 		return nil, r, e
 	})
-	mcp.AddTool(s, &mcp.Tool{Name: "plan_upgrade", Description: "Offline version-step actions from the configured inputs; includes unchecked dependencies."}, func(ctx context.Context, req *mcp.CallToolRequest, a UpgradeArgs) (*mcp.CallToolResult, analyze.Plan, error) {
+	mcp.AddTool(s, tool("plan_upgrade", "Offline version-step actions from the configured inputs; includes unchecked dependencies.", false), func(ctx context.Context, req *mcp.CallToolRequest, a UpgradeArgs) (*mcp.CallToolResult, analyze.Plan, error) {
 		set, e := load(ctx)
 		if e != nil {
 			return nil, analyze.Plan{}, e
@@ -116,7 +116,7 @@ func NewConfigured(c Config) *mcp.Server {
 		r.Unchecked = append(r.Unchecked, snapshotGaps()...)
 		return nil, r, e
 	})
-	mcp.AddTool(s, &mcp.Tool{Name: "plan_migrate", Description: "Offline EKS/AKS/GKE dependency checklist; no cloud calls, data movement or provisioning."}, func(ctx context.Context, req *mcp.CallToolRequest, a MigrateArgs) (*mcp.CallToolResult, analyze.Plan, error) {
+	mcp.AddTool(s, tool("plan_migrate", "Offline EKS/AKS/GKE dependency checklist; no cloud calls, data movement or provisioning.", false), func(ctx context.Context, req *mcp.CallToolRequest, a MigrateArgs) (*mcp.CallToolResult, analyze.Plan, error) {
 		set, e := load(ctx)
 		if e != nil {
 			return nil, analyze.Plan{}, e
@@ -125,7 +125,7 @@ func NewConfigured(c Config) *mcp.Server {
 		r.Unchecked = append(r.Unchecked, snapshotGaps()...)
 		return nil, r, e
 	})
-	mcp.AddTool(s, &mcp.Tool{Name: "scan_network", Description: "Analyze configured exposure/policy isolation and operator-selected Hubble JSON; no active probes."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Network, error) {
+	mcp.AddTool(s, tool("scan_network", "Analyze configured exposure/policy isolation and operator-selected Hubble JSON; no active probes.", false), func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Network, error) {
 		set, e := load(ctx)
 		if e != nil {
 			return nil, analyze.Network{}, e
@@ -135,7 +135,7 @@ func NewConfigured(c Config) *mcp.Server {
 		return nil, r, e
 	})
 	if c.Input != "" {
-		mcp.AddTool(s, &mcp.Tool{Name: "scan_cel", Description: "Evaluate supplied CRD CEL rules locally with bounded cost. Optional old snapshot is operator-fixed; no admission or conversion calls."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Plan, error) {
+		mcp.AddTool(s, tool("scan_cel", "Evaluate supplied CRD CEL rules locally with bounded cost. Optional old snapshot is operator-fixed; no admission or conversion calls.", false), func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Plan, error) {
 			set, e := manifest.Load(ctx, c.Input)
 			if e != nil {
 				return nil, analyze.Plan{}, e
@@ -156,7 +156,7 @@ func NewConfigured(c Config) *mcp.Server {
 		})
 	}
 	if c.Profile != "" {
-		mcp.AddTool(s, &mcp.Tool{Name: "plan_aks", Description: "Offline AKS project review using operator-fixed profile and inputs. No Azure calls or writes."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Plan, error) {
+		mcp.AddTool(s, tool("plan_aks", "Offline AKS project review using operator-fixed profile and inputs. No Azure calls or writes.", false), func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Plan, error) {
 			set, e := load(ctx)
 			if e != nil {
 				return nil, analyze.Plan{}, e
@@ -171,7 +171,7 @@ func NewConfigured(c Config) *mcp.Server {
 		})
 	}
 	if c.Snapshot != "" && c.Input != "" {
-		mcp.AddTool(s, &mcp.Tool{Name: "compare_drift", Description: "Compare operator-selected desired files and snapshot; values omitted and redacted fields excluded."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Diff, error) {
+		mcp.AddTool(s, tool("compare_drift", "Compare operator-selected desired files and snapshot; values omitted and redacted fields excluded.", false), func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, analyze.Diff, error) {
 			set, e := load(ctx)
 			if e != nil {
 				return nil, analyze.Diff{}, e
@@ -185,7 +185,7 @@ func NewConfigured(c Config) *mcp.Server {
 		})
 	}
 	if c.Chart != "" {
-		mcp.AddTool(s, &mcp.Tool{Name: "scan_helm", Description: "Render the configured local chart with fixed values and no cluster or dependency downloads, then inspect."}, func(ctx context.Context, req *mcp.CallToolRequest, a Args) (*mcp.CallToolResult, scan.Report, error) {
+		mcp.AddTool(s, tool("scan_helm", "Render the configured local chart with fixed values and no cluster or dependency downloads, then inspect.", false), func(ctx context.Context, req *mcp.CallToolRequest, a Args) (*mcp.CallToolResult, scan.Report, error) {
 			rr, e := render.Render(ctx, render.Options{Chart: c.Chart, Values: c.Values, Release: "kubewiser", Namespace: c.Namespace, Target: a.Target})
 			if e != nil {
 				return nil, scan.Report{}, e
@@ -196,7 +196,10 @@ func NewConfigured(c Config) *mcp.Server {
 		})
 	}
 	if c.Cluster != nil {
-		mcp.AddTool(s, &mcp.Tool{Name: "collect_cluster", Description: "Explicitly enabled bounded GET-only collection of the operator-fixed context and namespace. Returns a redacted snapshot to the client."}, func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, cluster.Snapshot, error) {
+		mcp.AddTool(s, tool("collect_cluster", "Explicitly enabled bounded GET-only collection of the operator-fixed context and namespace. Returns a redacted snapshot to the client.", true), func(ctx context.Context, req *mcp.CallToolRequest, a Empty) (*mcp.CallToolResult, cluster.Snapshot, error) {
+			if c.Cluster.AllowExecAuth != "" {
+				return nil, cluster.Snapshot{}, fmt.Errorf("MCP collection does not execute authentication plugins; use static credentials or collect explicitly with the CLI")
+			}
 			r, e := cluster.Collect(ctx, *c.Cluster)
 			return nil, r, e
 		})
@@ -207,5 +210,17 @@ func Run(ctx context.Context, path string) error {
 	return RunConfigured(ctx, Config{Input: path, Namespace: "default"})
 }
 func RunConfigured(ctx context.Context, c Config) error {
+	if c.Cluster != nil && c.Cluster.AllowExecAuth != "" {
+		return fmt.Errorf("MCP collection does not execute authentication plugins; use static credentials or collect explicitly with the CLI")
+	}
 	return NewConfigured(c).Run(ctx, &mcp.StdioTransport{})
+}
+
+// Hints describe handlers, not an authorization boundary. Explicit false
+// pointers survive SDK JSON omitempty; tests verify tools/list wire output.
+func tool(name, description string, openWorld bool) *mcp.Tool {
+	destructive := false
+	return &mcp.Tool{Name: name, Description: description, Annotations: &mcp.ToolAnnotations{
+		ReadOnlyHint: true, DestructiveHint: &destructive, IdempotentHint: true, OpenWorldHint: &openWorld,
+	}}
 }
