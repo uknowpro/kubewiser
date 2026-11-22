@@ -52,7 +52,7 @@ Current generated reports from synthetic inputs: the full review matrix appears 
 
 <a id="comparison-matrix"></a>
 
-### Manifest and environment comparison matrix (v0.2.0-alpha.10)
+### Manifest and environment comparison matrix (v0.2.0-alpha.12)
 
 `plan upgrade` and `plan aks` include a coverage matrix. HTML merges group and resource/pool cells vertically; individual verdicts remain separate. Markdown/text use the same group order. Missing cgroup/kernel/runtime/driver evidence remains visible as **input missing**; unsupported analyzers are identified separately. Without `--after`, the target is a recommendation, not an actual proposed manifest.
 
@@ -62,7 +62,9 @@ kubewiser plan upgrade --source ./before --after ./after \
   --format html --lang en > comparison.html
 ```
 
-[Usage and verdict scope](docs/matrix.md) · [HTML report](docs/examples/matrix.html) · [Current input](docs/examples/cgroup/workload.yaml) · [Proposed input](docs/examples/cgroup/proposed.yaml)
+Includes workload-to-pool impact, PDB/drain risk and **resolved / remaining / introduced / cannot compare** finding progress. [Inputs, scope and examples](docs/upgrade-readiness.md). No drain or deployment is performed.
+
+[Usage and verdict scope](docs/matrix.md) · [HTML report](docs/examples/matrix.html) · [Current input](docs/examples/readiness/before.yaml) · [Proposed input](docs/examples/readiness/after.yaml)
 
 ![Manifest changes and cgroup, kernel and runtime verdicts in a single review matrix](docs/images/matrix.png)
 

@@ -488,6 +488,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 			return fail(e)
 		}
 		if sub == "upgrade" || sub == "aks" {
+			analyze.AttachReadiness(&p, set, *ns)
 			analyze.BuildMatrix(&p)
 			if *after != "" {
 				proposed, err := manifest.Load(ctx, *after)
@@ -505,6 +506,18 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 				p.Unchecked = append(p.Unchecked, gap.Resource+": "+gap.Reason)
 			}
 			p.Unchecked = append(p.Unchecked, "Snapshot annotations and literal configuration values may be redacted")
+			if len(s.Redacted) > 0 || len(s.Gaps) > 0 {
+				for i := range p.Transitions {
+					p.Transitions[i].Status = "cannot_compare"
+					p.Transitions[i].Evidence += "; snapshot redaction or collection gaps limit comparison"
+				}
+				for i := range p.Matrix {
+					if p.Matrix[i].Topic == "finding-transition" {
+						p.Matrix[i].Status = "cannot_compare"
+						p.Matrix[i].Evidence += "; snapshot redaction or collection gaps limit comparison"
+					}
+				}
+			}
 		}
 		return emit(out, errOut, p, *format, 0, *lang)
 	case "mcp":

@@ -271,20 +271,23 @@ type Action struct {
 	Before       string `json:"before_version,omitempty"`
 }
 type Plan struct {
-	Matrix      []MatrixRow      `json:"matrix,omitempty"`
-	AfterReport *scan.Report     `json:"after_report,omitempty"`
-	Cgroup      *CgroupReport    `json:"cgroup,omitempty"`
-	Lifecycle   *LifecycleReport `json:"lifecycle,omitempty"`
-	Route       *AKSRoute        `json:"aks_route,omitempty"`
-	Project     *ProjectProfile  `json:"project,omitempty"`
-	Status      string           `json:"status,omitempty"`
-	Kind        string           `json:"kind"`
-	From        string           `json:"from"`
-	To          string           `json:"to"`
-	Steps       []string         `json:"steps"`
-	Actions     []Action         `json:"actions"`
-	Unchecked   []string         `json:"unchecked"`
-	Report      *scan.Report     `json:"report,omitempty"`
+	Workloads   []MatrixRow         `json:"workloads,omitempty"`
+	Drain       []MatrixRow         `json:"drain,omitempty"`
+	Transitions []FindingTransition `json:"finding_transitions,omitempty"`
+	Matrix      []MatrixRow         `json:"matrix,omitempty"`
+	AfterReport *scan.Report        `json:"after_report,omitempty"`
+	Cgroup      *CgroupReport       `json:"cgroup,omitempty"`
+	Lifecycle   *LifecycleReport    `json:"lifecycle,omitempty"`
+	Route       *AKSRoute           `json:"aks_route,omitempty"`
+	Project     *ProjectProfile     `json:"project,omitempty"`
+	Status      string              `json:"status,omitempty"`
+	Kind        string              `json:"kind"`
+	From        string              `json:"from"`
+	To          string              `json:"to"`
+	Steps       []string            `json:"steps"`
+	Actions     []Action            `json:"actions"`
+	Unchecked   []string            `json:"unchecked"`
+	Report      *scan.Report        `json:"report,omitempty"`
 }
 
 func Upgrade(ctx context.Context, set manifest.Set, from, to string) (Plan, error) {
@@ -344,6 +347,7 @@ func Upgrade(ctx context.Context, set manifest.Set, from, to string) (Plan, erro
 	p.Unchecked = append(p.Unchecked, life.Unchecked...)
 	p.Actions = append(p.Actions, Action{ID: "KW-ADDON-MATRIX", Requirement: "conditional", Message: "Verify CNI, CSI, ingress, admission webhooks and managed-provider upgrade support for each step", Verification: "Use vendor version matrices and staging tests; these dependencies are not inferred from Kubernetes schemas", Source: "https://kubernetes.io/releases/version-skew-policy/"})
 	p.Unchecked = append(p.Unchecked, "Audit logs/API client usage, add-on release matrices, actual node kernel/cgroup and image runtime dependencies are not automatically established")
+	AttachReadiness(&p, set, "default")
 	BuildMatrix(&p)
 	return p, nil
 }

@@ -1,0 +1,19 @@
+[
+  {
+    "name": "apppool",
+    "current": {
+      "scope": "node",
+      "root_fs_type": "tmpfs",
+      "mountinfo": "31 22 0:27 / /sys/fs/cgroup/memory rw - cgroup cgroup rw,memory\n"
+    },
+    "target": {
+      "mode": "v2",
+      "evidence": "SYNTHETIC target specification; replace with reviewed node-pool evidence",
+      "kernel": "6.8.0-azure",
+      "runtime": "containerd",
+      "runtime_version": "2.0.0",
+      "kubelet_driver": "systemd",
+      "runtime_driver": "systemd"
+    }
+  }
+]

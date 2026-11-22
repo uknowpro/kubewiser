@@ -52,7 +52,7 @@ manifest, Helm 차트, 읽기 전용 스냅샷을 검사하고 **현재 상태 �
 
 <a id="comparison-matrix"></a>
 
-### Manifest · 환경 전후 비교 매트릭스 (v0.2.0-alpha.10)
+### Manifest · 환경 전후 비교 매트릭스 (v0.2.0-alpha.12)
 
 `plan upgrade`와 `plan aks`는 전체 검토표를 제공합니다. HTML은 그룹과 리소스·노드풀 셀을 세로 병합하며 항목별 판정은 유지합니다. Markdown·터미널도 같은 그룹 순서로 보여줍니다. cgroup·커널·런타임·드라이버 자료가 없으면 **입력 부족**, 아직 판정기가 없는 항목은 **판정기 미지원**으로 표시합니다. `--after`를 생략하면 목표 구성은 권장안이며 실제 변경 후 상태로 취급하지 않습니다.
 
@@ -62,7 +62,9 @@ kubewiser plan upgrade --source ./before --after ./after \
   --format html --lang ko > comparison.html
 ```
 
-[사용법·판정 범위](docs/matrix.md) · [HTML 결과](docs/examples/matrix.ko.html) · [현재 입력](docs/examples/cgroup/workload.yaml) · [변경 후 입력](docs/examples/cgroup/proposed.yaml)
+노드풀별 워크로드 영향, PDB·drain 위험과 **해결됨 / 남아 있음 / 새로 발생 / 비교 불가** 추적을 추가했습니다. [입력·판정 범위와 실행 예시](docs/upgrade-readiness.md). 실제 drain이나 배포는 수행하지 않습니다.
+
+[사용법·판정 범위](docs/matrix.md) · [HTML 결과](docs/examples/matrix.ko.html) · [현재 입력](docs/examples/readiness/before.yaml) · [변경 후 입력](docs/examples/readiness/after.yaml)
 
 ![Manifest 전후 변경과 cgroup·커널·런타임 판정을 함께 보여주는 매트릭스](docs/images/matrix.ko.png)
 

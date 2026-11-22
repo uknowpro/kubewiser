@@ -1,0 +1,28 @@
+# Synthetic offline evidence. Never deployed by kubewiser.
+apiVersion: v1
+kind: Node
+metadata:
+  name: synthetic-node
+  labels: {agentpool: apppool, disk: ssd}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: web, namespace: review}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: web}}
+  template:
+    metadata: {labels: {app: web}}
+    spec:
+      nodeSelector: {disk: ssd}
+      containers:
+      - name: app
+        image: example.invalid/web:v1
+        args: [memory.max]
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: {name: web, namespace: review}
+spec:
+  maxUnavailable: 1
+  selector: {matchLabels: {app: web}}

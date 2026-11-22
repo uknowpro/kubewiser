@@ -29,9 +29,10 @@ type CgroupSide struct {
 	RuntimeDriver  string `json:"runtime_driver,omitempty"`
 }
 type CgroupPool struct {
-	Name    string     `json:"name"`
-	Current CgroupSide `json:"current"`
-	Target  CgroupSide `json:"target"`
+	NodeSelector map[string]string `json:"node_selector,omitempty"`
+	Name         string            `json:"name"`
+	Current      CgroupSide        `json:"current"`
+	Target       CgroupSide        `json:"target"`
 }
 type CgroupComparison struct {
 	CurrentConfig   CgroupSide `json:"current_config"`
@@ -71,6 +72,9 @@ func ValidateCgroups(pools []CgroupPool) error {
 	}
 	seen := map[string]bool{}
 	for _, p := range pools {
+		if !validPoolSelector(p.NodeSelector) {
+			return fmt.Errorf("invalid or oversized cgroup pool node_selector")
+		}
 		if strings.TrimSpace(p.Name) == "" || seen[p.Name] {
 			return fmt.Errorf("cgroup pool names must be nonempty and unique")
 		}
@@ -170,7 +174,7 @@ func versionAtLeast(value string, major, minor int) (bool, bool) {
 	return a > major || (a == major && b >= minor), true
 }
 func Cgroups(set manifest.Set, pools []CgroupPool, target string) (Plan, error) {
-	p := Plan{Kind: "cgroup", Status: "partial", From: "current node pools", To: "target node pools", Actions: []Action{}, Steps: []string{}, Unchecked: []string{"Cgroup results compare supplied evidence/declarations, not live nodes. OS or Kubernetes versions alone never establish the active cgroup mode.", "Equal modes or minimum prerequisites do not certify application compatibility. Test memory limits/OOM, CPU throttling, agents and application runtime versions on target nodes.", "Workload hints are not mapped to individual pools; scheduling and node-pool membership require validation. Redacted snapshots can hide commands, environment values and host paths."}, Cgroup: &CgroupReport{Reviewed: "2026-11-17", Pools: []CgroupComparison{}}}
+	p := Plan{Kind: "cgroup", Status: "partial", From: "current node pools", To: "target node pools", Actions: []Action{}, Steps: []string{}, Unchecked: []string{"Cgroup results compare supplied evidence/declarations, not live nodes. OS or Kubernetes versions alone never establish the active cgroup mode.", "Equal modes or minimum prerequisites do not certify application compatibility. Test memory limits/OOM, CPU throttling, agents and application runtime versions on target nodes.", "Workload pool links use supplied Node labels/bindings and hard constraints only; target scheduling, capacity and pod affinity remain unverified. Redacted snapshots can hide configuration."}, Cgroup: &CgroupReport{Reviewed: "2026-11-17", Pools: []CgroupComparison{}}}
 	if len(set.Issues) > 0 {
 		return p, fmt.Errorf("cgroup inputs contain parse errors")
 	}
@@ -336,6 +340,18 @@ func AttachCgroups(p *Plan, set manifest.Set, pools []CgroupPool, target string)
 		return e
 	}
 	p.Cgroup = r.Cgroup
+	p.Workloads = workloadMatrix(set, pools, r.Cgroup, r.Actions)
+	for i := range r.Actions {
+		if r.Actions[i].ID == "KW-CGROUP-V1-REFERENCE" {
+			r.Actions[i].Requirement = "conditional"
+			for _, w := range p.Workloads {
+				if w.Resource == r.Actions[i].Resource && strings.Contains(w.Target, "→ v2") {
+					r.Actions[i].Requirement = "required"
+					break
+				}
+			}
+		}
+	}
 	filtered := p.Actions[:0]
 	for _, a := range p.Actions {
 		if !strings.HasPrefix(a.ID, "KW-CGROUP-") {

@@ -23,6 +23,7 @@ type MatrixRow struct {
 
 func BuildMatrix(p *Plan) {
 	p.Matrix = []MatrixRow{}
+	defer func() { p.Matrix = append(p.Matrix, p.Workloads...); p.Matrix = append(p.Matrix, p.Drain...) }()
 	add := func(topic, current, target, status, evidence, action string) {
 		p.Matrix = append(p.Matrix, MatrixRow{Topic: topic, Current: current, Target: target, Status: status, Evidence: evidence, Action: action})
 	}
@@ -149,6 +150,10 @@ func CompareManifests(ctx context.Context, p *Plan, before, after manifest.Set, 
 		return err
 	}
 	p.AfterReport = &report
+	p.Transitions, err = trackFindings(ctx, before, after, p.To, namespace)
+	if err != nil {
+		return err
+	}
 	BuildMatrix(p)
 	p.Matrix[0] = MatrixRow{Topic: "manifest", Current: fmt.Sprintf("%d resources", len(before.Resources)), Target: fmt.Sprintf("%d proposed resources; schema %s", len(after.Resources), report.Schema.Version), Status: "review_required", Evidence: fmt.Sprintf("%d structural differences; %d target findings", len(diff.Changes), len(report.Findings)), Action: "Proposed configuration, not an applied state. Values omitted; defaults, admission and runtime behavior require separate validation"}
 	for _, c := range diff.Changes {
@@ -176,6 +181,9 @@ func CompareManifests(ctx context.Context, p *Plan, before, after manifest.Set, 
 			status = "action_required"
 		}
 		p.Matrix = append(p.Matrix, MatrixRow{Topic: "target-validation", Resource: f.Resource + "#" + f.Field, Current: "Current findings remain in inspection table", Target: f.Message, Status: status, Evidence: f.Rule, Action: "Resolve or verify this finding in the proposed manifest"})
+	}
+	for _, f := range p.Transitions {
+		p.Matrix = append(p.Matrix, MatrixRow{Topic: "finding-transition", Resource: f.Resource + "#" + f.Field, Current: f.Before, Target: f.After, Status: f.Status, Evidence: f.Rule + "; " + f.Evidence, Action: "Status applies only to this supported check against the same target version; no deployment or runtime success inferred"})
 	}
 	p.Unchecked = append(p.Unchecked, diff.Unchecked...)
 	return nil

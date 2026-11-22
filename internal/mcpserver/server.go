@@ -113,6 +113,10 @@ func NewConfigured(c Config) *mcp.Server {
 			return nil, analyze.Plan{}, e
 		}
 		r, e := analyze.Upgrade(ctx, set, a.From, a.To)
+		if e == nil {
+			analyze.AttachReadiness(&r, set, c.Namespace)
+			analyze.BuildMatrix(&r)
+		}
 		r.Unchecked = append(r.Unchecked, snapshotGaps()...)
 		return nil, r, e
 	})
@@ -166,6 +170,10 @@ func NewConfigured(c Config) *mcp.Server {
 				return nil, analyze.Plan{}, e
 			}
 			p, e := analyze.Project(ctx, set, profile)
+			if e == nil {
+				analyze.AttachReadiness(&p, set, c.Namespace)
+				analyze.BuildMatrix(&p)
+			}
 			p.Unchecked = append(p.Unchecked, snapshotGaps()...)
 			return nil, p, e
 		})

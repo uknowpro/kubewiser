@@ -120,3 +120,16 @@ func TestMatrixFormatsAndAfterFlag(t *testing.T) {
 		t.Fatal(code)
 	}
 }
+
+func TestUpgradeReadinessAndProgressMatrix(t *testing.T) {
+	var out, errs bytes.Buffer
+	args := []string{"plan", "upgrade", "--source", "../../docs/examples/readiness/before.yaml", "--after", "../../docs/examples/readiness/after.yaml", "--cgroup-evidence", "../../docs/examples/readiness/pools.json", "--from", "1.21", "--to", "1.36", "--format", "html", "--lang", "ko"}
+	if code := Run(args, &out, &errs); code != 0 {
+		t.Fatal(code, errs.String())
+	}
+	for _, want := range []string{"워크로드 · 노드풀 영향", "Drain · PDB 위험", "문제 해결 상태", "해결됨 (검사 범위 내)", "apppool", `id="findings-table"`} {
+		if !strings.Contains(out.String(), want) {
+			t.Fatal(want)
+		}
+	}
+}
