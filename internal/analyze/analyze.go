@@ -271,23 +271,24 @@ type Action struct {
 	Before       string `json:"before_version,omitempty"`
 }
 type Plan struct {
-	Workloads   []MatrixRow         `json:"workloads,omitempty"`
-	Drain       []MatrixRow         `json:"drain,omitempty"`
-	Transitions []FindingTransition `json:"finding_transitions,omitempty"`
-	Matrix      []MatrixRow         `json:"matrix,omitempty"`
-	AfterReport *scan.Report        `json:"after_report,omitempty"`
-	Cgroup      *CgroupReport       `json:"cgroup,omitempty"`
-	Lifecycle   *LifecycleReport    `json:"lifecycle,omitempty"`
-	Route       *AKSRoute           `json:"aks_route,omitempty"`
-	Project     *ProjectProfile     `json:"project,omitempty"`
-	Status      string              `json:"status,omitempty"`
-	Kind        string              `json:"kind"`
-	From        string              `json:"from"`
-	To          string              `json:"to"`
-	Steps       []string            `json:"steps"`
-	Actions     []Action            `json:"actions"`
-	Unchecked   []string            `json:"unchecked"`
-	Report      *scan.Report        `json:"report,omitempty"`
+	ApplicationSources []MatrixRow         `json:"application_sources,omitempty"`
+	Workloads          []MatrixRow         `json:"workloads,omitempty"`
+	Drain              []MatrixRow         `json:"drain,omitempty"`
+	Transitions        []FindingTransition `json:"finding_transitions,omitempty"`
+	Matrix             []MatrixRow         `json:"matrix,omitempty"`
+	AfterReport        *scan.Report        `json:"after_report,omitempty"`
+	Cgroup             *CgroupReport       `json:"cgroup,omitempty"`
+	Lifecycle          *LifecycleReport    `json:"lifecycle,omitempty"`
+	Route              *AKSRoute           `json:"aks_route,omitempty"`
+	Project            *ProjectProfile     `json:"project,omitempty"`
+	Status             string              `json:"status,omitempty"`
+	Kind               string              `json:"kind"`
+	From               string              `json:"from"`
+	To                 string              `json:"to"`
+	Steps              []string            `json:"steps"`
+	Actions            []Action            `json:"actions"`
+	Unchecked          []string            `json:"unchecked"`
+	Report             *scan.Report        `json:"report,omitempty"`
 }
 
 func Upgrade(ctx context.Context, set manifest.Set, from, to string) (Plan, error) {

@@ -68,6 +68,16 @@ Includes workload-to-pool impact, PDB/drain risk and **resolved / remaining / in
 
 ![Manifest changes and cgroup, kernel and runtime verdicts in a single review matrix](docs/images/matrix.png)
 
+### Automatic Dockerfile review (v0.2.0-alpha.13)
+
+`scan cgroup`, `plan upgrade`, and `plan aks` **automatically inspect Dockerfiles/Containerfiles within `--source`**, with no additional option. Directory inputs include descendants; a manifest file includes only its own directory. Findings show file, stage and line alongside Java cgroup v2 baselines, v1 file references and disabled JVM container awareness in the matrix and existing inspection table.
+
+```sh
+kubewiser plan upgrade --source ./project --from 1.21 --to 1.36 --format html > upgrade.html
+```
+
+Missing files, ambiguous tags and unsupported syntax remain explicitly unknown/unsupported. Meeting a tag baseline does not certify the built image. [Scope, limitations and Windows examples](docs/dockerfile.md) · [Example HTML](docs/examples/dockerfile/report.html)
+
 ### Cgroup As-Is / To-Be (v0.2.0-alpha.8)
 
 Compare per-pool v1/v2/hybrid modes, conflicting or missing evidence, target prerequisites and workload v1 dependency hints. [Evidence format and coverage](docs/cgroup.md). No node commands are executed.

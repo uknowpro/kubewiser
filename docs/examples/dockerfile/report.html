@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Kubewiser report</title><style>
+:root{color-scheme:light dark;font-family:system-ui,sans-serif;line-height:1.5}body{max-width:1400px;margin:0 auto;padding:32px}h1{margin-bottom:8px}h2,h3{margin-top:32px}section{margin:16px 0}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #8886;text-align:left;vertical-align:top;padding:10px;white-space:pre-wrap;overflow-wrap:anywhere}th{background:#8882}tbody tr:nth-child(even){background:#8881}.muted{opacity:.7}li{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0}@media print{body{padding:0;font-size:11px}.table-wrap{overflow:visible}tr{break-inside:avoid}h2,h3{break-after:avoid}}
+
+:root{color-scheme:light;font-family:system-ui,sans-serif;color:#172b3a;background:#f3f6fa}body{max-width:1080px;padding:40px 24px}header{margin-bottom:24px}h1{font-size:32px;letter-spacing:-.03em}h2{font-size:22px;margin:12px 0}h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;margin:0 0 12px}.eyebrow{font-size:12px;font-weight:700;color:#486079;letter-spacing:.12em}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.metric{background:white;border:1px solid #d8e1ea;border-radius:12px;padding:18px 24px;border-top:4px solid #75869b}.metric.required{border-top-color:#b42318}.metric.conditional{border-top-color:#a66300}.metric.optional{border-top-color:#245eb0}.metric strong{font-size:34px;display:block}.metric span{font-size:14px}.notice{font-size:13px;color:#526277;background:#e8eef5;padding:12px 16px;border-radius:8px}.finding{background:white;border:1px solid #d8e1ea;border-radius:14px;padding:24px;margin:24px 0}.finding-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.badge{font-size:12px;font-weight:700;border-radius:6px;padding:4px 10px;background:#fff0d1;color:#795000}.required .badge{background:#fee6e3;color:#a42118}.optional .badge{background:#e6efff;color:#245eb0}.resource{font-family:ui-monospace,monospace;font-size:13px;overflow-wrap:anywhere;color:#486079}.comparison{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}.comparison section{margin:0;padding:18px;background:#f5f7fa;border-radius:8px;border:1px solid #dfe5ec}.comparison .recommended{background:#edf7f4;border-color:#b8dcd1}.comparison p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}dl{display:grid;grid-template-columns:130px 1fr;gap:12px;font-size:14px}dt{font-weight:650}dd{margin:0;overflow-wrap:anywhere}a{color:#245eb0}.coverage{border-top:1px solid #d8e1ea;padding-top:20px;font-size:14px}details{margin:24px 0;background:white;border:1px solid #d8e1ea;border-radius:8px;padding:16px}summary{cursor:pointer;font-weight:600}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}.muted{color:#58697c;opacity:1}@media(max-width:640px){body{padding:20px 12px}.comparison{grid-template-columns:1fr}.metrics{gap:8px}.metric{padding:12px}.metric strong{font-size:28px}dl{grid-template-columns:1fr;gap:6px}dd{margin-bottom:10px}}@media print{body{background:white}.finding{break-inside:avoid}details{display:block}details pre{display:block}}
+
+body{max-width:1680px;padding:24px}h1{font-size:26px}.metrics{display:flex;gap:12px}.metric{padding:8px 16px;display:flex;align-items:center;gap:12px}.metric strong{font-size:24px}.notice{padding:8px 12px}.compact-table{font-size:12px;line-height:1.45;table-layout:fixed;background:white}.compact-table th,.compact-table td{padding:8px;white-space:normal}.compact-table thead th{background:#e8eef5}.compact-table .resource{font-size:11px;margin-top:4px}.compact-table details{margin:4px 0 0;padding:0;border:0;background:transparent}.compact-table summary{font-size:11px;color:#245eb0}.compact-table dl{display:block;font-size:12px}.compact-table dt{margin-top:8px}.compact-table dd{margin-top:3px}.compact-table .badge{display:inline-block;padding:2px 5px;white-space:nowrap}.compact-table p{margin:4px 0}.compact-table .row-number{width:4%}.compact-table .priority{width:8%}.compact-table .subject{width:22%}.compact-table .state{width:22%}.compact-table .next{width:22%}.table-note{font-size:12px;color:#58697c}.compact-table .source-link{display:block;font-size:11px;margin-top:4px}@media(max-width:900px){.compact-table{min-width:1000px}body{padding:16px 10px}}@media print{body{max-width:none;padding:0}.compact-table{min-width:0;font-size:9px}.compact-table td,.compact-table th{padding:4px}.compact-table details:not([open]) dl{display:none}.metrics{gap:8px}thead{display:table-header-group}}
+#findings-table th:nth-child(1){width:3%}#findings-table th:nth-child(2){width:7%}#findings-table th:nth-child(3){width:20%}#findings-table th:nth-child(4){width:21%}#findings-table th:nth-child(5){width:23%}#findings-table th:nth-child(6){width:26%}#version-comparison th:nth-child(1){width:7%}#version-comparison th:nth-child(2){width:21%}#version-comparison th:nth-child(3){width:16%}#version-comparison th:nth-child(4){width:22%}#version-comparison th:nth-child(5){width:22%}#version-comparison th:nth-child(6){width:12%}</style></head><body><main>
+<header><p class="eyebrow">KUBEWISER · EVIDENCE-BASED REVIEW</p><h1>Change plan</h1><p>Start with required actions, then check whether conditional recommendations apply to your workloads.</p><p class="muted">1.21 → 1.36</p></header><div class="metrics"><div class="metric required"><strong>0</strong><span>Required</span></div><div class="metric conditional"><strong>11</strong><span>Conditional</span></div><div class="metric optional"><strong>0</strong><span>Optional</span></div></div><p class="notice">Partial coverage · Recommendations require workload validation · No automatic changes</p><section><h2>Manifest and environment review matrix</h2><p class="table-note">Grouped coverage review; merged cells share a topic group or resource, never a verdict. Missing evidence stays visible. Proposed manifests are not applied state; raw field values are omitted.</p><style>#review-matrix{table-layout:fixed;font-size:12px}#review-matrix th,#review-matrix td{padding:7px 8px;overflow-wrap:anywhere}#review-matrix thead th:nth-child(1){width:9%}#review-matrix thead th:nth-child(2){width:14%}#review-matrix thead th:nth-child(3){width:16%}#review-matrix thead th:nth-child(4){width:14%}#review-matrix thead th:nth-child(5){width:19%}#review-matrix thead th:nth-child(6){width:15%}#review-matrix thead th:nth-child(7){width:13%}#review-matrix .matrix-group{vertical-align:middle;background:#e6edf5;color:#23415c}#review-matrix .matrix-resource{vertical-align:middle;background:#f3f6fa;font-weight:400}#review-matrix .group-start>*{border-top:2px solid #a9b9ca}#review-matrix .resource{font-size:11px}#review-matrix .matrix-topic{font-weight:600}</style><div class="table-wrap"><table class="compact-table" id="review-matrix"><thead><tr><th scope="col">Group</th><th scope="col">Resource / pool</th><th scope="col">Topic / field</th><th scope="col">As-Is</th><th scope="col">To-Be</th><th scope="col">Verdict</th><th scope="col">Details</th></tr></thead><tbody><tr class="group-start"><td class="matrix-group" rowspan="4"><strong>Manifest / API</strong></td><td class="matrix-resource" rowspan="4"><span class="resource">Overall</span></td><td><span class="matrix-topic">Manifest comparison</span></td><td>Supplied current manifests</td><td>Recommendation only; no proposed manifests supplied</td><td>Input missing</td><td><details><summary>Evidence</summary><p>No before/after field comparison performed</p><p>Supply --after PATH to compare proposed manifests and validate them against the target version</p></details></td></tr><tr><td><span class="matrix-topic">API versions</span></td><td>1.21</td><td>1.36</td><td>No finding in supported checks</td><td><details><summary>Evidence</summary><p>No matching finding; coverage is partial</p><p>Review removed APIs and API clients; absence in supplied manifests is not proof of absence</p></details></td></tr><tr><td><span class="matrix-topic">Target schema</span></td><td>1.21</td><td>1.36</td><td>No finding in supported checks</td><td><details><summary>Evidence</summary><p>No matching finding; coverage is partial</p><p>Review target schema findings and exact bundled schema version; admission remains separate</p></details></td></tr><tr><td><span class="matrix-topic">Defaults / behavior</span></td><td>1.21</td><td>1.36</td><td>Review required</td><td><details><summary>Evidence</summary><p>3 related findings; see inspection details</p><p>Review selected behavior changes; exhaustive default/feature-gate comparison is not implemented</p></details></td></tr><tr class="group-start"><td class="matrix-group" rowspan="7"><strong>Platform / nodes</strong></td><td class="matrix-resource" rowspan="6"><span class="resource">Overall</span></td><td><span class="matrix-topic">CPU / image platform</span></td><td>Not established</td><td>Evidence needed</td><td>Input missing</td><td><details><summary>Evidence</summary><p>No matching finding; coverage is partial</p><p>Provide target platform and local OCI evidence in an AKS profile; test native dependencies</p></details></td></tr><tr><td><span class="matrix-topic">OS</span></td><td>Not established</td><td>Evidence needed</td><td>Input missing</td><td><details><summary>Evidence</summary><p>No matching finding; coverage is partial</p><p>Provide current/target OS architecture declarations and verify vendor support</p></details></td></tr><tr><td><span class="matrix-topic">Cgroup mode</span></td><td>Unknown</td><td>Unknown</td><td>Input missing</td><td><details><summary>Evidence</summary><p>No current/target node-pool evidence supplied</p><p>Supply --cgroup-evidence or AKS profile cgroup_pools; OS/Kubernetes versions do not establish cgroup mode</p></details></td></tr><tr><td><span class="matrix-topic">Kernel</span></td><td>Unknown</td><td>Unknown</td><td>Input missing</td><td><details><summary>Evidence</summary><p>No current/target node-pool evidence supplied</p><p>Supply --cgroup-evidence or AKS profile cgroup_pools; OS/Kubernetes versions do not establish cgroup mode</p></details></td></tr><tr><td><span class="matrix-topic">Container runtime</span></td><td>Unknown</td><td>Unknown</td><td>Input missing</td><td><details><summary>Evidence</summary><p>No current/target node-pool evidence supplied</p><p>Supply --cgroup-evidence or AKS profile cgroup_pools; OS/Kubernetes versions do not establish cgroup mode</p></details></td></tr><tr><td><span class="matrix-topic">Kubelet / runtime drivers</span></td><td>Unknown</td><td>Unknown</td><td>Input missing</td><td><details><summary>Evidence</summary><p>No current/target node-pool evidence supplied</p><p>Supply --cgroup-evidence or AKS profile cgroup_pools; OS/Kubernetes versions do not establish cgroup mode</p></details></td></tr><tr><td class="matrix-resource" rowspan="1"><span class="resource">apps/v1/Deployment//synthetic-java</span></td><td><span class="matrix-topic">Workload / pool impact</span></td><td>No usable Node inventory supplied</td><td>Unknown</td><td>Input missing</td><td><details><summary>Evidence</summary><p></p><p>Supply Nodes; validate capacity, topology and storage separately</p></details></td></tr><tr class="group-start"><td class="matrix-group" rowspan="8"><strong>Components / operations</strong></td><td class="matrix-resource" rowspan="4"><span class="resource">Overall</span></td><td><span class="matrix-topic">Support lifecycle</span></td><td>Not established</td><td>Evidence needed</td><td>No finding in supported checks</td><td><details><summary>Evidence</summary><p>No matching finding; coverage is partial</p><p>Verify components outside the selected lifecycle catalog</p></details></td></tr><tr><td><span class="matrix-topic">Ingress</span></td><td>Not established</td><td>Evidence needed</td><td>Analyzer not implemented</td><td><details><summary>Evidence</summary><p>No matching finding; coverage is partial</p><p>Validate target controller annotations, TLS and routing; general controller conversion is not implemented</p></details></td></tr><tr><td><span class="matrix-topic">Storage / CSI</span></td><td>Not established</td><td>Evidence needed</td><td>Analyzer not implemented</td><td><details><summary>Evidence</summary><p>No matching finding; coverage is partial</p><p>Verify CSI, access modes, zones and restore behavior</p></details></td></tr><tr><td><span class="matrix-topic">Application behavior</span></td><td>Not established</td><td>Evidence needed</td><td>Execution validation required</td><td><details><summary>Evidence</summary><p>No matching finding; coverage is partial</p><p>Test memory/OOM, CPU throttling, application runtimes and agents on target nodes</p></details></td></tr><tr><td class="matrix-resource" rowspan="3"><span class="resource">docs/examples/dockerfile/Dockerfile</span></td><td><span class="matrix-topic">Dockerfile / application runtime</span><div class="resource">stage 1, line 2</div></td><td>Recognized HotSpot image tag declares Java 11.0.15</td><td>HotSpot cgroup v2 baseline: 8u372+, 11.0.16+, or 15+; use a maintained vendor build</td><td>Review required</td><td><details><summary>Evidence</summary><p>Local Dockerfile sha256:c3d3eaf3e7260bd66220ceef8af8bd015dad605c9c234c59522e482bc0f0d805; stage declaration only, not deployed-image evidence; Declared tag predates the documented HotSpot cgroup v2 baseline; runtime may read host limits and size resources incorrectly. Verify vendor backports and the actual built image</p><p>Verify the built image digest and actual runtime; test memory limits/OOM and CPU throttling on cgroup v2</p></details></td></tr><tr><td><span class="matrix-topic">Dockerfile / application runtime</span><div class="resource">stage 1, line 3</div></td><td>Java container awareness disabled</td><td>Review effective JVM flags and resource sizing on cgroup v2</td><td>Review required</td><td><details><summary>Evidence</summary><p>Local Dockerfile sha256:c3d3eaf3e7260bd66220ceef8af8bd015dad605c9c234c59522e482bc0f0d805; stage declaration only, not deployed-image evidence; Static JVM option; build-time and effective runtime configuration may differ; command contents omitted</p><p>Verify the built image digest and actual runtime; test memory limits/OOM and CPU throttling on cgroup v2</p></details></td></tr><tr><td><span class="matrix-topic">Dockerfile / application runtime</span><div class="resource">stage 1, line 4</div></td><td>cgroup v1 file reference: memory.limit_in_bytes</td><td>Use hierarchy-aware readers; v2 memory.max/memory.current/cpu.max/cpu.weight have different semantics</td><td>Review required</td><td><details><summary>Evidence</summary><p>Local Dockerfile sha256:c3d3eaf3e7260bd66220ceef8af8bd015dad605c9c234c59522e482bc0f0d805; stage declaration only, not deployed-image evidence; Static token match; a comment, fallback or unused build stage is possible; command contents omitted</p><p>Verify the built image digest and actual runtime; test memory limits/OOM and CPU throttling on cgroup v2</p></details></td></tr><tr><td class="matrix-resource" rowspan="1"><span class="resource">workloads</span></td><td><span class="matrix-topic">Drain / PDB risk</span></td><td>No supported drain risk detected</td><td>Verify full inventory</td><td>Input missing</td><td><details><summary>Evidence</summary><p>No complete drain feasibility assessment is performed</p><p>Offline risk review only. Recheck live PDB status, healthy replicas and remaining-node capacity before an explicitly authorized drain</p></details></td></tr></tbody></table></div></section><section><h2>Cgroup As-Is / To-Be</h2><p class="table-note">Supplied node evidence or declarations; same mode does not certify application compatibility. No node commands executed. · Rules reviewed: 2026-11-17</p><div class="table-wrap"><table class="compact-table" id="cgroup-table"><thead><tr><th scope="col">Node pool</th><th scope="col">As-Is</th><th scope="col">To-Be</th><th scope="col">Verdict</th><th scope="col">Evidence</th><th scope="col">Prerequisites / actions</th></tr></thead><tbody><tr><td colspan="6">No current/target cgroup evidence supplied; mode cannot be inferred from Kubernetes or OS version alone.</td></tr></tbody></table></div></section><section><h2>Support lifecycle</h2><p class="table-note">Evaluated: 2026-11-23 UTC · Catalog reviewed: 2026-11-17 · Selected catalog; not an exhaustive support audit. Month-only deadlines do not imply an exact day.</p><div class="table-wrap"><table class="compact-table" id="lifecycle-table"><thead><tr><th scope="col">Component / resource</th><th scope="col">Status</th><th scope="col">End of support</th><th scope="col">Support scope</th><th scope="col">Identification evidence</th><th scope="col">Replacement / action</th></tr></thead><tbody><tr><td colspan="6">No catalog matches; support status of unrecognized components is not verified.</td></tr></tbody></table></div></section><section><h2>As-Is / To-Be version changes · 1.21 → 1.36</h2><p class="table-note">Selected bundled API-removal rules and reported behavior changes, ordered by first affected version. Not all release changes; not a verified AKS upgrade route. Missing findings do not establish absence. Existing issues predating As-Is remain in the findings table.</p><div class="table-wrap"><table class="compact-table" id="version-comparison"><thead><tr><th scope="col">First affected</th><th scope="col">Change</th><th scope="col">As-Is 1.21</th><th scope="col">To-Be 1.36</th><th scope="col">Action</th><th scope="col">Input evidence</th></tr></thead><tbody><tr><td>1.22</td><td>CSIDriver · storage.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: storage.k8s.io/v1beta1</td><td>Removed; replacement: storage.k8s.io/v1</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.22</td><td>CSINode · storage.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: storage.k8s.io/v1beta1</td><td>Removed; replacement: storage.k8s.io/v1</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.22</td><td>CertificateSigningRequest · certificates.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: certificates.k8s.io/v1beta1</td><td>Removed; replacement: certificates.k8s.io/v1; signerName required</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.22</td><td>ClusterRole · rbac.authorization.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: rbac.authorization.k8s.io/v1beta1</td><td>Removed; replacement: rbac.authorization.k8s.io/v1</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.22</td><td>ClusterRoleBinding · rbac.authorization.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: rbac.authorization.k8s.io/v1beta1</td><td>Removed; replacement: rbac.authorization.k8s.io/v1</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.22</td><td>CustomResourceDefinition · apiextensions.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: apiextensions.k8s.io/v1beta1</td><td>Removed; replacement: apiextensions.k8s.io/v1; structural schemas and per-version fields required</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.22</td><td>Ingress · extensions/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: extensions/v1beta1</td><td>Removed; replacement: networking.k8s.io/v1; convert backend fields and specify pathType</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.22</td><td>Ingress · networking.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: networking.k8s.io/v1beta1</td><td>Removed; replacement: networking.k8s.io/v1; convert backend fields and specify pathType</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.22</td><td>MutatingWebhookConfiguration · admissionregistration.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: admissionregistration.k8s.io/v1beta1</td><td>Removed; replacement: admissionregistration.k8s.io/v1; review sideEffects, admissionReviewVersions and failurePolicy</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.22</td><td>Role · rbac.authorization.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: rbac.authorization.k8s.io/v1beta1</td><td>Removed; replacement: rbac.authorization.k8s.io/v1</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.22</td><td>RoleBinding · rbac.authorization.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: rbac.authorization.k8s.io/v1beta1</td><td>Removed; replacement: rbac.authorization.k8s.io/v1</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.22</td><td>StorageClass · storage.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: storage.k8s.io/v1beta1</td><td>Removed; replacement: storage.k8s.io/v1</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.22</td><td>ValidatingWebhookConfiguration · admissionregistration.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: admissionregistration.k8s.io/v1beta1</td><td>Removed; replacement: admissionregistration.k8s.io/v1; review sideEffects, admissionReviewVersions and failurePolicy</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.22</td><td>VolumeAttachment · storage.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: storage.k8s.io/v1beta1</td><td>Removed; replacement: storage.k8s.io/v1</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.24</td><td>KW-BEHAVIOR-DOCKERSHIM<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/tasks/administer-cluster/migrating-from-dockershim/">Reference ↗</a></td><td>Built-in dockershim available</td><td>Built-in dockershim removed; verify CRI runtime</td><td>Verify the configured CRI runtime and run runtime-dependent agents on a test node</td><td>Version-range review; actual impact unverified</td></tr><tr><td>1.24</td><td>KW-BEHAVIOR-SA-TOKEN<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/security/service-accounts/">Reference ↗</a></td><td>Automatic ServiceAccount token Secret generation</td><td>Automatic generation disabled by default; review token consumers</td><td>Test projected token rotation and external clients without copying credentials into reports</td><td>Version-range review; actual impact unverified</td></tr><tr><td>1.25</td><td>CronJob · batch/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: batch/v1beta1</td><td>Removed; replacement: batch/v1</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.25</td><td>EndpointSlice · discovery.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: discovery.k8s.io/v1beta1</td><td>Removed; replacement: discovery.k8s.io/v1; topology fields changed</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.25</td><td>Event · events.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: events.k8s.io/v1beta1</td><td>Removed; replacement: events.k8s.io/v1</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.25</td><td>HorizontalPodAutoscaler · autoscaling/v2beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: autoscaling/v2beta1</td><td>Removed; replacement: autoscaling/v2; convert metric target fields</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.25</td><td>KW-BEHAVIOR-PSP<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/security/pod-security-policy/">Reference ↗</a></td><td>PodSecurityPolicy</td><td>Removed; validate replacement admission controls</td><td>Test allowed and rejected workloads in staging; do not assume equivalent policies</td><td>Version-range review; actual impact unverified</td></tr><tr><td>1.25</td><td>PodDisruptionBudget · policy/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: policy/v1beta1</td><td>Removed; replacement: policy/v1; empty selector {} selects all pods, unlike v1beta1</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.25</td><td>PodSecurityPolicy · policy/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: policy/v1beta1</td><td>Removed; replacement: Pod Security Admission or alternative policy controller; no direct API replacement</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.26</td><td>FlowSchema · flowcontrol.apiserver.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: flowcontrol.apiserver.k8s.io/v1beta1</td><td>Removed; replacement: flowcontrol.apiserver.k8s.io/v1; review concurrency field changes</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.26</td><td>HorizontalPodAutoscaler · autoscaling/v2beta2<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: autoscaling/v2beta2</td><td>Removed; replacement: autoscaling/v2</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.26</td><td>PriorityLevelConfiguration · flowcontrol.apiserver.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: flowcontrol.apiserver.k8s.io/v1beta1</td><td>Removed; replacement: flowcontrol.apiserver.k8s.io/v1; review concurrency field changes</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.27</td><td>CSIStorageCapacity · storage.k8s.io/v1beta1<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: storage.k8s.io/v1beta1</td><td>Removed; replacement: storage.k8s.io/v1</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.29</td><td>FlowSchema · flowcontrol.apiserver.k8s.io/v1beta2<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: flowcontrol.apiserver.k8s.io/v1beta2</td><td>Removed; replacement: flowcontrol.apiserver.k8s.io/v1; review nominalConcurrencyShares</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.29</td><td>PriorityLevelConfiguration · flowcontrol.apiserver.k8s.io/v1beta2<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: flowcontrol.apiserver.k8s.io/v1beta2</td><td>Removed; replacement: flowcontrol.apiserver.k8s.io/v1; review nominalConcurrencyShares</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.32</td><td>FlowSchema · flowcontrol.apiserver.k8s.io/v1beta3<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: flowcontrol.apiserver.k8s.io/v1beta3</td><td>Removed; replacement: flowcontrol.apiserver.k8s.io/v1; explicit zero nominalConcurrencyShares is no longer defaulted to 30</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr><tr><td>1.32</td><td>PriorityLevelConfiguration · flowcontrol.apiserver.k8s.io/v1beta3<a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/reference/using-api/deprecation-guide/">Reference ↗</a></td><td>Served API: flowcontrol.apiserver.k8s.io/v1beta3</td><td>Removed; replacement: flowcontrol.apiserver.k8s.io/v1; explicit zero nominalConcurrencyShares is no longer defaulted to 30</td><td>Required if used: migrate fields and API clients before removal</td><td>Not detected in supplied inputs; usage remains unverified</td></tr></tbody></table></div></section><section><h2>Inspection results (11)</h2><div class="table-wrap"><table class="compact-table" id="findings-table"><thead><tr><th scope="col">#</th><th scope="col">Priority</th><th scope="col">Finding / resource</th><th scope="col">Current state</th><th scope="col">Recommended state</th><th scope="col">Action / evidence</th></tr></thead><tbody><tr class="conditional"><td>1</td><td><span class="badge">Conditional</span></td><td><strong>Check readiness before routing traffic</strong><div class="resource">apps/v1/Deployment//synthetic-java</div><div class="muted">KW-READINESS</div></td><td>No readinessProbe declared.</td><td>For a service-serving container, an application-specific readiness check. A batch-only job may not need one.</td><td>Confirm this container serves traffic; then choose a real health endpoint or check. No endpoint or port is guessed.<details><summary>Details / verification</summary><dl><dt>Why</dt><dd>A running process does not necessarily mean it is ready to serve requests.</dd><dt>Verify</dt><dd>Re-run target validation and test workload behavior in staging</dd><dt>Location / deadline</dt><dd> · Deadline: 1.36</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">Reference ↗</a></details></td></tr><tr class="conditional"><td>2</td><td><span class="badge">Conditional</span></td><td><strong>Review cgroup mode and dependencies</strong><div class="resource">node pools</div><div class="muted">KW-CGROUP-MODE</div></td><td>unknown</td><td>Provide current and target cgroup evidence</td><td>Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed<details><summary>Details / verification</summary><dl><dt>Why</dt><dd>No node-pool cgroup comparison evidence supplied</dd><dt>Verify</dt><dd>Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/architecture/cgroups/">Reference ↗</a></details></td></tr><tr class="conditional"><td>3</td><td><span class="badge">Conditional</span></td><td><strong>Review cgroup mode and dependencies</strong><div class="resource">node pools</div><div class="muted">KW-CGROUP-PREREQUISITE</div></td><td>Target mode unknown</td><td>Confirm v2 or explicitly validated provider exception</td><td>Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed<details><summary>Details / verification</summary><dl><dt>Why</dt><dd>Kubernetes 1.35+ refuses cgroup v1 by default; verify effective failCgroupV1 without inferring actual node mode</dd><dt>Verify</dt><dd>Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/architecture/cgroups/">Reference ↗</a></details></td></tr><tr class="conditional"><td>4</td><td><span class="badge">Conditional</span></td><td><strong>Review version behavior change</strong><div class="resource"></div><div class="muted">KW-BEHAVIOR-DOCKERSHIM</div></td><td>A rule reported a condition requiring review; see the original evidence below.</td><td>Review the documented requirement for the target environment.</td><td>Verify the configured CRI runtime and run runtime-dependent agents on a test node<details><summary>Details / verification</summary><dl><dt>Why</dt><dd>Dockershim is removed: review Docker socket mounts, runtime monitoring and image build dependencies</dd><dt>Verify</dt><dd>Verify the configured CRI runtime and run runtime-dependent agents on a test node</dd><dt>Location / deadline</dt><dd> · Deadline: 1.24</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/tasks/administer-cluster/migrating-from-dockershim/">Reference ↗</a></details></td></tr><tr class="conditional"><td>5</td><td><span class="badge">Conditional</span></td><td><strong>Review version behavior change</strong><div class="resource"></div><div class="muted">KW-BEHAVIOR-SA-TOKEN</div></td><td>A rule reported a condition requiring review; see the original evidence below.</td><td>Review the documented requirement for the target environment.</td><td>Test projected token rotation and external clients without copying credentials into reports<details><summary>Details / verification</summary><dl><dt>Why</dt><dd>ServiceAccount token Secrets are no longer automatically generated; review clients expecting them</dd><dt>Verify</dt><dd>Test projected token rotation and external clients without copying credentials into reports</dd><dt>Location / deadline</dt><dd> · Deadline: 1.24</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/security/service-accounts/">Reference ↗</a></details></td></tr><tr class="conditional"><td>6</td><td><span class="badge">Conditional</span></td><td><strong>Review version behavior change</strong><div class="resource"></div><div class="muted">KW-BEHAVIOR-PSP</div></td><td>A rule reported a condition requiring review; see the original evidence below.</td><td>Review the documented requirement for the target environment.</td><td>Test allowed and rejected workloads in staging; do not assume equivalent policies<details><summary>Details / verification</summary><dl><dt>Why</dt><dd>PodSecurityPolicy is removed; validate replacement admission controls and namespace policy before upgrade</dd><dt>Verify</dt><dd>Test allowed and rejected workloads in staging; do not assume equivalent policies</dd><dt>Location / deadline</dt><dd> · Deadline: 1.25</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/security/pod-security-policy/">Reference ↗</a></details></td></tr><tr class="conditional"><td>7</td><td><span class="badge">Conditional</span></td><td><strong>Verify component compatibility</strong><div class="resource"></div><div class="muted">KW-ADDON-MATRIX</div></td><td>Kubelet skew or add-on compatibility needs review; see the original finding.</td><td>Compatible component versions at every minor upgrade step.</td><td>Check Kubernetes skew policy and CNI/CSI/ingress/webhook vendor matrices for each step.<details><summary>Details / verification</summary><dl><dt>Why</dt><dd>Verify CNI, CSI, ingress, admission webhooks and managed-provider upgrade support for each step</dd><dt>Verify</dt><dd>Use vendor version matrices and staging tests; these dependencies are not inferred from Kubernetes schemas</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/releases/version-skew-policy/">Reference ↗</a></details></td></tr><tr class="conditional"><td>8</td><td><span class="badge">Conditional</span></td><td><strong>KW-DRAIN-REVIEW</strong><div class="resource">workloads</div><div class="muted">KW-DRAIN-REVIEW</div></td><td>No supported drain risk detected</td><td>Verify full inventory</td><td>Review the affected resource and documentation before editing the configuration.<details><summary>Details / verification</summary><dl><dt>Why</dt><dd>No complete drain feasibility assessment is performed</dd><dt>Verify</dt><dd>Offline risk review only. Recheck live PDB status, healthy replicas and remaining-node capacity before an explicitly authorized drain</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/tasks/run-application/configure-pdb/">Reference ↗</a></details></td></tr><tr class="conditional"><td>9</td><td><span class="badge">Conditional</span></td><td><strong>KW-DOCKERFILE-BASE</strong><div class="resource">docs/examples/dockerfile/Dockerfile#stage 1, line 2</div><div class="muted">KW-DOCKERFILE-BASE</div></td><td>Recognized HotSpot image tag declares Java 11.0.15</td><td>HotSpot cgroup v2 baseline: 8u372+, 11.0.16+, or 15+; use a maintained vendor build</td><td>Review the affected resource and documentation before editing the configuration.<details><summary>Details / verification</summary><dl><dt>Why</dt><dd>Declared tag predates the documented HotSpot cgroup v2 baseline; runtime may read host limits and size resources incorrectly. Verify vendor backports and the actual built image</dd><dt>Verify</dt><dd>Verify the built image digest and actual runtime; test memory limits/OOM and CPU throttling on cgroup v2</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/architecture/cgroups/">Reference ↗</a></details></td></tr><tr class="conditional"><td>10</td><td><span class="badge">Conditional</span></td><td><strong>KW-DOCKERFILE-JAVA-OPTIONS</strong><div class="resource">docs/examples/dockerfile/Dockerfile#stage 1, line 3</div><div class="muted">KW-DOCKERFILE-JAVA-OPTIONS</div></td><td>Java container awareness disabled</td><td>Review effective JVM flags and resource sizing on cgroup v2</td><td>Review the affected resource and documentation before editing the configuration.<details><summary>Details / verification</summary><dl><dt>Why</dt><dd>Static JVM option; build-time and effective runtime configuration may differ; command contents omitted</dd><dt>Verify</dt><dd>Verify the built image digest and actual runtime; test memory limits/OOM and CPU throttling on cgroup v2</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/architecture/cgroups/">Reference ↗</a></details></td></tr><tr class="conditional"><td>11</td><td><span class="badge">Conditional</span></td><td><strong>KW-DOCKERFILE-V1-REFERENCE</strong><div class="resource">docs/examples/dockerfile/Dockerfile#stage 1, line 4</div><div class="muted">KW-DOCKERFILE-V1-REFERENCE</div></td><td>cgroup v1 file reference: memory.limit_in_bytes</td><td>Use hierarchy-aware readers; v2 memory.max/memory.current/cpu.max/cpu.weight have different semantics</td><td>Review the affected resource and documentation before editing the configuration.<details><summary>Details / verification</summary><dl><dt>Why</dt><dd>Static token match; a comment, fallback or unused build stage is possible; command contents omitted</dd><dt>Verify</dt><dd>Verify the built image digest and actual runtime; test memory limits/OOM and CPU throttling on cgroup v2</dd></dl><a class="source-link" rel="noreferrer" href="https://kubernetes.io/docs/concepts/architecture/cgroups/">Reference ↗</a></details></td></tr></tbody></table></div></section><section><h2>Upgrade / migration steps</h2><ol><li>1.22: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.23: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.24: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.25: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.26: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.27: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.28: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.29: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.30: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.31: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.32: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.33: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.34: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.35: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li><li>1.36: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads</li></ol></section><section class="coverage"><h2>Not verified</h2><p>These limits still apply even when no findings are reported.</p><ul><li>Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated</li><li>OpenAPI validation does not replace Kubernetes admission or server semantic validation</li><li>Requested version uses bundled v1.36.0; other patch-specific changes are not inferred</li><li>Cgroup results compare supplied evidence/declarations, not live nodes. OS or Kubernetes versions alone never establish the active cgroup mode.</li><li>Equal modes or minimum prerequisites do not certify application compatibility. Test memory limits/OOM, CPU throttling, agents and application runtime versions on target nodes.</li><li>Workload pool links use supplied Node labels/bindings and hard constraints only; target scheduling, capacity and pod affinity remain unverified. Redacted snapshots can hide configuration.</li><li>Selected, pinned lifecycle catalog only; absence of findings is not proof of support. No lifecycle databases or vendors are contacted.</li><li>Upstream retirement does not establish managed/vendor support coverage. Names, labels and mirror paths are hints only. Operator declarations are not independently verified.</li><li>Missing Node OS, controller resources, redacted annotations and snapshot scope may hide dependencies. Kubernetes API removal is evaluated separately by version scans and upgrade plans.</li><li>Audit logs/API client usage, add-on release matrices, actual node kernel/cgroup and image runtime dependencies are not automatically established</li><li>Dockerfile review inspects all declared stages, including unused build stages. Build target, ARG expansion, inherited configuration, COPY contents, installed packages, registry image contents and deployment digest linkage are unverified. No build, pull, script, network or cluster operation is executed. Dockerfile findings are not part of --after resolution tracking.</li></ul></section><details><summary>Original evidence, source hashes and metadata</summary><pre>{
+  &#34;actions&#34;: [
+    {
+      &#34;before_version&#34;: &#34;1.36&#34;,
+      &#34;id&#34;: &#34;KW-READINESS&#34;,
+      &#34;message&#34;: &#34;If serving traffic, define a readiness probe appropriate to the application&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;apps/v1/Deployment//synthetic-java&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/&#34;,
+      &#34;verification&#34;: &#34;Re-run target validation and test workload behavior in staging&#34;
+    },
+    {
+      &#34;current&#34;: &#34;unknown&#34;,
+      &#34;id&#34;: &#34;KW-CGROUP-MODE&#34;,
+      &#34;message&#34;: &#34;No node-pool cgroup comparison evidence supplied&#34;,
+      &#34;recommended&#34;: &#34;Provide current and target cgroup evidence&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;node pools&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/architecture/cgroups/&#34;,
+      &#34;verification&#34;: &#34;Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed&#34;
+    },
+    {
+      &#34;current&#34;: &#34;Target mode unknown&#34;,
+      &#34;id&#34;: &#34;KW-CGROUP-PREREQUISITE&#34;,
+      &#34;message&#34;: &#34;Kubernetes 1.35+ refuses cgroup v1 by default; verify effective failCgroupV1 without inferring actual node mode&#34;,
+      &#34;recommended&#34;: &#34;Confirm v2 or explicitly validated provider exception&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;node pools&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/architecture/cgroups/&#34;,
+      &#34;verification&#34;: &#34;Verify supplied node evidence and test CPU/memory enforcement, OOM behavior and monitoring on a canary; no commands are executed&#34;
+    },
+    {
+      &#34;before_version&#34;: &#34;1.24&#34;,
+      &#34;id&#34;: &#34;KW-BEHAVIOR-DOCKERSHIM&#34;,
+      &#34;message&#34;: &#34;Dockershim is removed: review Docker socket mounts, runtime monitoring and image build dependencies&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/tasks/administer-cluster/migrating-from-dockershim/&#34;,
+      &#34;verification&#34;: &#34;Verify the configured CRI runtime and run runtime-dependent agents on a test node&#34;
+    },
+    {
+      &#34;before_version&#34;: &#34;1.24&#34;,
+      &#34;id&#34;: &#34;KW-BEHAVIOR-SA-TOKEN&#34;,
+      &#34;message&#34;: &#34;ServiceAccount token Secrets are no longer automatically generated; review clients expecting them&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/security/service-accounts/&#34;,
+      &#34;verification&#34;: &#34;Test projected token rotation and external clients without copying credentials into reports&#34;
+    },
+    {
+      &#34;before_version&#34;: &#34;1.25&#34;,
+      &#34;id&#34;: &#34;KW-BEHAVIOR-PSP&#34;,
+      &#34;message&#34;: &#34;PodSecurityPolicy is removed; validate replacement admission controls and namespace policy before upgrade&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/security/pod-security-policy/&#34;,
+      &#34;verification&#34;: &#34;Test allowed and rejected workloads in staging; do not assume equivalent policies&#34;
+    },
+    {
+      &#34;id&#34;: &#34;KW-ADDON-MATRIX&#34;,
+      &#34;message&#34;: &#34;Verify CNI, CSI, ingress, admission webhooks and managed-provider upgrade support for each step&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/releases/version-skew-policy/&#34;,
+      &#34;verification&#34;: &#34;Use vendor version matrices and staging tests; these dependencies are not inferred from Kubernetes schemas&#34;
+    },
+    {
+      &#34;current&#34;: &#34;No supported drain risk detected&#34;,
+      &#34;id&#34;: &#34;KW-DRAIN-REVIEW&#34;,
+      &#34;message&#34;: &#34;No complete drain feasibility assessment is performed&#34;,
+      &#34;recommended&#34;: &#34;Verify full inventory&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;workloads&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/tasks/run-application/configure-pdb/&#34;,
+      &#34;verification&#34;: &#34;Offline risk review only. Recheck live PDB status, healthy replicas and remaining-node capacity before an explicitly authorized drain&#34;
+    },
+    {
+      &#34;current&#34;: &#34;Recognized HotSpot image tag declares Java 11.0.15&#34;,
+      &#34;id&#34;: &#34;KW-DOCKERFILE-BASE&#34;,
+      &#34;message&#34;: &#34;Declared tag predates the documented HotSpot cgroup v2 baseline; runtime may read host limits and size resources incorrectly. Verify vendor backports and the actual built image&#34;,
+      &#34;recommended&#34;: &#34;HotSpot cgroup v2 baseline: 8u372+, 11.0.16+, or 15+; use a maintained vendor build&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;docs/examples/dockerfile/Dockerfile#stage 1, line 2&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/architecture/cgroups/&#34;,
+      &#34;verification&#34;: &#34;Verify the built image digest and actual runtime; test memory limits/OOM and CPU throttling on cgroup v2&#34;
+    },
+    {
+      &#34;current&#34;: &#34;Java container awareness disabled&#34;,
+      &#34;id&#34;: &#34;KW-DOCKERFILE-JAVA-OPTIONS&#34;,
+      &#34;message&#34;: &#34;Static JVM option; build-time and effective runtime configuration may differ; command contents omitted&#34;,
+      &#34;recommended&#34;: &#34;Review effective JVM flags and resource sizing on cgroup v2&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;docs/examples/dockerfile/Dockerfile#stage 1, line 3&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/architecture/cgroups/&#34;,
+      &#34;verification&#34;: &#34;Verify the built image digest and actual runtime; test memory limits/OOM and CPU throttling on cgroup v2&#34;
+    },
+    {
+      &#34;current&#34;: &#34;cgroup v1 file reference: memory.limit_in_bytes&#34;,
+      &#34;id&#34;: &#34;KW-DOCKERFILE-V1-REFERENCE&#34;,
+      &#34;message&#34;: &#34;Static token match; a comment, fallback or unused build stage is possible; command contents omitted&#34;,
+      &#34;recommended&#34;: &#34;Use hierarchy-aware readers; v2 memory.max/memory.current/cpu.max/cpu.weight have different semantics&#34;,
+      &#34;requirement&#34;: &#34;conditional&#34;,
+      &#34;resource&#34;: &#34;docs/examples/dockerfile/Dockerfile#stage 1, line 4&#34;,
+      &#34;source&#34;: &#34;https://kubernetes.io/docs/concepts/architecture/cgroups/&#34;,
+      &#34;verification&#34;: &#34;Verify the built image digest and actual runtime; test memory limits/OOM and CPU throttling on cgroup v2&#34;
+    }
+  ],
+  &#34;application_sources&#34;: [
+    {
+      &#34;action&#34;: &#34;Verify the built image digest and actual runtime; test memory limits/OOM and CPU throttling on cgroup v2&#34;,
+      &#34;current&#34;: &#34;Recognized HotSpot image tag declares Java 11.0.15&#34;,
+      &#34;evidence&#34;: &#34;Local Dockerfile sha256:c3d3eaf3e7260bd66220ceef8af8bd015dad605c9c234c59522e482bc0f0d805; stage declaration only, not deployed-image evidence; Declared tag predates the documented HotSpot cgroup v2 baseline; runtime may read host limits and size resources incorrectly. Verify vendor backports and the actual built image&#34;,
+      &#34;resource&#34;: &#34;docs/examples/dockerfile/Dockerfile#stage 1, line 2&#34;,
+      &#34;status&#34;: &#34;review_required&#34;,
+      &#34;target&#34;: &#34;HotSpot cgroup v2 baseline: 8u372+, 11.0.16+, or 15+; use a maintained vendor build&#34;,
+      &#34;topic&#34;: &#34;dockerfile&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Verify the built image digest and actual runtime; test memory limits/OOM and CPU throttling on cgroup v2&#34;,
+      &#34;current&#34;: &#34;Java container awareness disabled&#34;,
+      &#34;evidence&#34;: &#34;Local Dockerfile sha256:c3d3eaf3e7260bd66220ceef8af8bd015dad605c9c234c59522e482bc0f0d805; stage declaration only, not deployed-image evidence; Static JVM option; build-time and effective runtime configuration may differ; command contents omitted&#34;,
+      &#34;resource&#34;: &#34;docs/examples/dockerfile/Dockerfile#stage 1, line 3&#34;,
+      &#34;status&#34;: &#34;review_required&#34;,
+      &#34;target&#34;: &#34;Review effective JVM flags and resource sizing on cgroup v2&#34;,
+      &#34;topic&#34;: &#34;dockerfile&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Verify the built image digest and actual runtime; test memory limits/OOM and CPU throttling on cgroup v2&#34;,
+      &#34;current&#34;: &#34;cgroup v1 file reference: memory.limit_in_bytes&#34;,
+      &#34;evidence&#34;: &#34;Local Dockerfile sha256:c3d3eaf3e7260bd66220ceef8af8bd015dad605c9c234c59522e482bc0f0d805; stage declaration only, not deployed-image evidence; Static token match; a comment, fallback or unused build stage is possible; command contents omitted&#34;,
+      &#34;resource&#34;: &#34;docs/examples/dockerfile/Dockerfile#stage 1, line 4&#34;,
+      &#34;status&#34;: &#34;review_required&#34;,
+      &#34;target&#34;: &#34;Use hierarchy-aware readers; v2 memory.max/memory.current/cpu.max/cpu.weight have different semantics&#34;,
+      &#34;topic&#34;: &#34;dockerfile&#34;
+    }
+  ],
+  &#34;cgroup&#34;: {
+    &#34;pools&#34;: [],
+    &#34;reviewed&#34;: &#34;2026-11-17&#34;
+  },
+  &#34;drain&#34;: [
+    {
+      &#34;action&#34;: &#34;Offline risk review only. Recheck live PDB status, healthy replicas and remaining-node capacity before an explicitly authorized drain&#34;,
+      &#34;current&#34;: &#34;No supported drain risk detected&#34;,
+      &#34;evidence&#34;: &#34;No complete drain feasibility assessment is performed&#34;,
+      &#34;resource&#34;: &#34;workloads&#34;,
+      &#34;status&#34;: &#34;input_missing&#34;,
+      &#34;target&#34;: &#34;Verify full inventory&#34;,
+      &#34;topic&#34;: &#34;drain&#34;
+    }
+  ],
+  &#34;from&#34;: &#34;1.21&#34;,
+  &#34;kind&#34;: &#34;upgrade&#34;,
+  &#34;lifecycle&#34;: {
+    &#34;catalog_reviewed&#34;: &#34;2026-11-17&#34;,
+    &#34;evaluated_at&#34;: &#34;2026-11-23&#34;,
+    &#34;findings&#34;: []
+  },
+  &#34;matrix&#34;: [
+    {
+      &#34;action&#34;: &#34;Supply --after PATH to compare proposed manifests and validate them against the target version&#34;,
+      &#34;current&#34;: &#34;Supplied current manifests&#34;,
+      &#34;evidence&#34;: &#34;No before/after field comparison performed&#34;,
+      &#34;status&#34;: &#34;input_missing&#34;,
+      &#34;target&#34;: &#34;Recommendation only; no proposed manifests supplied&#34;,
+      &#34;topic&#34;: &#34;manifest&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Review removed APIs and API clients; absence in supplied manifests is not proof of absence&#34;,
+      &#34;current&#34;: &#34;1.21&#34;,
+      &#34;evidence&#34;: &#34;No matching finding; coverage is partial&#34;,
+      &#34;status&#34;: &#34;not_detected&#34;,
+      &#34;target&#34;: &#34;1.36&#34;,
+      &#34;topic&#34;: &#34;api&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Review target schema findings and exact bundled schema version; admission remains separate&#34;,
+      &#34;current&#34;: &#34;1.21&#34;,
+      &#34;evidence&#34;: &#34;No matching finding; coverage is partial&#34;,
+      &#34;status&#34;: &#34;not_detected&#34;,
+      &#34;target&#34;: &#34;1.36&#34;,
+      &#34;topic&#34;: &#34;schema&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Review selected behavior changes; exhaustive default/feature-gate comparison is not implemented&#34;,
+      &#34;current&#34;: &#34;1.21&#34;,
+      &#34;evidence&#34;: &#34;3 related findings; see inspection details&#34;,
+      &#34;status&#34;: &#34;review_required&#34;,
+      &#34;target&#34;: &#34;1.36&#34;,
+      &#34;topic&#34;: &#34;defaults&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Verify components outside the selected lifecycle catalog&#34;,
+      &#34;current&#34;: &#34;Not established from supplied inputs&#34;,
+      &#34;evidence&#34;: &#34;No matching finding; coverage is partial&#34;,
+      &#34;status&#34;: &#34;not_detected&#34;,
+      &#34;target&#34;: &#34;Target requirements require evidence&#34;,
+      &#34;topic&#34;: &#34;lifecycle&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Validate target controller annotations, TLS and routing; general controller conversion is not implemented&#34;,
+      &#34;current&#34;: &#34;Not established from supplied inputs&#34;,
+      &#34;evidence&#34;: &#34;No matching finding; coverage is partial&#34;,
+      &#34;status&#34;: &#34;analyzer_unsupported&#34;,
+      &#34;target&#34;: &#34;Target requirements require evidence&#34;,
+      &#34;topic&#34;: &#34;ingress&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Verify CSI, access modes, zones and restore behavior&#34;,
+      &#34;current&#34;: &#34;Not established from supplied inputs&#34;,
+      &#34;evidence&#34;: &#34;No matching finding; coverage is partial&#34;,
+      &#34;status&#34;: &#34;analyzer_unsupported&#34;,
+      &#34;target&#34;: &#34;Target requirements require evidence&#34;,
+      &#34;topic&#34;: &#34;storage&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Provide target platform and local OCI evidence in an AKS profile; test native dependencies&#34;,
+      &#34;current&#34;: &#34;Not established from supplied inputs&#34;,
+      &#34;evidence&#34;: &#34;No matching finding; coverage is partial&#34;,
+      &#34;status&#34;: &#34;input_missing&#34;,
+      &#34;target&#34;: &#34;Target requirements require evidence&#34;,
+      &#34;topic&#34;: &#34;cpu&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Provide current/target OS architecture declarations and verify vendor support&#34;,
+      &#34;current&#34;: &#34;Not established from supplied inputs&#34;,
+      &#34;evidence&#34;: &#34;No matching finding; coverage is partial&#34;,
+      &#34;status&#34;: &#34;input_missing&#34;,
+      &#34;target&#34;: &#34;Target requirements require evidence&#34;,
+      &#34;topic&#34;: &#34;os&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Test memory/OOM, CPU throttling, application runtimes and agents on target nodes&#34;,
+      &#34;current&#34;: &#34;Not established from supplied inputs&#34;,
+      &#34;evidence&#34;: &#34;No matching finding; coverage is partial&#34;,
+      &#34;status&#34;: &#34;execution_required&#34;,
+      &#34;target&#34;: &#34;Target requirements require evidence&#34;,
+      &#34;topic&#34;: &#34;application&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Supply --cgroup-evidence or AKS profile cgroup_pools; OS/Kubernetes versions do not establish cgroup mode&#34;,
+      &#34;current&#34;: &#34;unknown&#34;,
+      &#34;evidence&#34;: &#34;No current/target node-pool evidence supplied&#34;,
+      &#34;status&#34;: &#34;input_missing&#34;,
+      &#34;target&#34;: &#34;unknown&#34;,
+      &#34;topic&#34;: &#34;cgroup&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Supply --cgroup-evidence or AKS profile cgroup_pools; OS/Kubernetes versions do not establish cgroup mode&#34;,
+      &#34;current&#34;: &#34;unknown&#34;,
+      &#34;evidence&#34;: &#34;No current/target node-pool evidence supplied&#34;,
+      &#34;status&#34;: &#34;input_missing&#34;,
+      &#34;target&#34;: &#34;unknown&#34;,
+      &#34;topic&#34;: &#34;kernel&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Supply --cgroup-evidence or AKS profile cgroup_pools; OS/Kubernetes versions do not establish cgroup mode&#34;,
+      &#34;current&#34;: &#34;unknown&#34;,
+      &#34;evidence&#34;: &#34;No current/target node-pool evidence supplied&#34;,
+      &#34;status&#34;: &#34;input_missing&#34;,
+      &#34;target&#34;: &#34;unknown&#34;,
+      &#34;topic&#34;: &#34;runtime&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Supply --cgroup-evidence or AKS profile cgroup_pools; OS/Kubernetes versions do not establish cgroup mode&#34;,
+      &#34;current&#34;: &#34;unknown&#34;,
+      &#34;evidence&#34;: &#34;No current/target node-pool evidence supplied&#34;,
+      &#34;status&#34;: &#34;input_missing&#34;,
+      &#34;target&#34;: &#34;unknown&#34;,
+      &#34;topic&#34;: &#34;drivers&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Verify the built image digest and actual runtime; test memory limits/OOM and CPU throttling on cgroup v2&#34;,
+      &#34;current&#34;: &#34;Recognized HotSpot image tag declares Java 11.0.15&#34;,
+      &#34;evidence&#34;: &#34;Local Dockerfile sha256:c3d3eaf3e7260bd66220ceef8af8bd015dad605c9c234c59522e482bc0f0d805; stage declaration only, not deployed-image evidence; Declared tag predates the documented HotSpot cgroup v2 baseline; runtime may read host limits and size resources incorrectly. Verify vendor backports and the actual built image&#34;,
+      &#34;resource&#34;: &#34;docs/examples/dockerfile/Dockerfile#stage 1, line 2&#34;,
+      &#34;status&#34;: &#34;review_required&#34;,
+      &#34;target&#34;: &#34;HotSpot cgroup v2 baseline: 8u372+, 11.0.16+, or 15+; use a maintained vendor build&#34;,
+      &#34;topic&#34;: &#34;dockerfile&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Verify the built image digest and actual runtime; test memory limits/OOM and CPU throttling on cgroup v2&#34;,
+      &#34;current&#34;: &#34;Java container awareness disabled&#34;,
+      &#34;evidence&#34;: &#34;Local Dockerfile sha256:c3d3eaf3e7260bd66220ceef8af8bd015dad605c9c234c59522e482bc0f0d805; stage declaration only, not deployed-image evidence; Static JVM option; build-time and effective runtime configuration may differ; command contents omitted&#34;,
+      &#34;resource&#34;: &#34;docs/examples/dockerfile/Dockerfile#stage 1, line 3&#34;,
+      &#34;status&#34;: &#34;review_required&#34;,
+      &#34;target&#34;: &#34;Review effective JVM flags and resource sizing on cgroup v2&#34;,
+      &#34;topic&#34;: &#34;dockerfile&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Verify the built image digest and actual runtime; test memory limits/OOM and CPU throttling on cgroup v2&#34;,
+      &#34;current&#34;: &#34;cgroup v1 file reference: memory.limit_in_bytes&#34;,
+      &#34;evidence&#34;: &#34;Local Dockerfile sha256:c3d3eaf3e7260bd66220ceef8af8bd015dad605c9c234c59522e482bc0f0d805; stage declaration only, not deployed-image evidence; Static token match; a comment, fallback or unused build stage is possible; command contents omitted&#34;,
+      &#34;resource&#34;: &#34;docs/examples/dockerfile/Dockerfile#stage 1, line 4&#34;,
+      &#34;status&#34;: &#34;review_required&#34;,
+      &#34;target&#34;: &#34;Use hierarchy-aware readers; v2 memory.max/memory.current/cpu.max/cpu.weight have different semantics&#34;,
+      &#34;topic&#34;: &#34;dockerfile&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Supply Nodes; validate capacity, topology and storage separately&#34;,
+      &#34;current&#34;: &#34;No usable Node inventory supplied&#34;,
+      &#34;evidence&#34;: &#34;&#34;,
+      &#34;resource&#34;: &#34;apps/v1/Deployment//synthetic-java&#34;,
+      &#34;status&#34;: &#34;input_missing&#34;,
+      &#34;target&#34;: &#34;Unknown&#34;,
+      &#34;topic&#34;: &#34;workload-pool&#34;
+    },
+    {
+      &#34;action&#34;: &#34;Offline risk review only. Recheck live PDB status, healthy replicas and remaining-node capacity before an explicitly authorized drain&#34;,
+      &#34;current&#34;: &#34;No supported drain risk detected&#34;,
+      &#34;evidence&#34;: &#34;No complete drain feasibility assessment is performed&#34;,
+      &#34;resource&#34;: &#34;workloads&#34;,
+      &#34;status&#34;: &#34;input_missing&#34;,
+      &#34;target&#34;: &#34;Verify full inventory&#34;,
+      &#34;topic&#34;: &#34;drain&#34;
+    }
+  ],
+  &#34;report&#34;: {
+    &#34;documents&#34;: 1,
+    &#34;findings&#34;: [
+      {
+        &#34;document&#34;: 1,
+        &#34;evidence&#34;: &#34;confirmed&#34;,
+        &#34;field&#34;: &#34;/spec/template/spec/containers/0/readinessProbe&#34;,
+        &#34;file&#34;: &#34;docs/examples/dockerfile/workload.yaml&#34;,
+        &#34;line&#34;: 1,
+        &#34;message&#34;: &#34;If serving traffic, define a readiness probe appropriate to the application&#34;,
+        &#34;requirement&#34;: &#34;conditional&#34;,
+        &#34;resource&#34;: &#34;apps/v1/Deployment//synthetic-java&#34;,
+        &#34;rule_id&#34;: &#34;KW-READINESS&#34;,
+        &#34;severity&#34;: &#34;warning&#34;,
+        &#34;source&#34;: &#34;https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/&#34;
+      }
+    ],
+    &#34;inputs&#34;: [
+      {
+        &#34;file&#34;: &#34;docs/examples/dockerfile/workload.yaml&#34;,
+        &#34;sha256&#34;: &#34;79c99baf047367db74d77c00237d8341015301bf1780725b7386ed915c67e99f&#34;
+      }
+    ],
+    &#34;rules_version&#34;: &#34;2026-11-15&#34;,
+    &#34;schema&#34;: {
+      &#34;bundle_sha256&#34;: &#34;97930915a59788eeef6e732ab28fb1c0e427d0d0cf1141e1f3e483d1f7f49204&#34;,
+      &#34;reviewed&#34;: &#34;2026-11-16&#34;,
+      &#34;source&#34;: &#34;https://raw.githubusercontent.com/kubernetes/kubernetes/v1.36.0/api/openapi-spec/swagger.json&#34;,
+      &#34;source_sha256&#34;: &#34;dcede2063da1d7ad62ecb5af8adb6d7fabd0b52385a7fa0048afb491dac90450&#34;,
+      &#34;version&#34;: &#34;v1.36.0&#34;
+    },
+    &#34;schema_checked&#34;: 1,
+    &#34;schema_version&#34;: &#34;2&#34;,
+    &#34;status&#34;: &#34;partial&#34;,
+    &#34;target_version&#34;: &#34;1.36&#34;,
+    &#34;unchecked&#34;: [
+      &#34;Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated&#34;,
+      &#34;OpenAPI validation does not replace Kubernetes admission or server semantic validation&#34;,
+      &#34;Requested version uses bundled v1.36.0; other patch-specific changes are not inferred&#34;
+    ]
+  },
+  &#34;steps&#34;: [
+    &#34;1.22: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.23: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.24: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.25: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.26: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.27: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.28: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.29: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.30: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.31: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.32: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.33: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.34: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.35: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;,
+    &#34;1.36: verify provider/add-on prerequisites, upgrade control plane, then compatible node components, then validate workloads&#34;
+  ],
+  &#34;to&#34;: &#34;1.36&#34;,
+  &#34;unchecked&#34;: [
+    &#34;Admission, CEL, controller behavior, feature-gate availability and application runtime compatibility are not evaluated&#34;,
+    &#34;OpenAPI validation does not replace Kubernetes admission or server semantic validation&#34;,
+    &#34;Requested version uses bundled v1.36.0; other patch-specific changes are not inferred&#34;,
+    &#34;Cgroup results compare supplied evidence/declarations, not live nodes. OS or Kubernetes versions alone never establish the active cgroup mode.&#34;,
+    &#34;Equal modes or minimum prerequisites do not certify application compatibility. Test memory limits/OOM, CPU throttling, agents and application runtime versions on target nodes.&#34;,
+    &#34;Workload pool links use supplied Node labels/bindings and hard constraints only; target scheduling, capacity and pod affinity remain unverified. Redacted snapshots can hide configuration.&#34;,
+    &#34;Selected, pinned lifecycle catalog only; absence of findings is not proof of support. No lifecycle databases or vendors are contacted.&#34;,
+    &#34;Upstream retirement does not establish managed/vendor support coverage. Names, labels and mirror paths are hints only. Operator declarations are not independently verified.&#34;,
+    &#34;Missing Node OS, controller resources, redacted annotations and snapshot scope may hide dependencies. Kubernetes API removal is evaluated separately by version scans and upgrade plans.&#34;,
+    &#34;Audit logs/API client usage, add-on release matrices, actual node kernel/cgroup and image runtime dependencies are not automatically established&#34;,
+    &#34;Dockerfile review inspects all declared stages, including unused build stages. Build target, ARG expansion, inherited configuration, COPY contents, installed packages, registry image contents and deployment digest linkage are unverified. No build, pull, script, network or cluster operation is executed. Dockerfile findings are not part of --after resolution tracking.&#34;
+  ],
+  &#34;workloads&#34;: [
+    {
+      &#34;action&#34;: &#34;Supply Nodes; validate capacity, topology and storage separately&#34;,
+      &#34;current&#34;: &#34;No usable Node inventory supplied&#34;,
+      &#34;evidence&#34;: &#34;&#34;,
+      &#34;resource&#34;: &#34;apps/v1/Deployment//synthetic-java&#34;,
+      &#34;status&#34;: &#34;input_missing&#34;,
+      &#34;target&#34;: &#34;Unknown&#34;,
+      &#34;topic&#34;: &#34;workload-pool&#34;
+    }
+  ]
+}</pre></details></main></body></html>

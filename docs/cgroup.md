@@ -55,7 +55,7 @@ Selected checks include:
 
 - Target v2: documented baseline kernel 5.8+, containerd 1.4+ or CRI-O 1.20+, effective kubelet/runtime systemd drivers. Missing or unrecognized values remain unchecked; meeting minimums does not establish current vendor support or exact Kubernetes compatibility.
 - Kubernetes 1.35+: v1 is deprecated and kubelet refuses v1 by default. Results require reviewing actual `failCgroupV1`/provider policy, not automatically setting an override.
-- v1/v2 changes: hierarchy, memory resource files and CPU quota interface; test limits, OOM and throttling behavior. Validate JVM, Node.js, Go automaxprocs, monitoring and security agents where used. Their actual versions and binary behavior are not inferred from image names.
+- v1/v2 changes: hierarchy, memory resource files and CPU quota interface; test limits, OOM and throttling behavior. Validate JVM, Node.js, Go automaxprocs, monitoring and security agents where used. Dockerfile declarations are now inspected separately when available; actual binary versions and behavior remain unverified.
 - Workload hints: cgroup v1 filenames in declared commands/args/literal environment values; hostPath mounts that expose the cgroup filesystem or its ancestors. These are static hints, not proof of executed access. Raw matching values/host paths are omitted from findings.
 
 `scan cgroup` returns 1 when review actions exist (including a same-mode review), 0 only when no actions exist, and 2 for invalid input. Plan commands retain their existing exit semantics. JSON contains the `cgroup` comparisons plus actions; text/Markdown contain the same mode decisions and verification actions. Default upgrade/AKS plans show missing evidence explicitly rather than silently omitting cgroups.
@@ -65,7 +65,7 @@ Selected checks include:
 - 현재와 목표 cgroup을 실제로 비교해 전환 필요·동일 모드·미확인·근거 충돌·혼합 계층으로 판정합니다.
 - Kubernetes 버전만 입력했다고 노드 모드까지 확인되는 것은 아닙니다. `--cgroup-evidence` 또는 AKS 프로필 `cgroup_pools`에 노드풀별 근거를 제공하세요.
 - 모드 전환뿐 아니라 대상 커널·런타임·드라이버 조건, v1 전용 파일 참조, 호스트 마운트도 결과에 포함합니다.
-- Java 등의 앱 버전은 이미지 이름으로 추측하지 않습니다. 대상 노드에서 메모리 제한·OOM·CPU throttling·에이전트 동작 검증이 필요합니다.
+- Dockerfile의 인식 가능한 Java 태그는 선언된 버전 기준으로 별도 검사하지만, 실제 이미지의 바이너리 버전은 확정하지 않습니다. 대상 노드에서 메모리 제한·OOM·CPU throttling·에이전트 동작 검증이 필요합니다.
 - [예제 HTML](examples/cgroup/report.ko.html)은 합성 입력입니다. 실제 노드 접속·변경 없이 생성했습니다.
 
 ## Official sources reviewed 2026-11-17
@@ -73,3 +73,7 @@ Selected checks include:
 - [Kubernetes cgroup v2 requirements, migration and identification](https://kubernetes.io/docs/concepts/architecture/cgroups/)
 - [Kubernetes cgroup v2 transition and v1 deprecation](https://kubernetes.io/blog/2026/10/06/kubernetes-cgroups-v2-shift/)
 - [AKS application memory issues after an OS/cgroup transition](https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/aks-memory-saturation-after-upgrade)
+
+## Automatic Dockerfile review
+
+From alpha.13, CLI cgroup/upgrade/AKS commands automatically inspect Dockerfile/Containerfile files in the `--source` scope. [Discovery rules, evidence boundaries and bilingual examples](dockerfile.md). No extra option is needed; explicit `--dockerfile FILE` is an optional override or standalone input. Snapshot-only and MCP inputs do not trigger source discovery.

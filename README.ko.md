@@ -68,6 +68,16 @@ kubewiser plan upgrade --source ./before --after ./after \
 
 ![Manifest 전후 변경과 cgroup·커널·런타임 판정을 함께 보여주는 매트릭스](docs/images/matrix.ko.png)
 
+### Dockerfile 자동 검사 (v0.2.0-alpha.13)
+
+`scan cgroup`, `plan upgrade`, `plan aks`는 **추가 옵션 없이 `--source` 범위의 Dockerfile/Containerfile을 자동 검사**합니다. 폴더는 하위 경로까지, manifest 파일은 같은 폴더만 검사합니다. Java 베이스 태그의 cgroup v2 지원 기준, v1 전용 파일 참조, `-XX:-UseContainerSupport`를 파일·단계·줄 번호별로 매트릭스와 기존 결과표에 표시합니다.
+
+```sh
+kubewiser plan upgrade --source ./project --from 1.21 --to 1.36 --format html --lang ko > upgrade.html
+```
+
+찾지 못한 Dockerfile·불명확한 태그·지원하지 않는 문법은 **입력 부족/판정기 미지원**입니다. 태그가 기준을 충족해도 실제 이미지 호환성을 보증하지 않습니다. [자동 검색 범위·제약·Windows 저장 예시](docs/dockerfile.md) · [HTML 예제](docs/examples/dockerfile/report.ko.html)
+
 ### cgroup 현재·목표 비교 (v0.2.0-alpha.8)
 
 노드풀별 v1/v2/혼합 모드를 비교하고, 근거 충돌·미확인·커널/런타임/드라이버 조건·워크로드의 v1 의존 단서를 표로 표시합니다. [근거 입력과 검사 범위](docs/cgroup.md). 실제 노드 명령은 실행하지 않습니다.

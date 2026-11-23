@@ -30,15 +30,15 @@ const help = `Commands: kubewiser or kubewise
   scan network [--flows HUBBLE.jsonl] [--namespace NS] PATH
   scan network --snapshot FILE [--flows HUBBLE.jsonl]
   scan path --source PATH --source-pod NS/NAME --destination-pod NS/NAME --port PORT [--protocol TCP]
-  scan cgroup --source PATH [--cgroup-evidence FILE] [--target-version VERSION]
+  scan cgroup [--source PATH] [--dockerfile FILE] [--cgroup-evidence FILE] [--target-version VERSION]
   scan lifecycle --source PATH [--profile FILE] [--format html]
   collect --kubeconfig FILE --context NAME --namespace NS --output snapshot.json
   diff --source PATH --snapshot FILE [--namespace NS]
   diff --chart DIR --target-version VERSION --release NAME --snapshot FILE [--values FILE]
-  plan upgrade --source PATH --from VERSION --to VERSION [--after PATH] [--cgroup-evidence FILE]
+  plan upgrade --source PATH --from VERSION --to VERSION [--after PATH] [--cgroup-evidence FILE] [--dockerfile FILE]
   plan upgrade --snapshot FILE --from VERSION --to VERSION
   plan migrate --source PATH --from eks --to aks
-  plan aks --source PATH --profile project.json
+  plan aks --source PATH --profile project.json [--dockerfile FILE]
   generate --profile project.json --output NEW_DIRECTORY
   mcp --input PATH [--snapshot FILE] [--chart DIR] [--values FILE] [--flows FILE]
 Use --format json|text|markdown|html (default json); flags precede positional paths.
@@ -94,6 +94,7 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 	crdDefaults := fs.Bool("crd-defaults", false, "normalize local CRD defaults during diff")
 	crdConversion := fs.Bool("crd-conversion", false, "simulate local CRD strategy None conversion during diff")
 	after := fs.String("after", "", "optional proposed manifest path for plan upgrade/aks comparison")
+	dockerfile := fs.String("dockerfile", "", "local Dockerfile for offline cgroup v2 application hints")
 	cgroupEvidence := fs.String("cgroup-evidence", "", "local JSON current/target node-pool cgroup evidence")
 	profile := fs.String("profile", "", "local AKS project profile JSON")
 	source := fs.String("source", "", "desired manifest path")
@@ -119,6 +120,9 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 	allowCluster := fs.Bool("allow-cluster", false, "explicitly enable scoped MCP collection")
 	if e := fs.Parse(restArgs); e != nil {
 		return 2
+	}
+	if *dockerfile != "" && !((cmd == "scan" && sub == "cgroup") || (cmd == "plan" && (sub == "upgrade" || sub == "aks"))) {
+		return fail(fmt.Errorf("--dockerfile requires scan cgroup, plan upgrade or plan aks"))
 	}
 	if *after != "" && !(cmd == "plan" && (sub == "upgrade" || sub == "aks")) {
 		return fail(fmt.Errorf("--after requires plan upgrade or plan aks"))
@@ -169,7 +173,11 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 			if fs.NArg() != 0 {
 				return fail(fmt.Errorf("scan cgroup uses --source or --snapshot"))
 			}
-			set, e := load()
+			var set manifest.Set
+			var e error
+			if *source != "" || *snapshot != "" || *dockerfile == "" {
+				set, e = load()
+			}
 			if e != nil {
 				return fail(e)
 			}
@@ -184,6 +192,10 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 			if e != nil {
 				return fail(e)
 			}
+			if e = analyze.AttachDockerfiles(ctx, &p, *source, *dockerfile); e != nil {
+				return fail(e)
+			}
+			p.Matrix = append(p.Matrix, p.ApplicationSources...)
 			code := 0
 			if len(p.Actions) > 0 {
 				code = 1
@@ -489,6 +501,9 @@ func RunContext(ctx context.Context, args []string, out, errOut io.Writer) int {
 		}
 		if sub == "upgrade" || sub == "aks" {
 			analyze.AttachReadiness(&p, set, *ns)
+			if e = analyze.AttachDockerfiles(ctx, &p, *source, *dockerfile); e != nil {
+				return fail(e)
+			}
 			analyze.BuildMatrix(&p)
 			if *after != "" {
 				proposed, err := manifest.Load(ctx, *after)

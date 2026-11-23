@@ -23,7 +23,11 @@ type MatrixRow struct {
 
 func BuildMatrix(p *Plan) {
 	p.Matrix = []MatrixRow{}
-	defer func() { p.Matrix = append(p.Matrix, p.Workloads...); p.Matrix = append(p.Matrix, p.Drain...) }()
+	defer func() {
+		p.Matrix = append(p.Matrix, p.ApplicationSources...)
+		p.Matrix = append(p.Matrix, p.Workloads...)
+		p.Matrix = append(p.Matrix, p.Drain...)
+	}()
 	add := func(topic, current, target, status, evidence, action string) {
 		p.Matrix = append(p.Matrix, MatrixRow{Topic: topic, Current: current, Target: target, Status: status, Evidence: evidence, Action: action})
 	}
